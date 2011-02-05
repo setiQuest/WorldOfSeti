@@ -1,4 +1,6 @@
 SetiWorld::Application.routes.draw do
+  get "display1/index"
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
