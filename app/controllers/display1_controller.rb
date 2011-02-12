@@ -1,4 +1,6 @@
 require 'base64'
+require "net/http"
+require "uri"
 
 class Display1Controller < ApplicationController
 
@@ -13,23 +15,11 @@ class Display1Controller < ApplicationController
 #    }
 #}
   def index
-    @waterfall1 = {:id => 1,
-                  :start_row => 1,
-                  :end_row => 100,
-                  :data => get_random_waterfall_data
-                 }
+    @waterfall1 = get_json_waterfall(1, 1, 100)
 
-    @waterfall2 = {:id => 2,
-                  :start_row => 1,
-                  :end_row => 100,
-                  :data => get_random_waterfall_data
-                 }
+    @waterfall2 = get_json_waterfall(2, 1, 100)
 
-    @waterfall3 = {:id => 3,
-                  :start_row => 1,
-                  :end_row => 100,
-                  :data => get_random_waterfall_data
-                 }
+    @waterfall3 = get_json_waterfall(3, 1, 100)
   end
 
   private
@@ -37,10 +27,25 @@ class Display1Controller < ApplicationController
   def get_random_waterfall_data
 
     data = ''
-    100.times do |i|
-      data += (0...1000).map{(rand(256)).chr}.join
+    waterfall_height.times do |i|
+      data += (0...waterfall_width).map{(rand(256)).chr}.join
     end
 
     return Base64::strict_encode64(data)
   end
+
+
+  def get_json_waterfall(id, start_row, end_row)
+    data = ''
+    uri = URI.parse("http://174.129.14.98:8080/waterfall?id=#{id}&start_row=#{start_row}&end_row=#{end_row}")   
+    response = Net::HTTP.get_response(uri) 
+    j = ActiveSupport::JSON.decode(response.body)
+    
+    # Merge strings
+    j["data"] = j["data"].join
+
+    # Convert hash keys to symbols
+    return j.to_options
+  end
+
 end
