@@ -10,7 +10,8 @@ loadPixels();
 for(int i=0; i<height; i++) {
   for(int j=0; j<width; j++) {
     char value = (waterfall_data[i*1000+j].charCodeAt());
-    pixels[i*1000+j] = color(value,value,value);
+    pixels[i*1000+j] = color(value);
+   // pixels[i*1000+j] = color(value,value,value);
   }
 }
 updatePixels();
