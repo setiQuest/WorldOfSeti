@@ -1,0 +1,17 @@
+<canvas id="canvas_<%= waterfall[:id] %>" width="1000" height="100"></canvas>
+
+<script id="script_<%= waterfall[:id] %>" type="application/processing">
+char[] waterfall_data64 = "<%= waterfall[:data] %>";
+char[] waterfall_data = decode64(waterfall_data64);
+
+size(1000, 100);
+
+loadPixels();
+for(int i=0; i<height; i++) {
+  for(int j=0; j<width; j++) {
+    char value = (waterfall_data[i*1000+j].charCodeAt());
+    pixels[i*1000+j] = color(value,value,value);
+  }
+}
+updatePixels();
+</script>

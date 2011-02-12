@@ -13,7 +13,19 @@ class Display1Controller < ApplicationController
 #    }
 #}
   def index
-    @waterfall = {:id => 1,
+    @waterfall1 = {:id => 1,
+                  :start_row => 1,
+                  :end_row => 100,
+                  :data => get_random_waterfall_data
+                 }
+
+    @waterfall2 = {:id => 2,
+                  :start_row => 1,
+                  :end_row => 100,
+                  :data => get_random_waterfall_data
+                 }
+
+    @waterfall3 = {:id => 3,
                   :start_row => 1,
                   :end_row => 100,
                   :data => get_random_waterfall_data
