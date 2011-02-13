@@ -1,5 +1,6 @@
 SetiWorld::Application.routes.draw do
   get "display1/index"
+  match "display1/baseline_chart"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

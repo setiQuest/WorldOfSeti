@@ -1,0 +1,22 @@
+<canvas id="canvas_baseline<%= baseline[:id] %>" width="<%= baseline_width %>" height="<%= baseline_height %>"></canvas>
+
+<script id="script_<%= baseline[:id] %>" type="application/processing">
+char[] baseline_data = "<%= baseline[:data] %>";
+var baseline_array = eval(baseline_data);
+
+size(<%= baseline_width %>, <%= baseline_height %>);
+
+background(0);
+loadPixels();
+
+for(int i=0; i<baseline_array.length; i++)
+{
+  //var y=baseline_array[i];
+  var y=(int)random(100);
+  pixels[y*<%= baseline_width %>+i] = color(255);
+}
+
+updatePixels();
+</script>
+
+<%= image_tag display1_baseline_chart_path %>

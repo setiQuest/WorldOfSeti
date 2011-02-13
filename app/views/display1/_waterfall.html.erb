@@ -1,4 +1,4 @@
-<canvas id="canvas_<%= waterfall[:id] %>" width="<%= waterfall_width %>" height="<%= waterfall_height %>"></canvas>
+<canvas id="canvas_waterfall<%= waterfall[:id] %>" width="<%= waterfall_width %>" height="<%= waterfall_height %>"></canvas>
 
 <script id="script_<%= waterfall[:id] %>" type="application/processing">
 char[] waterfall_data64 = "<%= waterfall[:data] %>";
@@ -11,7 +11,6 @@ for(int i=0; i<height; i++) {
   for(int j=0; j<width; j++) {
     char value = (waterfall_data[i*<%= waterfall_width %>+j].charCodeAt());
     pixels[i*<%= waterfall_width %>+j] = color(value);
-   // pixels[i*<%= waterfall_width %>+j] = color(value,value,value);
   }
 }
 updatePixels();
