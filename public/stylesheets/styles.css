@@ -1,0 +1,48 @@
+/* 
+    Document   : styles
+    Created on : Feb 15, 2011, 6:57:18 PM
+    Author     : cmu
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+root { 
+    display: block;
+}
+
+body {
+    background-color: #000000;
+
+    margin:0px;
+    padding:0px;
+
+    font-family: arial;
+    font-size: 12px;
+    color: #80d1ff;
+}
+
+.text-large {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.text-title {
+    font-weight: bold;
+    font-size: 38px;
+    color: #0072ff;
+}
+
+.waterfall, .baseline {
+    border-width: 2px;
+    border-color: #0072ff;
+    border-style: solid;
+}
+
+.float-wall {
+    clear: both;
+}

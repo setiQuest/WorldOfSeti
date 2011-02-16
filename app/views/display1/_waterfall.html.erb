@@ -1,4 +1,4 @@
-<canvas id="canvas_waterfall<%= waterfall[:id] %>" width="<%= waterfall_width %>" height="<%= waterfall_height %>"></canvas>
+<canvas class="waterfall" id="canvas_waterfall<%= waterfall[:id] %>" width="<%= waterfall_width %>" height="<%= waterfall_height %>"></canvas>
 
 <script id="script_<%= waterfall[:id] %>" type="application/processing">
 char[] waterfall_data64 = "<%= waterfall[:data] %>";

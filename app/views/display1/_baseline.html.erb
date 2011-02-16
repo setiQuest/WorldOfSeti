@@ -1,4 +1,4 @@
-<canvas id="canvas_baseline<%= baseline[:id] %>" width="<%= baseline_width %>" height="<%= baseline_height %>"></canvas>
+<!--<canvas class="baseline" id="canvas_baseline<%= baseline[:id] %>" width="<%= baseline_width %>" height="<%= baseline_height %>"></canvas>
 
 <script id="script_<%= baseline[:id] %>" type="application/processing">
 char[] baseline_data = "<%= baseline[:data] %>";
@@ -18,5 +18,5 @@ for(int i=0; i<baseline_array.length; i++)
 
 updatePixels();
 </script>
-
-<%= image_tag display1_baseline_chart_path %>
+-->
+<%= image_tag display1_baseline_chart_path, :style => "height:100px;", :class => "baseline" %>
