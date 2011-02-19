@@ -24,6 +24,15 @@ class Display1Controller < ApplicationController
     @baseline1 = get_random_json_baseline
   end
 
+  def waterfall
+    waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, nil)
+    respond_to do |format|
+      format.json{render :json => waterfall}
+    end
+
+  end
+
+
   def baseline_chart
     params = {
       :cht => 'lc',
@@ -54,6 +63,11 @@ class Display1Controller < ApplicationController
 
 
   def get_json_waterfall(id, start_row, end_row)
+
+    if end_row.nil?
+      end_row = start_row + 1
+    end
+    
     uri = URI.parse("http://174.129.14.98:8080/waterfall?id=#{id}&start_row=#{start_row}&end_row=#{end_row}")   
     response = Net::HTTP.get_response(uri) 
     j = ActiveSupport::JSON.decode(response.body)

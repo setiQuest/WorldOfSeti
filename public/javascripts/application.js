@@ -35,3 +35,17 @@ if (window.addEventListener) {
     }
   }, false);
 }
+
+
+/* Javascript update function */
+function registerElementTimer( fn_handle, interval_milliseconds )
+{
+    // Create new function with timeout
+    var newfunction = function(){
+        fn_handle();
+        setTimeout(newfunction, interval_milliseconds);
+    }
+
+    // Call new function to register timeout
+    newfunction();
+}

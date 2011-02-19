@@ -41,3 +41,39 @@
   </div>
   <div class="float-wall"></div>
 </div>
+
+<script type="text/javascript">
+  // AJAX call to update JSON
+  function updateWaterfall(id)
+  {
+      if(updateWaterfall.waterfall_data == undefined)
+      {
+         updateWaterfall.waterfall_data = new Array();
+      }
+
+      if(updateWaterfall.waterfall_data[id] == undefined)
+      {
+        updateWaterfall.waterfall_data[id] = {data:"", last_row:1};
+      }
+
+      // Take id and make AJAX query
+      $.ajax({
+        type:'GET',
+        url:'/display1/waterfall',
+        data:{id:id, start_row:updateWaterfall.waterfall_data[id].last_row},
+        success:function(){
+          // We should update the watefall display here
+        },
+        error:function(){
+          // We should handle error here
+        },
+        datatype:"json"
+      });
+  }
+
+  // Register waterfall display for automatic updates
+  $(document).ready(function(){
+    registerElementTimer(function(){updateWaterfall(1);},10000);
+  });
+
+</script>
