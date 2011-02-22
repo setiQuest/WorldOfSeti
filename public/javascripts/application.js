@@ -16,7 +16,7 @@ if (window.addEventListener) {
         if (src && src.indexOf("#") > -1) {
           canvas = document.getElementById(src.substr(src.indexOf("#") + 1));
           if (canvas) {
-            new Processing(canvas, scripts[i].text);
+            Processing.addInstance(new Processing(canvas, scripts[i].text));
             for (var k = 0; k< canvasArray.length; k++)
             {
               if (canvasArray[k] === canvas) {
@@ -27,7 +27,7 @@ if (window.addEventListener) {
           }
         } else {
           if (canvasArray.length >= j) {
-            new Processing(canvasArray[j], scripts[i].text);
+            Processing.addInstance(new Processing(canvasArray[j], scripts[i].text));
           }
           j++;
         }

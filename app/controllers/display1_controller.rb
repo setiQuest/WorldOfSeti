@@ -15,12 +15,6 @@ class Display1Controller < ApplicationController
 #    }
 #}
   def index
-    @waterfall1 = get_json_waterfall(1, 1, 100)
-
-    @waterfall2 = get_json_waterfall(2, 1, 100)
-
-    @waterfall3 = get_json_waterfall(3, 1, 100)
-
     @baseline1 = get_random_json_baseline
   end
 

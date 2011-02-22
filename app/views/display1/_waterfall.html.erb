@@ -1,17 +1,26 @@
-<canvas class="waterfall" id="canvas_waterfall<%= waterfall[:id] %>" width="<%= waterfall_width %>" height="<%= waterfall_height %>"></canvas>
+<canvas class="waterfall" id="canvas_waterfall<%= waterfall_id %>" width="<%= waterfall_width %>" height="<%= waterfall_height %>"></canvas>
 
-<script id="script_<%= waterfall[:id] %>" type="application/processing">
-char[] waterfall_data64 = "<%= waterfall[:data] %>";
-char[] waterfall_data = decode64(waterfall_data64);
-
-size(<%= waterfall_width %>, <%= waterfall_height %>);
-
-loadPixels();
-for(int i=0; i<height; i++) {
-  for(int j=0; j<width; j++) {
-    char value = (waterfall_data[i*<%= waterfall_width %>+j].charCodeAt());
-    pixels[i*<%= waterfall_width %>+j] = color(value);
-  }
+<script id="script_<%= waterfall_id %>" type="application/processing">
+void setup()
+{
+  size(<%= waterfall_width %>, <%= waterfall_height %>);
+  background(0);
 }
-updatePixels();
+
+void drawWaterfallRows(id, start_row, num_rows, data)
+{
+  loadPixels();
+
+  for(int i=0; i<num_rows && i<height; i++)
+  {
+    for(int j=0; j<width; j++)
+    {
+      char value = (data[i*width+j].charCodeAt());
+      pixels[(i+start_row-1)*width+j] = color(value);
+    }
+  }
+
+  updatePixels(0, 0, width, num_rows);
+}
+
 </script>
