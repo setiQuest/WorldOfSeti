@@ -27,12 +27,32 @@ class Display1Controller < ApplicationController
   end
 
 
-  def baseline_chart
+  def baseline_chart()
+
+    # TODO: Create a function which takes in marker index and chart data.
+#    if marker_index.nil?
+      marker_index = 1
+#    end
+
+ #   if chart_data.nil?
+      chart_data = "1,50,1,100,1,100,12,35,54,234,32,343,223"
+  #  end
+
     params = {
       :cht => 'lc',
-      :chs => '600x200',
+      :chtt => 'Baseline Display',          # Chart title
+      :chs => '768x100',
       :chds => '0,100',
-      :chd => 't:1,5,10,25,57'
+      :chf => 'bg,s,DDDDDD|c,s,FFFFFF',     # Color background
+      :chma => '1,1,1,1',
+      :chg => '5,20,1,0',                  # Grid lines
+      :chxt => 'x,x,y,y',                   # Show Axis for X and Y
+      :chxr => '0,0,8,.5|2,0,1.8,.6',       # Custom range for X axis | Y axis
+      :chxl => '1:|subband number|x10^2|3:|power|x10^3',
+      :chxs => '0,000000|1,000000|2,000000|3,000000', # Color axis labels to black
+      :chxtc => '0,10|2,10',                # Tick marks for the labels
+      :chem => "y;s=map_pin_icon;d=camping,FFFF00;dp=#{marker_index}",  # We are currently observing
+      :chd => "t:#{chart_data}"                           # Values
     }
 
     uri = URI.parse("http://chart.googleapis.com/chart")
