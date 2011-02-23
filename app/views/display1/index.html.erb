@@ -1,49 +1,17 @@
-
-
 <div id="display1_header">
-  <div class="text-large" style="float:left; width:125px;"><%= image_tag "logo_seti.png" %></div>
-  <div class="text-title" style="float:left; height:65px; vertical-align:bottom;">What We are Currently Scanning</div>
+  <div class="text-large"><%= image_tag "logo_seti.png" %></div>
+  <div class="text-title" style="padding-left:25px; width:1150px;">What We are Currently Scanning</div>
+  <div class="text-title-dark-blue">Activity ID: </div>
   <div class="float-wall"></div>
 </div>
 
-<div id="beam_row">
-  <div style="float:left;">Observation History</div>
-  <div style="float:left; padding-left:5px;">
-    <div style="float:left;"><%= render 'waterfall', :waterfall_id => 1 %></div>
-    <div style="float:left; padding-left:5px;"><%= render 'baseline', :baseline => @baseline1 %></div>
-    <div class="float-wall"></div>
+<div class="divider-horizontal"></div>
 
-    <div class="text-large" style="float:left;">Beam 1</div>
-  </div>
-  <div class="float-wall"></div>
-</div>
-
-<div id="beam_row">
-  <div style="float:left;">Observation History</div>
-  <div style="float:left; padding-left:5px;">
-    <div style="float:left;"><%= render 'waterfall', :waterfall_id => 2 %></div>
-    <div style="float:left; padding-left:5px;"><%= render 'baseline', :baseline => @baseline1 %></div>
-    <div class="float-wall"></div>
-
-    <div class="text-large" style="float:left;">Beam 2</div>
-  </div>
-  <div class="float-wall"></div>
-</div>
-
-<div id="beam_row">
-  <div style="float:left;">Observation History</div>
-  <div style="float:left; padding-left:5px;">
-    <div style="float:left;"><%= render 'waterfall', :waterfall_id => 3 %></div>
-    <div style="float:left; padding-left:5px;"><%= render 'baseline', :baseline => @baseline1 %></div>
-    <div class="float-wall"></div>
-
-    <div class="text-large" style="float:left;">Beam 3</div>
-  </div>
-  <div class="float-wall"></div>
-</div>
-
-
-
+<%= render 'beam', :beam_id => 1, :waterfall_id => 1, :baseline => @baseline1 %>
+<div class="divider-horizontal"></div>
+<%= render 'beam', :beam_id => 2, :waterfall_id => 2, :baseline => @baseline1 %>
+<div class="divider-horizontal"></div>
+<%= render 'beam', :beam_id => 3, :waterfall_id => 3, :baseline => @baseline1 %>
 
 <script type="text/javascript">
 

@@ -18,17 +18,31 @@ root {
 body {
     background-color: #000000;
 
-    margin:0px;
+    margin:10px;
     padding:0px;
 
     font-family: arial;
-    font-size: 12px;
+    font-size: 28px;
     color: #80d1ff;
+}
+
+#display1_header {
+    height: 100px;
+}
+
+#display1_header div {
+    float: left;
+    line-height: 100px;
+    vertical-align: bottom;
+}
+
+.text-small {
+    font-size: 18px;
 }
 
 .text-large {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 38px;
 }
 
 .text-title {
@@ -37,10 +51,77 @@ body {
     color: #0072ff;
 }
 
+.text-title-dark-blue {
+    font-weight: bold;
+    font-size: 38px;
+    color: #0072ff;
+    color: #3344ec;
+}
 .waterfall, .baseline {
     border-width: 2px;
     border-color: #0072ff;
     border-style: solid;
+    height: 100px;
+    width: 768px;
+}
+
+.beam_information {
+    height: 250px;
+    width: 750px;
+    float: left;
+}
+
+.beam_information_top {
+    height: 150px;
+    padding-top: 15px;
+    padding-left: 15px;
+}
+
+.beam_information_bottom {
+    height: 100px;
+}
+
+.beam_observation_history {
+    float: left;
+    padding-left: 25px;
+}
+
+.divider-horizontal {
+    margin-top: 25px;
+    margin-left: 50px;
+    margin-right: 50px;
+    margin-bottom: 25px;
+    height: 1px;
+    background-color: #0072ff;
+}
+
+.beam_frequency {
+    color: #faf58b;
+    font-size: 18px;
+    background-image: url(/images/bg_frequency.png);
+    line-height: 77px;
+    height: 77px;
+    width: 125px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.observation_history_table {
+    background-color: #80d1ff;
+    width: 300px;
+}
+
+.observation_history_table th {
+    background-color: #ffffff;
+    color: #0072ff;
+    padding: 5px;
+}
+
+.observation_history_table td {
+    background-color: #ffffff;
+    font-size: 18px;
+    color: #000000;
+    padding: 5px;
 }
 
 .float-wall {
