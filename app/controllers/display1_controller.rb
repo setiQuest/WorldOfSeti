@@ -35,12 +35,11 @@ class Display1Controller < ApplicationController
 #    end
 
  #   if chart_data.nil?
-      chart_data = "1,50,1,100,1,100,12,35,54,234,32,343,223"
+      chart_data = "1,25,1,100,1,100,12,35,54,234,32,343,223"
   #  end
 
     params = {
       :cht => 'lc',
-      :chtt => 'Baseline Display',          # Chart title
       :chs => '768x100',
       :chds => '0,100',
       :chf => 'bg,s,DDDDDD|c,s,FFFFFF',     # Color background
