@@ -9,13 +9,13 @@
     </div>
 
     <div class="beam_information_bottom">
-      <div><%= render 'baseline', :baseline => baseline %></div>
+      <div><%= render 'baseline', :baseline_id => beam_id %></div>
     </div>
   </div>
 
   <div style="float:left; padding-left:15px;">
     <div>&nbsp;<!-- Description here --></div>
-    <div><%= render 'waterfall', :waterfall_id => waterfall_id %></div>
+    <div><%= render 'waterfall', :waterfall_id => beam_id %></div>
   </div>
   
   <div class="beam_observation_history">
