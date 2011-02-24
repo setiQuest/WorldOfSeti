@@ -18,7 +18,7 @@ root {
 body {
     background-color: #000000;
 
-    margin: 10px;
+    margin: 10px 0px 0px 0px;
     padding: 0px;
 
     font-family: arial;
@@ -58,39 +58,57 @@ body {
     color: #0072ff;
     color: #3344ec;
 }
-.waterfall, .baseline {
+
+.waterfall {
     border-width: 2px;
     border-color: #0072ff;
     border-style: solid;
-    height: 100px;
+    height: 200px;
+    width: 768px;
+}
+
+.baseline {
+    border-width: 2px;
+    border-color: #0072ff;
+    border-style: solid;
+    height: 150px;
     width: 768px;
 }
 
 .beam_information {
-    height: 250px;
-    width: 750px;
+    width: 768px;
     float: left;
-}
-
-.beam_information_top {
-    height: 150px;
-    padding-top: 15px;
+    padding-top: 30px;
     padding-left: 15px;
 }
 
-.beam_information_bottom {
+.beam_information_top {
     height: 100px;
+}
+
+.beam_information_top div {
+    float: left;
+    line-height: 100px;
+    vertical-align: middle;
+}
+
+.beam_status {
+    padding-left: 25px;
+}
+
+.beam_location {
+    padding-left: 25px;
 }
 
 .beam_observation_history {
     float: left;
-    padding-left: 25px;
+    padding-left: 15px;
 }
 
 .divider-horizontal {
     margin-top: 25px;
     margin-left: 50px;
-    margin-right: 50px;
+    margin-right: 0px;
     margin-bottom: 25px;
     height: 1px;
     background-color: #0072ff;
@@ -100,11 +118,13 @@ body {
     color: #faf58b;
     font-size: 18px;
     background-image: url(/images/bg_frequency.png);
-    line-height: 77px;
-    height: 77px;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100px;
     width: 125px;
     vertical-align: middle;
     text-align: center;
+    padding-left: 25px;
 }
 
 .observation_history_table {

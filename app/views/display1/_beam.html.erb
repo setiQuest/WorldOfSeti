@@ -1,28 +1,26 @@
 <div>
   <div class="beam_information">
     <div class="beam_information_top">
-      <div class="text-large" style="float:left;">Beam <%= beam_id %></div>
-      <div class="text-large" style="float:left;"><!-- ON/OFF image here --></div>
-      <div class="text-large" style="float:left;"><!-- RA / DEC here --></div>
+      <div class="text-large">Beam <%= beam_id %></div>
+      <div class="beam_status">&nbsp;<!-- ON/OFF image here --></div>
+      <div class="beam_frequency">&nbsp;<!-- MHz here --></div>
+      <div class="beam_location">&nbsp;<!-- RA / DEC here --></div>
       <div class="float-wall"></div>
     </div>
 
     <div class="beam_information_bottom">
-      <div class="beam_frequency" style="float:left;"><!-- MHz here --></div>
-      <div class="text-large" style="float:left;"><!-- Description here --></div>
-      <div class="float-wall"></div>
+      <div><%= render 'baseline', :baseline => baseline %></div>
     </div>
   </div>
 
-  <div style="float:left; padding-left:5px;">
-    <div>Waterfall<br /><%= render 'waterfall', :waterfall_id => waterfall_id %></div>
-    <div style="padding-top:15px;">Baseline<br /><%= render 'baseline', :baseline => baseline %></div>
+  <div style="float:left; padding-left:15px;">
+    <div>&nbsp;<!-- Description here --></div>
+    <div><%= render 'waterfall', :waterfall_id => waterfall_id %></div>
   </div>
   
   <div class="beam_observation_history">
     <table class="observation_history_table">
       <tr><th>Observation History</th></tr>
-      <tr><td>&nbsp;</td></tr>
       <tr><td>&nbsp;</td></tr>
       <tr><td>&nbsp;</td></tr>
       <tr><td>&nbsp;</td></tr>
