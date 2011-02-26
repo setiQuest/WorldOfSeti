@@ -202,19 +202,19 @@ body {
     margin: 0px;
 }
 
-#frequency_cover_data_table {
+.frequency_cover_data_table {
     padding: 0px;
     margin: 0px;
     width: 200px;
 }
 
-#frequency_cover_data_table td.off {
+.frequency_cover_data_table td.off {
     background-color: #ffffff;
     width: 20px;
     height: 20px;
 }
 
-#frequency_cover_data_table td.on {
+.frequency_cover_data_table td.on {
     background-color: green;
     width: 20px;
     height: 20px;
