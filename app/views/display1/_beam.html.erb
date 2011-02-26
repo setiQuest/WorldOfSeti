@@ -55,18 +55,18 @@
     </td>
     <td class="beam_frequency_coverage">
       <table class="frequency_coverage_table">
-        <tr><th colspan="2">Frequency Coverage</th></tr>
+        <tr><th colspan="3">Frequency Coverage</th></tr>
         <tr>
           <td class="header">
             <table style="width:100%;">
             <% freq_coverage_rows.times do |i| %>
               <tr class="frequency_coverage_table_header">
-                <td><%= i+1 %> - <%= i+2 %> GHz</td>
+                <td><%= i+1 %></td>
               </tr>
             <% end %>
             </table>
           </td>
-          <td>
+          <td style="width:200px;">
             <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table">
               <% freq_coverage_rows.times do %>
               <tr>
@@ -77,14 +77,15 @@
             <% end %>
             </table>
           </td>
+          <td style="background-color:white;">&nbsp;</td>
         </tr>
         <tr>
-          <td class="header"></td>
-          <td class="footer">
+          <td class="header">GHz</td>
+          <td class="footer" colspan="2">
             <table>
             <tr class="frequency_coverage_table_footer">
-              <td style="width:85px;">0.1</td>
-              <td style="width:85px;">0.5</td>
+              <td style="width:76px;">0.1</td>
+              <td style="width:97px;">0.5</td>
               <td>1.0</td>
             </tr>
             </table>

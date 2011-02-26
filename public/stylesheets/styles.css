@@ -47,13 +47,13 @@ root {
 body {
     background-color: #000000;
 
-    margin: 10px 0px 0px 0px;
+    margin: 10px;
     padding: 0px;
 
     font-family: arial;
     font-size: 28px;
     color: #80d1ff;
-    width: 1910px;
+    width: 1900px;
 }
 
 #display1_header {
@@ -164,7 +164,7 @@ body {
 
 .frequency_coverage_table {
     background-color: #0072ff;
-    width: 300px;
+    width: 275px;
 }
 
 .frequency_coverage_table th {
@@ -182,8 +182,8 @@ body {
 .frequency_coverage_table td.header {
     background-color: #ffffff;
     font-size: 18px;
-    width: 100px;
-    text-align: right;
+    width: 50px;
+    text-align: center;
 }
 
 .frequency_coverage_table_footer {
@@ -206,6 +206,7 @@ body {
     padding: 0px;
     margin: 0px;
     width: 200px;
+    background-color: #000000;
 }
 
 .frequency_cover_data_table td.off {
