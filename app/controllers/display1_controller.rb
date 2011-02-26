@@ -21,20 +21,16 @@ class Display1Controller < ApplicationController
   def waterfall
     waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, nil)
     respond_to do |format|
-      format.json{render :json => waterfall}
+      format.json { render :json => waterfall }
     end
 
   end
 
 
   def baseline_chart
-
-    # TODO: Create a function which takes in marker index and chart data.
-#    if marker_index.nil?
-      marker_index = 50
-#    end
-
-    chart_data = get_json_baseline(params[:id])[:data].join(',')
+    baseline = get_json_baseline(params[:id])
+    chart_data = baseline[:data].join(',')
+    marker_index = baseline[:subChannel]
 
     chart_params = {
       :cht => 'lc',
@@ -57,6 +53,40 @@ class Display1Controller < ApplicationController
     response = Net::HTTP.post_form(uri, chart_params)
 
     send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
+  end
+
+  def activity
+    uri = URI.parse("http://174.129.14.98:8080/activity")
+    response = Net::HTTP.get_response(uri)
+    j = ActiveSupport::JSON.decode(response.body)
+
+    # the following two lines are temporary placeholder until activity REST interface
+    # is implemented by seti server
+    j = {}
+    j["id"] = 32445
+
+    respond_to do |format|
+      format.json { render :json => j.to_options }
+    end
+  end
+
+  def beam
+    uri = URI.parse("http://174.129.14.98:8080/beam?id=#{params[:id]}")
+    response = Net::HTTP.get_response(uri)
+    j = ActiveSupport::JSON.decode(response.body)
+
+    # the following lines are temporary placeholder until the REST interface
+    # is implemented by seti server
+    j = {}
+    j["name"] = "Polaris"
+    j["frequency"] = 1246
+    j["status"] = "ON2"
+    j["ra"] = 67.82
+    j["dec"] = 14.45
+
+    respond_to do |format|
+      format.json { render :json => j.to_options }
+    end
   end
 
   private
@@ -112,6 +142,7 @@ class Display1Controller < ApplicationController
     j = ActiveSupport::JSON.decode(response.body)
 
     j["data"] = Base64::decode64( j["data"] ).unpack("f*")
+    j["subChannel"] = rand(baseline_width).to_i;      # subChannel not provided yet from server; we'll use a placeholder for now
     
     # Convert hash keys to symbols
     return j.to_options

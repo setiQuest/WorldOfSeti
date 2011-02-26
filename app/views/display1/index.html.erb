@@ -1,7 +1,7 @@
 <div id="display1_header">
   <div class="text-large"><%= image_tag "logo_seti.png" %></div>
   <div class="text-title" style="padding-left:25px; width:1150px;">What We are Currently Scanning</div>
-  <div class="text-title-dark-blue">Activity ID: </div>
+  <div class="text-title-dark-blue">Activity ID: <span id="activity-id">?</span></div>
   <div class="float-wall"></div>
 </div>
 
@@ -42,7 +42,7 @@ function updateWaterfall(id)
   // Take id and make AJAX query
   $.ajax({
     type:     'GET',
-    url:      '/display1/waterfall',
+    url:      '<%= display1_waterfall_path %>',
     data:     { id:id, start_row:updateWaterfall.waterfall_data[id].last_row },
     success:  function(response) {
       // store the last row we have so far, so that the next query gets the subsequent rows
@@ -61,12 +61,63 @@ function updateWaterfall(id)
   });
 }
 
+function updateBaseline(id)
+{
+  // to bypass browser caching, we need to append a random parameter to the URL
+  d = new Date();
+  $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime());
+}
+
+function updateBeamInfo(id)
+{
+  // Take id and make AJAX query
+  $.ajax({
+    type:     'GET',
+    url:      '<%= display1_beam_path %>',
+    data:     { id:id },
+    success:  function(response) {
+      $('#beam' + id + ' .beam_information_top .beam_status').text(response.status);
+      $('#beam' + id + ' .beam_information_top .beam_frequency').text(response.frequency + ' MHz');
+    },
+    error:    function() {
+      // We should handle error here
+    },
+    datatype: 'json'
+  });
+}
+
+function updateActivity()
+{
+  // Take id and make AJAX query
+  $.ajax({
+    type:     'GET',
+    url:      '<%= display1_activity_path %>',
+    success:  function(response) {
+      $('#activity-id').text(response.id);
+    },
+    error:    function() {
+      // We should handle error here
+    },
+    datatype: 'json'
+  });
+}
+
 // Register waterfall display for automatic updates
 $(document).ready(function()
 {
-  registerElementTimer(function() { updateWaterfall(1); }, 1500);
-  registerElementTimer(function() { updateWaterfall(2); }, 1500);
-  registerElementTimer(function() { updateWaterfall(3); }, 1500);
+  registerElementTimer(function() { updateActivity(); }, 60000);
+
+  registerElementTimer(function() { updateWaterfall(1); }, 2000);
+  registerElementTimer(function() { updateBaseline(1); }, 60000);
+  registerElementTimer(function() { updateBeamInfo(1); }, 10000);
+
+  registerElementTimer(function() { updateWaterfall(2); }, 2000);
+  registerElementTimer(function() { updateBaseline(2); }, 60000);
+  registerElementTimer(function() { updateBeamInfo(2); }, 60000);
+
+  registerElementTimer(function() { updateWaterfall(3); }, 2000);
+  registerElementTimer(function() { updateBaseline(3); }, 60000);
+  registerElementTimer(function() { updateBeamInfo(3); }, 60000);
 });
 
 </script>

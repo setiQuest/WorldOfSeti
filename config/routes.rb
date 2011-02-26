@@ -1,9 +1,9 @@
 SetiWorld::Application.routes.draw do
   get "display1/index"
-  
   get "display1/waterfall"
-
-  match "display1/baseline_chart/:id" => 'display1#baseline_chart', :as => :display1_baseline_chart
+  get "display1/beam"
+  get "display1/activity"
+  get "display1/baseline_chart/:id" => 'display1#baseline_chart', :as => :display1_baseline_chart
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
