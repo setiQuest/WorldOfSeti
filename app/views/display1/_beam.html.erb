@@ -53,15 +53,31 @@
       <div>&nbsp;<!-- Description here --></div>
       <div><%= render 'waterfall', :waterfall_id => beam_id %></div>
     </td>
-    <td class="beam_observation_history">
-      <table class="observation_history_table">
-        <tr><th>Observation History</th></tr>
-        <tr><td>&nbsp;</td></tr>
-        <tr><td>&nbsp;</td></tr>
-        <tr><td>&nbsp;</td></tr>
-        <tr><td>&nbsp;</td></tr>
-        <tr><td>&nbsp;</td></tr>
-        <tr><td>&nbsp;</td></tr>
+    <td class="beam_frequency_coverage">
+      <table class="frequency_coverage_table">
+        <tr><th colspan="2">Frequency Coverage</th></tr>
+        <tr>
+          <td class="header">
+            <table>
+            <% 8.times do |i| %>
+              <tr class="frequency_coverage_table_header">
+                <td><%= i+1 %> - <%= i+2 %> GHz</td>
+              </tr>
+            <% end %>
+            </table>
+          </td>
+          <td rowspan="10">
+            <table id="frequency_cover_data_table">
+            <% 8.times do %>
+              <tr>
+                <% 10.times do %>
+                  <td class="off">&nbsp;</td>
+                <% end %>
+              </tr>
+            <% end %>
+            </table>
+          </td>
+        </tr>
       </table>
     </td>
   </tr>
