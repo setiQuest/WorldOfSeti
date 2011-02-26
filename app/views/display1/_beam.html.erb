@@ -58,7 +58,7 @@
         <tr><th colspan="2">Frequency Coverage</th></tr>
         <tr>
           <td class="header">
-            <table>
+            <table style="width:100%;">
             <% 8.times do |i| %>
               <tr class="frequency_coverage_table_header">
                 <td><%= i+1 %> - <%= i+2 %> GHz</td>
@@ -66,15 +66,27 @@
             <% end %>
             </table>
           </td>
-          <td rowspan="10">
+          <td>
             <table id="frequency_cover_data_table">
             <% 8.times do %>
               <tr>
                 <% 10.times do %>
-                  <td class="off">&nbsp;</td>
+                  <td class="off"></td>
                 <% end %>
               </tr>
             <% end %>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="header"></td>
+          <td class="footer">
+            <table>
+            <tr class="frequency_coverage_table_footer">
+              <td style="width:85px;">0.1</td>
+              <td style="width:85px;">0.5</td>
+              <td>1.0</td>
+            </tr>
             </table>
           </td>
         </tr>
