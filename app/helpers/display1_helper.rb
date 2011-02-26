@@ -39,7 +39,7 @@ module Display1Helper
   end
 
   def waterfall_height
-    100
+    200
   end
 
   def baseline_width
