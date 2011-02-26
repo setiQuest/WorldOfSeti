@@ -49,4 +49,12 @@ module Display1Helper
   def baseline_height
     100
   end
+
+  def freq_coverage_rows
+    9
+  end
+
+  def freq_coverage_cols
+    10
+  end
 end

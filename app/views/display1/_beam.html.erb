@@ -59,7 +59,7 @@
         <tr>
           <td class="header">
             <table style="width:100%;">
-            <% 8.times do |i| %>
+            <% freq_coverage_rows.times do |i| %>
               <tr class="frequency_coverage_table_header">
                 <td><%= i+1 %> - <%= i+2 %> GHz</td>
               </tr>
@@ -68,9 +68,9 @@
           </td>
           <td>
             <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table">
-            <% 8.times do %>
+              <% freq_coverage_rows.times do %>
               <tr>
-                <% 10.times do %>
+                <% freq_coverage_cols.times do %>
                   <td class="off"></td>
                 <% end %>
               </tr>

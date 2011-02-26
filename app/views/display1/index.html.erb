@@ -51,110 +51,140 @@
 
 <script type="text/javascript">
 
-function drawWaterfallRows(id, start_row, end_row, data64)
-{
-  var waterfall_data = decode64(data64);
-
-  var processingInstance = null;
-  if (!processingInstance)
+  function drawWaterfallRows(id, start_row, end_row, data64)
   {
-    processingInstance = Processing.getInstanceById('canvas_waterfall' + id);
-    processingInstance.drawWaterfallRows(id, start_row, end_row - start_row, waterfall_data);
-  }
-}
+    var waterfall_data = decode64(data64);
 
-// AJAX call to update JSON
-function updateWaterfall(id)
-{
-  if(updateWaterfall.waterfall_data == undefined)
-  {
-     updateWaterfall.waterfall_data = new Array();
+    var processingInstance = null;
+    if (!processingInstance)
+    {
+      processingInstance = Processing.getInstanceById('canvas_waterfall' + id);
+      processingInstance.drawWaterfallRows(id, start_row, end_row - start_row, waterfall_data);
+    }
   }
 
-  if(updateWaterfall.waterfall_data[id] == undefined)
+  // AJAX call to update JSON
+  function updateWaterfall(id)
   {
-    updateWaterfall.waterfall_data[id] = {data:"", last_row:1};
+    if(updateWaterfall.waterfall_data == undefined)
+    {
+      updateWaterfall.waterfall_data = new Array();
+    }
+
+    if(updateWaterfall.waterfall_data[id] == undefined)
+    {
+      updateWaterfall.waterfall_data[id] = {data:"", last_row:1};
+    }
+
+    // Take id and make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_waterfall_path %>',
+      data:     { id:id, start_row:updateWaterfall.waterfall_data[id].last_row },
+      success:  function(response) {
+        // store the last row we have so far, so that the next query gets the subsequent rows
+        updateWaterfall.waterfall_data[id].last_row = response.endRow;
+        if(updateWaterfall.waterfall_data[id].last_row >= <%= waterfall_height %> )
+        {
+          updateWaterfall.waterfall_data[id].last_row = 0;
+        }
+
+        drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
+      },
+      error:    function() {
+        // We should handle error here
+      },
+      datatype: 'json'
+    });
   }
 
-  // Take id and make AJAX query
-  $.ajax({
-    type:     'GET',
-    url:      '<%= display1_waterfall_path %>',
-    data:     { id:id, start_row:updateWaterfall.waterfall_data[id].last_row },
-    success:  function(response) {
-      // store the last row we have so far, so that the next query gets the subsequent rows
-      updateWaterfall.waterfall_data[id].last_row = response.endRow;
-      if(updateWaterfall.waterfall_data[id].last_row >= <%= waterfall_height %> )
-      {
-        updateWaterfall.waterfall_data[id].last_row = 0;
-      }
+  function updateBaseline(id)
+  {
+    // to bypass browser caching, we need to append a random parameter to the URL
+    d = new Date();
+    $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime());
+  }
 
-      drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
-    },
-    error:    function() {
-      // We should handle error here
-    },
-    datatype: 'json'
+  function updateBeamInfo(id)
+  {
+    // Take id and make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_beam_path %>',
+      data:     { id:id },
+      success:  function(response) {
+        $('#beam' + id + ' .beam_information_top .beam_status').text(response.status);
+        $('#beam' + id + ' .beam_information_top .beam_frequency').text(response.frequency + ' MHz');
+      },
+      error:    function() {
+        // We should handle error here
+      },
+      datatype: 'json'
+    });
+  }
+
+  function updateActivity()
+  {
+    // Take id and make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_activity_path %>',
+      success:  function(response) {
+        $('#activity-id').text(response.id);
+      },
+      error:    function() {
+        // We should handle error here
+      },
+      datatype: 'json'
+    });
+  }
+
+  function updateFrequencyCoverage(id) {
+    // Take id and make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_frequency_coverage_path %>',
+      data:     { id:id },
+      success:  function(response) {
+        var freqHistory = response;
+        for(var row = 0; row < freqHistory.length; row++) {
+          for(var col = 0; col < freqHistory[row].length; col++) {
+            var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(' + row + ') td:nth-child(' + col + ')');
+            if(freqHistory[row][col]) {
+              cell.attr("class", "on");
+            } else {
+              cell.attr("class", "off");
+            }
+          }
+        }
+      },
+      error:    function() {
+        // We should handle error here
+      },
+      datatype: 'json'
+    });
+  }
+
+  // Register waterfall display for automatic updates
+  $(document).ready(function()
+  {
+    registerElementTimer(function() { updateActivity(); }, 60000);
+
+    registerElementTimer(function() { updateWaterfall(1); }, 2000);
+    registerElementTimer(function() { updateBaseline(1); }, 60000);
+    registerElementTimer(function() { updateBeamInfo(1); }, 60000);
+    registerElementTimer(function() { updateFrequencyCoverage(1); }, 60000);
+
+    registerElementTimer(function() { updateWaterfall(2); }, 2000);
+    registerElementTimer(function() { updateBaseline(2); }, 60000);
+    registerElementTimer(function() { updateBeamInfo(2); }, 60000);
+    registerElementTimer(function() { updateFrequencyCoverage(2); }, 60000);
+
+    registerElementTimer(function() { updateWaterfall(3); }, 2000);
+    registerElementTimer(function() { updateBaseline(3); }, 60000);
+    registerElementTimer(function() { updateBeamInfo(3); }, 60000);
+    registerElementTimer(function() { updateFrequencyCoverage(3); }, 60000);
+
   });
-}
-
-function updateBaseline(id)
-{
-  // to bypass browser caching, we need to append a random parameter to the URL
-  d = new Date();
-  $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime());
-}
-
-function updateBeamInfo(id)
-{
-  // Take id and make AJAX query
-  $.ajax({
-    type:     'GET',
-    url:      '<%= display1_beam_path %>',
-    data:     { id:id },
-    success:  function(response) {
-      $('#beam' + id + ' .beam_information_top .beam_status').text(response.status);
-      $('#beam' + id + ' .beam_information_top .beam_frequency').text(response.frequency + ' MHz');
-    },
-    error:    function() {
-      // We should handle error here
-    },
-    datatype: 'json'
-  });
-}
-
-function updateActivity()
-{
-  // Take id and make AJAX query
-  $.ajax({
-    type:     'GET',
-    url:      '<%= display1_activity_path %>',
-    success:  function(response) {
-      $('#activity-id').text(response.id);
-    },
-    error:    function() {
-      // We should handle error here
-    },
-    datatype: 'json'
-  });
-}
-
-// Register waterfall display for automatic updates
-$(document).ready(function()
-{
-  registerElementTimer(function() { updateActivity(); }, 60000);
-
-  registerElementTimer(function() { updateWaterfall(1); }, 2000);
-  registerElementTimer(function() { updateBaseline(1); }, 60000);
-  registerElementTimer(function() { updateBeamInfo(1); }, 10000);
-
-  registerElementTimer(function() { updateWaterfall(2); }, 2000);
-  registerElementTimer(function() { updateBaseline(2); }, 60000);
-  registerElementTimer(function() { updateBeamInfo(2); }, 60000);
-
-  registerElementTimer(function() { updateWaterfall(3); }, 2000);
-  registerElementTimer(function() { updateBaseline(3); }, 60000);
-  registerElementTimer(function() { updateBeamInfo(3); }, 60000);
-});
 
 </script>

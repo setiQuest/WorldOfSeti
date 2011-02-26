@@ -124,6 +124,25 @@ class Display1Controller < ApplicationController
     end
   end
 
+  def frequency_coverage
+    observ_history = get_observational_history(params[:id])[:observationHistory]
+    freq_coverage = Array.new(freq_coverage_rows) { Array.new(freq_coverage_cols) { false }}
+    observ_history[:freqHistory].each do |item|
+      # take the frequency seen before and compute which row and column it will
+      # go in to in the table. rows describe the frequency in the thousands
+      # place and the cols describe the frequency in the hundreds place.
+      row = (item / 1000).to_i - 1
+      col = ((item.to_i % 1000) / 100).ceil - 1
+
+      # true means that this frequency has been checked before
+      freq_coverage[row][col] = true
+    end
+
+    respond_to do |format|
+      format.json { render :json => freq_coverage }
+    end
+  end
+
   private
 
   def get_random_waterfall_data
@@ -182,5 +201,12 @@ class Display1Controller < ApplicationController
     # Convert hash keys to symbols
     return j.to_options
   end
-  
+
+  def get_observational_history(id)
+    history = {}
+    history[:observationHistory]= {}
+    history[:observationHistory][:id] = id
+    history[:observationHistory][:freqHistory] = 20.times.collect { rand(9000) + 1000 }
+    return history
+  end
 end
