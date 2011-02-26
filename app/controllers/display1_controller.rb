@@ -71,6 +71,7 @@ class Display1Controller < ApplicationController
       :cht => 'lc',
       :chs => '768x150',
       :chds => '0,20000',
+      :chls => '3',							# Line thickness
       :chf => 'bg,s,DDDDDD|c,s,FFFFFF',                                 # Color background
       :chma => '1,1,10,1',
       :chg => '5,20,1,0',                                               # Grid lines
