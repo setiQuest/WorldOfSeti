@@ -34,38 +34,35 @@
 #
 ################################################################################
 -->
+<table id="beam<%= beam_id %>">
+  <tr>
+    <td class="beam_information">
+      <div class="beam_information_top">
+        <div class="text-large">Beam <%= beam_id %></div>
+        <div class="beam_status">&nbsp;<!-- ON/OFF image here --></div>
+        <div class="beam_frequency">&nbsp;<!-- MHz here --></div>
+        <div class="beam_location">&nbsp;<!-- RA / DEC here --></div>
+        <div class="float-wall"></div>
+      </div>
 
-<div id="beam<%= beam_id %>">
-  <div class="beam_information">
-    <div class="beam_information_top">
-      <div class="text-large">Beam <%= beam_id %></div>
-      <div class="beam_status">&nbsp;<!-- ON/OFF image here --></div>
-      <div class="beam_frequency">&nbsp;<!-- MHz here --></div>
-      <div class="beam_location">&nbsp;<!-- RA / DEC here --></div>
-      <div class="float-wall"></div>
-    </div>
-
-    <div class="beam_information_bottom">
-      <div><%= render 'baseline', :baseline_id => beam_id %></div>
-    </div>
-  </div>
-
-  <div style="float:left; padding-left:15px;">
-    <div>&nbsp;<!-- Description here --></div>
-    <div><%= render 'waterfall', :waterfall_id => beam_id %></div>
-  </div>
-  
-  <div class="beam_observation_history">
-    <table class="observation_history_table">
-      <tr><th>Observation History</th></tr>
-      <tr><td>&nbsp;</td></tr>
-      <tr><td>&nbsp;</td></tr>
-      <tr><td>&nbsp;</td></tr>
-      <tr><td>&nbsp;</td></tr>
-      <tr><td>&nbsp;</td></tr>
-      <tr><td>&nbsp;</td></tr>
-    </table>
-  </div>
-  
-  <div class="float-wall"></div>
-</div>
+      <div class="beam_information_bottom">
+        <div><%= render 'baseline', :baseline_id => beam_id %></div>
+      </div>
+    </td>
+    <td class="beam_information_center">
+      <div>&nbsp;<!-- Description here --></div>
+      <div><%= render 'waterfall', :waterfall_id => beam_id %></div>
+    </td>
+    <td class="beam_observation_history">
+      <table class="observation_history_table">
+        <tr><th>Observation History</th></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+      </table>
+    </td>
+  </tr>
+</table>

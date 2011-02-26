@@ -107,8 +107,8 @@ body {
 .beam_information {
     width: 768px;
     float: left;
-    padding-top: 30px;
     padding-left: 15px;
+    vertical-align: bottom;
 }
 
 .beam_information_top {
@@ -119,6 +119,11 @@ body {
     float: left;
     line-height: 100px;
     vertical-align: middle;
+}
+
+.beam_information_center {
+    vertical-align: bottom;
+    padding-left: 15px;
 }
 
 .beam_status {
@@ -132,6 +137,7 @@ body {
 .beam_observation_history {
     float: left;
     padding-left: 15px;
+    vertical-align: bottom;
 }
 
 .divider-horizontal {
