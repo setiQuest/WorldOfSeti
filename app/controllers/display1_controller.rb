@@ -129,7 +129,7 @@ class Display1Controller < ApplicationController
     observ_history = get_observational_history(params[:id])[:observationHistory]
     freq_coverage = Array.new(frequency_num_elements){ false }
     observ_history[:freqHistory].each do |item|
-      freq_coverage[(item / 100).to_i - 1] = true
+      freq_coverage[(item / 100).to_i - 10] = true
     end
 
     respond_to do |format|

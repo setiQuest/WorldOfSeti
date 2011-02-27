@@ -51,6 +51,6 @@ module Display1Helper
   end
 
   def frequency_num_elements
-    100
+    90
   end
 end
