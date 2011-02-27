@@ -110,14 +110,12 @@
       data:     { id:id },
       success:  function(response) {
         var freqHistory = response;
-        for(var row = 0; row < freqHistory.length; row++) {
-          for(var col = 0; col < freqHistory[row].length; col++) {
-            var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(' + row + ') td:nth-child(' + col + ')');
-            if(freqHistory[row][col]) {
-              cell.attr("class", "on");
-            } else {
-              cell.attr("class", "off");
-            }
+        for(var col = 0; col < freqHistory.length; col++) {
+          var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')');
+          if(freqHistory[col]) {
+            cell.attr("class", "on");
+          } else {
+            cell.attr("class", "off");
           }
         }
       },

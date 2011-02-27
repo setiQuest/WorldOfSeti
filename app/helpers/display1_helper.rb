@@ -50,11 +50,7 @@ module Display1Helper
     100
   end
 
-  def freq_coverage_rows
-    9
-  end
-
-  def freq_coverage_cols
-    10
+  def frequency_num_elements
+    100
   end
 end

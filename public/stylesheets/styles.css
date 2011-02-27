@@ -29,6 +29,10 @@ body {
     vertical-align: bottom;
 }
 
+.text-smaller {
+    font-size: 12px;
+}
+
 .text-small {
     font-size: 18px;
 }
@@ -168,23 +172,21 @@ body {
 .frequency_cover_data_table {
     padding: 0px;
     margin: 0px;
-    width: 200px;
     background-color: #000000;
 }
 
 .frequency_cover_data_table td.off {
     background-color: #FF0000;
     background: -moz-linear-gradient(top, #ff0000, #AA0000);
-    width: 20px;
-    height: 20px;
+    width: 12px;
+    height: 15px;
 }
 
 .frequency_cover_data_table td.on {
     background-color: #00FF00;
     background: -moz-linear-gradient(top, #00ff00, #006a00);
-    width: 20px;
-    height: 20px;
-    border: 1px solid #80d1ff;
+    width: 12px;
+    height: 15px; 
 }
 
 .float-wall {

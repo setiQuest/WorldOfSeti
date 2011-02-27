@@ -18,44 +18,36 @@
       <div><%= render 'waterfall', :waterfall_id => beam_id %></div>
     </td>
     <td class="beam_frequency_coverage">
-      <table class="frequency_coverage_table">
-        <tr><th colspan="3">Frequency Coverage</th></tr>
-        <tr>
-          <td class="header">
-            <table style="width:100%;">
-            <% freq_coverage_rows.times do |i| %>
-              <tr class="frequency_coverage_table_header">
-                <td><%= i+1 %></td>
-              </tr>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      <div>
+      <div class="text-small" style="float:left;">Past Frequency Coverage</div>
+      <div style="float:left; padding-top:2px; padding-left:25px;">
+        <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table">
+          <tr>
+            <% frequency_num_elements.times do %>
+              <td class="off"></td>
             <% end %>
-            </table>
-          </td>
-          <td style="width:200px;">
-            <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table">
-              <% freq_coverage_rows.times do %>
-              <tr>
-                <% freq_coverage_cols.times do %>
-                  <td class="off"></td>
-                <% end %>
-              </tr>
-            <% end %>
-            </table>
-          </td>
-          <td style="background-color:white;">&nbsp;</td>
-        </tr>
-        <tr>
-          <td class="header">GHz</td>
-          <td class="footer" colspan="2">
-            <table>
-            <tr class="frequency_coverage_table_footer">
-              <td style="width:76px;">0.1</td>
-              <td style="width:97px;">0.5</td>
-              <td>1.0</td>
-            </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
+          </tr>
+          <tr>
+            <td class="text-smaller" colspan="10">0.0</td>
+            <td class="text-smaller" colspan="10">1.0</td>
+            <td class="text-smaller" colspan="10">2.0</td>
+            <td class="text-smaller" colspan="10">3.0</td>
+            <td class="text-smaller" colspan="10">4.0</td>
+            <td class="text-smaller" colspan="10">5.0</td>
+            <td class="text-smaller" colspan="10">6.0</td>
+            <td class="text-smaller" colspan="10">7.0</td>
+            <td class="text-smaller" colspan="10">8.0</td>
+            <td class="text-smaller" colspan="10">9.0</td>
+            <td class="text-smaller" colspan="10">10.0</td>
+          </tr>
+        </table>
+      </div>
+      <div class="float-wall"></div>
+      </div>
     </td>
   </tr>
 </table>

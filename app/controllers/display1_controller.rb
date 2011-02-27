@@ -127,16 +127,9 @@ class Display1Controller < ApplicationController
 
   def frequency_coverage
     observ_history = get_observational_history(params[:id])[:observationHistory]
-    freq_coverage = Array.new(freq_coverage_rows) { Array.new(freq_coverage_cols) { false }}
+    freq_coverage = Array.new(frequency_num_elements){ false }
     observ_history[:freqHistory].each do |item|
-      # take the frequency seen before and compute which row and column it will
-      # go in to in the table. rows describe the frequency in the thousands
-      # place and the cols describe the frequency in the hundreds place.
-      row = (item / 1000).to_i - 1
-      col = ((item.to_i % 1000) / 100).ceil - 1
-
-      # true means that this frequency has been checked before
-      freq_coverage[row][col] = true
+      freq_coverage[(item / 100).to_i - 1] = true
     end
 
     respond_to do |format|
