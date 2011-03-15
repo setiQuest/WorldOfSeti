@@ -76,8 +76,8 @@
       url:      '<%= display1_beam_path %>',
       data:     { id:id },
       success:  function(response) {
-        $('#beam' + id + ' .beam_information_top .beam_status').text(response.status);
-        $('#beam' + id + ' .beam_information_top .beam_frequency').text(response.frequency + ' MHz');
+        $('#beam' + id + ' .beam_status').text(response.status);
+        $('#beam' + id + ' .beam_frequency').text(response.frequency + ' MHz');
       },
       error:    function() {
         // We should handle error here

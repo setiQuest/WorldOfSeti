@@ -1,57 +1,52 @@
-<table id="beam<%= beam_id %>">
-  <tr>
-    <td class="beam_information">
-      <div class="beam_information_top">
-        <div class="text-large">Beam <%= beam_id %></div>
-        <div class="beam_status">&nbsp;<!-- ON/OFF image here --></div>
-        <div class="beam_frequency">&nbsp;<!-- MHz here --></div>
-        <div class="beam_location">&nbsp;<!-- RA / DEC here --></div>
-        <div class="float-wall"></div>
-      </div>
+<div  id="beam<%= beam_id %>">
+  <div class="beam_information">
+    <div class="text-large">Beam <%= beam_id %></div>
+    <div class="beam_status">&nbsp;<!-- ON/OFF image here --></div>
+    <div class="beam_frequency">&nbsp;<!-- MHz here --></div>
+    <div class="beam_location text-small">&nbsp;<!-- RA / DEC here --></div>
+  </div>
 
-      <div class="beam_information_bottom">
-        <div><%= render 'baseline', :baseline_id => beam_id %></div>
-      </div>
-    </td>
-    <td class="beam_information_center">
-      <div>&nbsp;<!-- Description here --></div>
-      <div><%= render 'waterfall', :waterfall_id => beam_id %></div>
-    </td>
-    <td class="beam_frequency_coverage">
-    </td>
-  </tr>
-  <tr>
-    <td colspan="3">
-      <div>
-      <div class="text-small" style="float:left;">Past Frequency Coverage (GHz)</div>
-      <div style="float:left; padding-top:2px; padding-left:25px;">
-        <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table" cellspacing="0" cellpadding="0">
-          <tr>
-            <% frequency_num_elements.times do |i| %>
-              <% if i % 10 == 0 %>
-                <td class="off" style="border-left: 1px solid white;"></td>
-              <% else %>
-                <td class="off"></td>
-              <% end %>
+  <div class="beam_information_center">
+    <div>
+      <%= render 'baseline', :baseline_id => beam_id %><br />
+      <div class="beam_description text-small">&nbsp;<!-- Description here --></div>
+    </div>
+    <div>
+      <%= render 'waterfall', :waterfall_id => beam_id %>
+    </div>
+    <div class="float-wall"></div>
+  </div>
+
+  <div class="float-wall"></div>
+
+  <div class="beam_past_frequency_coverage">
+    <div class="text-small" style="float:left;">Past Frequency Coverage (GHz)</div>
+    <div class="frequency_cover_data_table_container">
+      <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table" cellspacing="0" cellpadding="0">
+        <tr>
+          <% frequency_num_elements.times do |i| %>
+            <% if i % 10 == 0 %>
+              <td class="off" style="border-left: 1px solid white;"></td>
+            <% else %>
+              <td class="off"></td>
             <% end %>
-            <td style="border-left: 1px solid white; background-color:black;"></td>
-          </tr>
-          <tr>
-            <td class="text-smaller label" colspan="10">1.0</td>
-            <td class="text-smaller label" colspan="10">2.0</td>
-            <td class="text-smaller label" colspan="10">3.0</td>
-            <td class="text-smaller label" colspan="10">4.0</td>
-            <td class="text-smaller label" colspan="10">5.0</td>
-            <td class="text-smaller label" colspan="10">6.0</td>
-            <td class="text-smaller label" colspan="10">7.0</td>
-            <td class="text-smaller label" colspan="10">8.0</td>
-            <td class="text-smaller label" colspan="10">9.0</td>
-            <td class="text-smaller label" colspan="10">10.0</td>
-          </tr>
-        </table>
-      </div>
-      <div class="float-wall"></div>
-      </div>
-    </td>
-  </tr>
-</table>
+          <% end %>
+          <td style="border-left: 1px solid white; background-color:black;"></td>
+        </tr>
+        <tr>
+          <td class="text-smaller label" colspan="10">1.0</td>
+          <td class="text-smaller label" colspan="10">2.0</td>
+          <td class="text-smaller label" colspan="10">3.0</td>
+          <td class="text-smaller label" colspan="10">4.0</td>
+          <td class="text-smaller label" colspan="10">5.0</td>
+          <td class="text-smaller label" colspan="10">6.0</td>
+          <td class="text-smaller label" colspan="10">7.0</td>
+          <td class="text-smaller label" colspan="10">8.0</td>
+          <td class="text-smaller label" colspan="10">9.0</td>
+          <td class="text-smaller label" colspan="10">10.0</td>
+        </tr>
+      </table>
+    </div>
+    <div class="float-wall"></div>
+  </div>
+</div>

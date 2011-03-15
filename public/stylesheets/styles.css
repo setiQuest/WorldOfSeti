@@ -72,33 +72,33 @@ body {
 }
 
 .beam_information {
-    width: 768px;
+    width: 225px;
     float: left;
     padding-left: 15px;
-    vertical-align: bottom;
 }
 
-.beam_information_top {
-    height: 100px;
-}
-
-.beam_information_top div {
-    float: left;
-    line-height: 100px;
-    vertical-align: middle;
+.beam_description {
+    padding-top: 15px;
+    padding-left: 15px;
 }
 
 .beam_information_center {
-    vertical-align: bottom;
-    padding-left: 15px;
+    float: left;
+}
+
+.beam_information_center div {
+    float: left;
+    padding-left: 50px;
 }
 
 .beam_status {
     padding-left: 25px;
+    text-align: center;
 }
 
 .beam_location {
     padding-left: 25px;
+    text-align: center;
 }
 
 .divider-horizontal {
@@ -110,63 +110,28 @@ body {
     background-color: #0072ff;
 }
 
+.beam_past_frequency_coverage {
+    padding-top: 15px;
+    padding-left: 25px;
+}
+
 .beam_frequency {
     color: #faf58b;
     font-size: 18px;
     background-image: url(/images/bg_frequency.png);
     background-position: center;
     background-repeat: no-repeat;
+    line-height: 100px;
     height: 100px;
-    width: 125px;
     vertical-align: middle;
     text-align: center;
     padding-left: 25px;
 }
 
-.beam_frequency_coverage {
+.frequency_cover_data_table_container {
+    padding-top: 2px;
+    padding-left: 25px;
     float: left;
-    padding-left: 15px;
-    vertical-align: bottom;
-}
-
-.frequency_coverage_table {
-    background-color: #0072ff;
-    width: 275px;
-}
-
-.frequency_coverage_table th {
-    background-color: #ffffff;
-    color: #0072ff;
-    padding: 5px;
-}
-
-.frequency_coverage_table_header {
-    color: #000000;
-    height: 20px;
-    text-align: center;
-}
-
-.frequency_coverage_table td.header {
-    background-color: #ffffff;
-    font-size: 18px;
-    width: 50px;
-    text-align: center;
-}
-
-.frequency_coverage_table_footer {
-    color: #000000;
-    height: 20px;
-}
-
-.frequency_coverage_table td.footer {
-    background-color: #ffffff;
-    font-size: 18px;
-    text-align: left;
-}
-
-.frequency_coverage_table td {
-    padding: 0px;
-    margin: 0px;
 }
 
 .frequency_cover_data_table {
@@ -177,7 +142,7 @@ body {
 
 .frequency_cover_data_table td {
     border-left: 1px solid #000000;
-    width: 12px;
+    width: 15px;
     height: 15px;
 }
 
