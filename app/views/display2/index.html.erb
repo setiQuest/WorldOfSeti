@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Maps JavaScript API Example</title>
+      <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAddiIMkMAknNU3D5NS1TU4RT2yXp_ZAY8_ufC3CFXhHIE1NvwkxQU01Mn68JTNFGadfavdmyOXKv-bw" type="text/javascript"></script>
+      <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+
+      <script type="text/javascript">
+
+      var map; // Global map variable.
+
+      // Initializes Google Sky Map
+      function initialize() {
+       if (GBrowserIsCompatible()) {
+
+         map = new GMap2(document.getElementById("sky_map"), {
+             mapTypes : G_SKY_MAP_TYPES
+             });
+             // sample look at Mars
+         var longitude = raToLng('23:14:52.02');
+         var latitude  = decToLat('-05:56:40.36');
+         map.setCenter(new GLatLng(latitude, longitude), 10);
+         map.addControl(new GLargeMapControl());
+         map.addControl(new GMapTypeControl());
+       }
+      }
+
+      // Updates the map location
+      function updateMapLocation()
+      {
+        // Take id and make AJAX query
+        $.ajax({
+          type:     'GET',
+          url:      '<%= display1_activity_path %>',
+          success:  function(response) {
+            // TODO comment out two lines below since this is just testing.
+            response.primaryBeamLocation.ra = 5.68;
+            response.primaryBeamLocation.dec = -2.48;
+             var longitude = raToLng(decimalDegreesToString(response.primaryBeamLocation.ra));
+             var latitude  = decToLat(decimalDegreesToString(response.primaryBeamLocation.dec));
+             map.panTo(new GLatLng(latitude, longitude));
+          },
+          error:    function() {
+            // We should handle error here
+          },
+          datatype: 'json'
+        });
+      }
+  
+      $(document).ready(function()
+      {
+        registerElementTimer(function() { updateMapLocation(); }, 10000);
+      })
+  
+    </script>
+  </head>
+  
+  <body onload="initialize()" onunload="GUnload()">
+  <div id="sky_map" style="height: 1080px;width: 1920px; overflow: hidden"></div>
+  </body>
+
+</html>
