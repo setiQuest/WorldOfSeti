@@ -104,6 +104,7 @@
     });
   }
 
+
   function updateFrequencyCoverage(id) {
     // Take id and make AJAX query
     $.ajax({
@@ -128,26 +129,30 @@
     });
   }
 
-  // Register waterfall display for automatic updates
+  // Register display for automatic updates
   $(document).ready(function()
   {
-    registerElementTimer(function() { updateActivity(); }, 60000);
+    // Use constants defined in ApplicationController.... is this the correct way
+    // to reference static constants?
+    registerElementTimer(function() { updateActivity(); }, <%= ApplicationController::TIMEOUT_ACTIVITY %> );
 
-    registerElementTimer(function() { updateWaterfall(1); }, 2000);
-    registerElementTimer(function() { updateBaseline(1); }, 60000);
-    registerElementTimer(function() { updateBeamInfo(1); }, 60000);
-    registerElementTimer(function() { updateFrequencyCoverage(1); }, 5000);
+    // Time updates for antenna id 1
+    registerElementTimer(function() { updateWaterfall(1); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
+    registerElementTimer(function() { updateBaseline(1); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
+    registerElementTimer(function() { updateBeamInfo(1); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
+    registerElementTimer(function() { updateFrequencyCoverage(1); }, <%=  ApplicationController::TIMEOUT_FREQUENCY_COVERAGE %>);
 
-    registerElementTimer(function() { updateWaterfall(2); }, 2000);
-    registerElementTimer(function() { updateBaseline(2); }, 60000);
-    registerElementTimer(function() { updateBeamInfo(2); }, 60000);
-    registerElementTimer(function() { updateFrequencyCoverage(2); }, 5000);
+    // Time updates for antenna id 2
+    registerElementTimer(function() { updateWaterfall(2); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
+    registerElementTimer(function() { updateBaseline(2); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
+    registerElementTimer(function() { updateBeamInfo(2); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
+    registerElementTimer(function() { updateFrequencyCoverage(2); }, <%=  ApplicationController::TIMEOUT_FREQUENCY_COVERAGE %>);
 
-    registerElementTimer(function() { updateWaterfall(3); }, 2000);
-    registerElementTimer(function() { updateBaseline(3); }, 60000);
-    registerElementTimer(function() { updateBeamInfo(3); }, 60000);
-    registerElementTimer(function() { updateFrequencyCoverage(3); }, 5000);
-
+    // Time updates for antenna id 3
+    registerElementTimer(function() { updateWaterfall(3); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
+    registerElementTimer(function() { updateBaseline(3); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
+    registerElementTimer(function() { updateBeamInfo(3); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
+    registerElementTimer(function() { updateFrequencyCoverage(3); }, <%=  ApplicationController::TIMEOUT_FREQUENCY_COVERAGE %>);
   });
 
 </script>

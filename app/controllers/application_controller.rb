@@ -38,5 +38,14 @@ class ApplicationController < ActionController::Base
 
   include Display1Helper
 
+
+  # Constants either used in display 1 and/or display 2
   SETI_SERVER = "http://174.129.14.98:8010"
+
+  # Timeout constants for timer updates in milliseconds
+  TIMEOUT_ACTIVITY              = 60000
+  TIMEOUT_WATERFALL             = 2000
+  TIMEOUT_BASELINE              = 60000
+  TIMEOUT_BEAM_INFO             = 60000
+  TIMEOUT_FREQUENCY_COVERAGE    = 60000
 end

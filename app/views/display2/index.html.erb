@@ -50,7 +50,7 @@
   
       $(document).ready(function()
       {
-        registerElementTimer(function() { updateMapLocation(); }, 10000);
+        registerElementTimer(function() { updateMapLocation(); },  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
       })
   
     </script>
