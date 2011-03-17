@@ -99,3 +99,93 @@ function decode64(input) {
 
     return output;
 }
+
+
+/*
+  latToDec: latitude to declination
+
+  @param {Number} latitude
+  @return {Number} declination for this latitude
+ 
+  // Copyright 2008 Google Inc.
+  // All Rights Reserved.
+*/
+function latToDec(latitude) {
+  if (latitude < 0) return '-' + latToDec(- latitude);
+  var DEC = Math.floor(latitude).toString() + '° ';
+  latitude = (latitude - Math.floor(latitude)) * 60;
+  DEC += Math.floor(latitude).toString() + '\' ';
+  latitude = (latitude - Math.floor(latitude)) * 60;
+  DEC += latitude.toFixed(1) + '"';
+  return DEC;
+}
+
+/*
+  decToLat: declination to latitude
+
+  @param {Number} dec
+  @return {Number} latitude for this declination
+
+  // Copyright 2008 Google Inc.
+  // All Rights Reserved.
+*/
+function decToLat(dec) {
+  if (dec[0] == '-') return '-' + decToLat(dec.substring(1));
+  var decSplit = dec.split(':');
+  var latitude = parseFloat(decSplit[0]) +
+                 parseFloat(decSplit[1]) / 60.0 +
+                 parseFloat(decSplit[2]) / 3600.0;
+  return latitude;
+}
+
+/*
+  lngToRa: longitude to right ascension
+
+  @param {Number} longitude
+  @return {Number} right ascension
+  // Copyright 2008 Google Inc.
+  // All Rights Reserved.
+
+*/
+function lngToRa(longitude) {
+  longitude = (- longitude + 180) / 15;
+  var RA = Math.floor(longitude).toString() + 'h ';
+  longitude = (longitude - Math.floor(longitude)) * 60;
+  RA += Math.floor(longitude).toString() + 'm ';
+  longitude = (longitude - Math.floor(longitude)) * 60;
+  RA += Math.floor(longitude).toFixed(1) + 's';
+  return RA;
+}
+
+/*
+  raToLng: right ascension to longitude
+
+  @param {Number} right ascension
+  @return {Number} longitude
+
+  // Copyright 2008 Google Inc.
+  // All Rights Reserved.
+*/
+function raToLng(ra) {
+  var raSplit = ra.split(':');
+  var longitude = parseFloat(raSplit[0]) +
+                  parseFloat(raSplit[1]) / 60.0 +
+                  parseFloat(raSplit[2]) / 3600.0;
+  return - (longitude * 15 - 180);
+}
+
+/*
+ * This function takes in a float in decimal degrees and returns a
+ * string in DMS
+ */
+function decimalDegreesToString( dd )
+{
+  var h = parseInt(dd);
+  var m, s;
+  var stringdd = "" + h + ":";
+  m = ((dd - h) * 60);
+  stringdd += parseInt(m) + ":";
+  s = (m - parseInt(m)) * 60;
+  stringdd += s;
+  return stringdd;
+}

@@ -92,14 +92,9 @@ class Display1Controller < ApplicationController
   end
 
   def activity
-    uri = URI.parse("http://174.129.14.98:8080/activity")
+    uri = URI.parse("#{SETI_SERVER}/activity")
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
-
-    # the following two lines are temporary placeholder until activity REST interface
-    # is implemented by seti server
-    j = {}
-    j["id"] = 32445
 
     respond_to do |format|
       format.json { render :json => j.to_options }
@@ -107,7 +102,7 @@ class Display1Controller < ApplicationController
   end
 
   def beam
-    uri = URI.parse("http://174.129.14.98:8080/beam?id=#{params[:id]}")
+    uri = URI.parse("#{SETI_SERVER}/beam?id=#{params[:id]}")
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 
@@ -156,13 +151,10 @@ class Display1Controller < ApplicationController
       end_row = start_row + 1
     end
     
-    uri = URI.parse("http://174.129.14.98:8080/waterfall?id=#{id}&start_row=#{start_row}&end_row=#{end_row}")   
+    uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}&endRow=#{end_row}")
     response = Net::HTTP.get_response(uri) 
     j = ActiveSupport::JSON.decode(response.body)
     
-    # Merge strings
-    j["data"] = j["data"].join
-
     # Convert hash keys to symbols
     return j.to_options
   end
@@ -185,7 +177,7 @@ class Display1Controller < ApplicationController
   end
 
   def get_json_baseline(id)
-    uri = URI.parse("http://174.129.14.98:8080/baseline?id=#{id}")
+    uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id}")
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 

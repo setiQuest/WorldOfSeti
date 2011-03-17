@@ -37,4 +37,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   include Display1Helper
+
+  SETI_SERVER = "http://174.129.14.98:8010"
 end

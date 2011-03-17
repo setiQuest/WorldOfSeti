@@ -41,6 +41,8 @@ SetiWorld::Application.routes.draw do
   get "display1/frequency_coverage"
   get "display1/baseline_chart/:id" => 'display1#baseline_chart', :as => :display1_baseline_chart
 
+  get "display2/index"
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
