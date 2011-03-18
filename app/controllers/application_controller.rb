@@ -40,6 +40,8 @@ class ApplicationController < ActionController::Base
 
 
   # Constants either used in display 1 and/or display 2
+
+  # Location for the SETI Server
   SETI_SERVER = "http://174.129.14.98:8010"
 
   # Timeout constants for timer updates in milliseconds

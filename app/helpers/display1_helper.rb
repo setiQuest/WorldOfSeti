@@ -50,6 +50,9 @@ module Display1Helper
     100
   end
 
+  # Defines the number of elements in a frequency coverage chart.
+  # The frequency coverage is 1GHz - 10GHz with each interval being
+  # (10GHz-1Ghz)/frequency_num_elements
   def frequency_num_elements
     90
   end

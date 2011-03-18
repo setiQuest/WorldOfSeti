@@ -32,36 +32,29 @@
 # The SETI Institute at www.seti.org or setiquest.org. 
 #
 ################################################################################
-
 require 'base64'
 require "net/http"
 require "uri"
 
 class Display1Controller < ApplicationController
 
-#  {
-#
-#    waterfall:{
-#            id: 1,
-#            start_row: 63,
-#            end_row: 78,
-#            data: TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlzIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBv=
-#        }
-#    }
-#}
+  #
+  #
   def index
     @baseline1 = get_random_json_baseline
   end
 
+  #
+  #
   def waterfall
     waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, nil)
     respond_to do |format|
       format.json { render :json => waterfall }
     end
-
   end
 
-
+  #
+  #
   def baseline_chart
     baseline = get_json_baseline(params[:id])
     chart_data = baseline[:data].join(',')
@@ -85,12 +78,12 @@ class Display1Controller < ApplicationController
     }
 
     uri = URI.parse("http://chart.googleapis.com/chart")
-
     response = Net::HTTP.post_form(uri, chart_params)
-
     send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
   end
 
+  #
+  #
   def activity
     uri = URI.parse("#{SETI_SERVER}/activity")
     response = Net::HTTP.get_response(uri)
@@ -101,6 +94,8 @@ class Display1Controller < ApplicationController
     end
   end
 
+  #
+  #
   def beam
     uri = URI.parse("#{SETI_SERVER}/beam?id=#{params[:id]}")
     response = Net::HTTP.get_response(uri)
@@ -120,6 +115,8 @@ class Display1Controller < ApplicationController
     end
   end
 
+  #
+  #
   def frequency_coverage
     observ_history = get_observational_history(params[:id])[:observationHistory]
     freq_coverage = Array.new(frequency_num_elements){ false }
@@ -134,8 +131,9 @@ class Display1Controller < ApplicationController
 
   private
 
+  #
+  #
   def get_random_waterfall_data
-
     data = ''
     waterfall_height.times do |i|
       data += (0...waterfall_width).map{(rand(256)).chr}.join
@@ -144,9 +142,9 @@ class Display1Controller < ApplicationController
     return Base64::strict_encode64(data)
   end
 
-
+  #
+  #
   def get_json_waterfall(id, start_row, end_row)
-
     if end_row.nil?
       end_row = start_row + 1
     end
@@ -159,23 +157,25 @@ class Display1Controller < ApplicationController
     return j.to_options
   end
 
+  #
+  # For testing the baseline display. Generates random data
   def get_random_baseline_data
-
     data = (0...baseline_width*4).map{(rand(256)).chr}.join
-
     return Base64::strict_encode64(data)
   end
 
+  #
+  # For testing the waterfall display. Generates random waterfall data.
   def get_random_json_baseline
-
     baseline = {}
     baseline[:id] = 1
     baseline[:data] = Base64::decode64(get_random_baseline_data).unpack("f*").to_json()
 
     return baseline
-    
   end
 
+  #
+  #
   def get_json_baseline(id)
     uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id}")
     response = Net::HTTP.get_response(uri)
@@ -188,6 +188,8 @@ class Display1Controller < ApplicationController
     return j.to_options
   end
 
+  #
+  #
   def get_observational_history(id)
     history = {}
     history[:observationHistory]= {}
