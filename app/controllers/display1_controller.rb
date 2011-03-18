@@ -189,8 +189,26 @@ class Display1Controller < ApplicationController
   end
 
   #
-  #
+  # Obtains the observation history from the SETI webservice, parses the data
+  # and returns it as a map. The map includes the id and also the frequency
+  # history, which is an array of doubles.
   def get_observational_history(id)
+    # make the call to the seti webservice
+    uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
+    response = Net::HTTP.get_response(uri)
+    j = ActiveSupport::JSON.decode(response.body)
+
+    # get the values from the json returned
+    history = {}
+    history[:observationHistory]= {}
+    history[:observationHistory][:id] = j["id"]
+    history[:observationHistory][:freqHistory] = j["freqHistory"]
+    return history
+  end
+
+  #
+  # For testing the observational history/frequency coverage. Generates random data.
+  def get_random_observational_history(id)
     history = {}
     history[:observationHistory]= {}
     history[:observationHistory][:id] = id
