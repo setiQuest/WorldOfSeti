@@ -49,4 +49,5 @@ class ApplicationController < ActionController::Base
   TIMEOUT_WATERFALL             = 2000
   TIMEOUT_BASELINE              = 60000
   TIMEOUT_BEAM_INFO             = 60000
+  TIMEOUT_WEATHER               = 7200000
 end
