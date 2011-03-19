@@ -101,15 +101,6 @@ class Display1Controller < ApplicationController
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 
-    # the following lines are temporary placeholder until the REST interface
-    # is implemented by seti server
-    j = {}
-    j["name"] = "Polaris"
-    j["frequency"] = 1246
-    j["status"] = "ON2"
-    j["ra"] = 67.82
-    j["dec"] = 14.45
-
     respond_to do |format|
       format.json { render :json => j.to_options }
     end

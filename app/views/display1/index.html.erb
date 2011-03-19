@@ -88,8 +88,8 @@
         }
         
         $('#beam' + id + ' .beam_status').text(response.status);
-        $('#beam' + id + ' .beam_frequency').text(response.frequency + ' MHz');
-        beam_frequency = response.frequency;
+        $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
+        updateFrequencyCoverage(id, response.freq);
       },
       error:    function() {
         // We should handle error here
@@ -116,29 +116,7 @@
     });
   }
 
-  function getBeamFrequency()
-  {
-    if(beam_frequency != null)
-    {
-      return beam_frequency;
-    }
-
-    $.ajax({
-      type:     'GET',
-      url:      '<%= display1_beam_path %>',
-      data:     { id:id },
-      success:  function(response) {
-        beam_frequency = response.frequency;
-
-        return beam_frequency;
-      },
-      error:    function() {
-        // We should handle error here
-      },
-      datatype: 'json'
-    });
-  }
-  function updateFrequencyCoverage(id) {
+  function updateFrequencyCoverage(id, currFreq) {
     // Take id and make AJAX query
     $.ajax({
       type:     'GET',
@@ -146,8 +124,6 @@
       data:     { id:id },
       success:  function(response) {
 
-        var currFreq = getBeamFrequency();
-          
         var freqHistory = response;
         for(var col = 0; col < freqHistory.length; col++) {
           var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
@@ -182,19 +158,16 @@
     registerElementTimer(function() { updateWaterfall(1); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
     registerElementTimer(function() { updateBaseline(1); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
     registerElementTimer(function() { updateBeamInfo(1); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
-    registerElementTimer(function() { updateFrequencyCoverage(1); }, <%=  ApplicationController::TIMEOUT_FREQUENCY_COVERAGE %>);
 
     // Time updates for antenna id 2
     registerElementTimer(function() { updateWaterfall(2); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
     registerElementTimer(function() { updateBaseline(2); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
     registerElementTimer(function() { updateBeamInfo(2); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
-    registerElementTimer(function() { updateFrequencyCoverage(2); }, <%=  ApplicationController::TIMEOUT_FREQUENCY_COVERAGE %>);
 
     // Time updates for antenna id 3
     registerElementTimer(function() { updateWaterfall(3); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
     registerElementTimer(function() { updateBaseline(3); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
     registerElementTimer(function() { updateBeamInfo(3); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
-    registerElementTimer(function() { updateFrequencyCoverage(3); }, <%=  ApplicationController::TIMEOUT_FREQUENCY_COVERAGE %>);
   });
 
 </script>
