@@ -150,7 +150,7 @@
           
         var freqHistory = response;
         for(var col = 0; col < freqHistory.length; col++) {
-          var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')');
+          var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
           if(freqHistory[col]) {
             cell.attr("class", "on");
           } else {
@@ -160,7 +160,7 @@
           var thisFreq = col * 100 + 1000;
           if(currFreq != null && (thisFreq <= currFreq && currFreq <= (thisFreq + 100)) )
           {
-            cell.attr("class", "current");
+            $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
           }
         }
       },

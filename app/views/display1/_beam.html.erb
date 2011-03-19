@@ -25,6 +25,11 @@
       <table id="frequency_cover_data_table<%=beam_id%>" class="frequency_cover_data_table" cellspacing="0" cellpadding="0">
         <tr>
           <% frequency_num_elements.times do |i| %>
+            <td class="arrow"><img src="/images/arrow_yellow.png" style="display:none;" /></td>
+          <% end %>
+        </tr>
+        <tr>
+          <% frequency_num_elements.times do |i| %>
             <% if i % 10 == 0 %>
               <td class="off" style="border-left: 1px solid white;"></td>
             <% else %>
