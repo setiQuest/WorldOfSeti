@@ -14,6 +14,8 @@
 
 <script type="text/javascript">
 
+  var beam_frequency = null;
+  
   function drawWaterfallRows(id, start_row, end_row, data64)
   {
     var waterfall_data = decode64(data64);
@@ -87,6 +89,7 @@
         
         $('#beam' + id + ' .beam_status').text(response.status);
         $('#beam' + id + ' .beam_frequency').text(response.frequency + ' MHz');
+        beam_frequency = response.frequency;
       },
       error:    function() {
         // We should handle error here
@@ -113,7 +116,28 @@
     });
   }
 
+  function getBeamFrequency()
+  {
+    if(beam_frequency != null)
+    {
+      return beam_frequency;
+    }
 
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_beam_path %>',
+      data:     { id:id },
+      success:  function(response) {
+        beam_frequency = response.frequency;
+
+        return beam_frequency;
+      },
+      error:    function() {
+        // We should handle error here
+      },
+      datatype: 'json'
+    });
+  }
   function updateFrequencyCoverage(id) {
     // Take id and make AJAX query
     $.ajax({
@@ -121,6 +145,9 @@
       url:      '<%= display1_frequency_coverage_path %>',
       data:     { id:id },
       success:  function(response) {
+
+        var currFreq = getBeamFrequency();
+          
         var freqHistory = response;
         for(var col = 0; col < freqHistory.length; col++) {
           var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')');
@@ -128,6 +155,12 @@
             cell.attr("class", "on");
           } else {
             cell.attr("class", "off");
+          }
+          
+          var thisFreq = col * 100 + 1000;
+          if(currFreq != null && (thisFreq <= currFreq && currFreq <= (thisFreq + 100)) )
+          {
+            cell.attr("class", "current");
           }
         }
       },

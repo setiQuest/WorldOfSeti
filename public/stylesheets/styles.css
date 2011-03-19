@@ -164,7 +164,12 @@ body {
 
 .frequency_cover_data_table td.on {
     background-color: #00FF00;
-    background: -moz-linear-gradient(top, #00ff00, #006a00);\
+    background: -moz-linear-gradient(top, #00ff00, #006a00);
+}
+
+.frequency_cover_data_table td.current {
+    background-color: #dddd00;
+    background: -moz-linear-gradient(top, #dddd00, #606000);
 }
 
 .frequency_cover_data_table td.label {
