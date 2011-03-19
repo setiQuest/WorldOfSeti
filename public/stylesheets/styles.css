@@ -29,6 +29,11 @@ body {
     vertical-align: bottom;
 }
 
+#display2 {
+    height: 1050px;
+    width: 1910px;
+}
+
 .text-smaller {
     font-size: 12px;
 }
@@ -189,12 +194,25 @@ body {
 
 #webcam {
     position: absolute;
-    top: 875px;
-    left: 995px;
+    top: 845px;
+    left: 900px;
     border: 2px solid white;
     width: 922px;
 }
 
 .webcam-image {
     width: 300px;
+}
+
+#weatherForecast {
+    position: absolute;
+    left: 100px;
+    top: 960px;
+    width: 728px;
+    height: 90px;
+}
+
+#sky_map {
+    height: 1050px;
+    overflow: hidden;
 }
