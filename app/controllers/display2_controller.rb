@@ -34,7 +34,7 @@
 ################################################################################
 class Display2Controller < ApplicationController
   def index
-    
+    @title = 'Other Areas of Interest'
   end
 
 

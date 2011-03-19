@@ -2,10 +2,12 @@
 
 <html>
 <head>
-  <title>SetiWorld</title>
+  <title><%= title %></title>
   <%= stylesheet_link_tag :all %>
   <%= javascript_include_tag 'jquery-1.4.4.min', 'utilities', 'processing-1.0.0.min', 'application' %>
   <%= csrf_meta_tag %>
+
+  <%= yield(:head) %>
 </head>
 <body>
 

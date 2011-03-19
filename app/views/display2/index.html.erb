@@ -1,99 +1,96 @@
-<!DOCTYPE HTML>
-<html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Other Areas of Interest</title>
-      <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAddiIMkMAknNU3D5NS1TU4RT2yXp_ZAY8_ufC3CFXhHIE1NvwkxQU01Mn68JTNFGadfavdmyOXKv-bw" type="text/javascript"></script>
-      <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 
-      <script type="text/javascript">
+<% content_for(:head) do %>
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAddiIMkMAknNU3D5NS1TU4RT2yXp_ZAY8_ufC3CFXhHIE1NvwkxQU01Mn68JTNFGadfavdmyOXKv-bw" type="text/javascript"></script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<% end %>
 
-      var map; // Global map variable.
+<div id="sky_map" style="height: 1080px;width: 1920px; overflow: hidden"></div>
 
-      // Initializes Google Sky Map
-      function initialize() {
-       if (GBrowserIsCompatible()) {
-         map = new GMap2(document.getElementById("sky_map"), {
-             mapTypes : G_SKY_MAP_TYPES
-             });
-             // sample look at Mars initially
-         var longitude = raToLng('23:14:52.02');
-         var latitude  = decToLat('-05:56:40.36');
-         map.setCenter(new GLatLng(latitude, longitude), 3);
-         map.addControl(new GLargeMapControl());
-         map.addControl(new GMapTypeControl());
-       }
-      }
 
-      // Updates the map location
-      function updateMapLocation()
-      {
-        // Take id and make AJAX query
-        $.ajax({
-          type:     'GET',
-          url:      '<%= display1_activity_path %>',
-          success:  function(response) {
-             // Clear all overlays and markers
-             map.clearOverlays();
 
-             // construct GLatLng primary beam loc
-             var longitude = raToLng(decimalDegreesToString(response.primaryBeamLocation.ra));
-             var latitude  = decToLat(decimalDegreesToString(response.primaryBeamLocation.dec));
-             var primary_beam_ll = new GLatLng(latitude, longitude);
+<script type="text/javascript">
+  var map; // Global map variable.
 
-             // construct GLatLng fov beam loc
-             var fov_longitude = raToLng(decimalDegreesToString(response.fovBeamLocation.ra));
-             var fov_latitude  = decToLat(decimalDegreesToString(response.fovBeamLocation.dec));
-             var fov_beam_ll = new GLatLng(fov_latitude, fov_longitude);
-  
-             // Covert to pixels because it's easier to draw circle
-             var zoom = map.getZoom();
-             var current_projection = map.getCurrentMapType().getProjection();
-             var pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
-             var fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
-    
-             // Calculate actual pixel distance from the two points
-             var pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
+  // Initializes Google Sky Map
+  function initialize() {
+   if (GBrowserIsCompatible()) {
+     map = new GMap2(document.getElementById("sky_map"), {
+         mapTypes : G_SKY_MAP_TYPES
+         });
+         // sample look at Mars initially
+     var longitude = raToLng('23:14:52.02');
+     var latitude  = decToLat('-05:56:40.36');
+     map.setCenter(new GLatLng(latitude, longitude), 3);
+     map.addControl(new GLargeMapControl());
+     map.addControl(new GMapTypeControl());
+   }
+  }
 
-             // Add markers to show where FOV and beam loc is (mainly for debugging)
-             var primary_marker = new GMarker(primary_beam_ll);
-             var fov_marker = new GMarker(fov_beam_ll);
-             map.addOverlay(primary_marker);
-             map.addOverlay(fov_marker);
+  // Updates the map location
+  function updateMapLocation()
+  {
+    // Take id and make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_activity_path %>',
+      success:  function(response) {
+         // Clear all overlays and markers
+         map.clearOverlays();
 
-             // Draw circle
-             var degrees = 0;
-             var x, y;
-             var lla = new Array();
-             for(;degrees<=6.50; degrees+=.15)
-               {
-                  y =  pixelxy.y + Math.cos(degrees) * pixel_distance;
-                  x =  pixelxy.x + Math.sin(degrees) * pixel_distance;
-                  var new_pixelxy = new GPoint(x,y);
-                  lla.push(current_projection.fromPixelToLatLng(new_pixelxy,zoom,false));
-               }
-             gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
-             map.addOverlay(gp);
-             gp.show();               // Show the overlay
-             map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
-          },
-          error:    function() {
-            // We should handle error here
-          },
-          datatype: 'json'
-        });
-      }
-  
-      $(document).ready(function()
-      {
-        registerElementTimer(function() { updateMapLocation(); },  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
-      })
-  
-    </script>
-  </head>
-  
-  <body onload="initialize()" onunload="GUnload()">
-  <div id="sky_map" style="height: 1080px;width: 1920px; overflow: hidden"></div>
-  </body>
+         // construct GLatLng primary beam loc
+         var longitude = raToLng(decimalDegreesToString(response.primaryBeamLocation.ra));
+         var latitude  = decToLat(decimalDegreesToString(response.primaryBeamLocation.dec));
+         var primary_beam_ll = new GLatLng(latitude, longitude);
 
-</html>
+         // construct GLatLng fov beam loc
+         var fov_longitude = raToLng(decimalDegreesToString(response.fovBeamLocation.ra));
+         var fov_latitude  = decToLat(decimalDegreesToString(response.fovBeamLocation.dec));
+         var fov_beam_ll = new GLatLng(fov_latitude, fov_longitude);
+
+         // Covert to pixels because it's easier to draw circle
+         var zoom = map.getZoom();
+         var current_projection = map.getCurrentMapType().getProjection();
+         var pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
+         var fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
+
+         // Calculate actual pixel distance from the two points
+         var pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
+
+         // Add markers to show where FOV and beam loc is (mainly for debugging)
+         var primary_marker = new GMarker(primary_beam_ll);
+         var fov_marker = new GMarker(fov_beam_ll);
+         map.addOverlay(primary_marker);
+         map.addOverlay(fov_marker);
+
+         // Draw circle
+         var degrees = 0;
+         var x, y;
+         var lla = new Array();
+         for(;degrees<=6.50; degrees+=.15)
+           {
+              y =  pixelxy.y + Math.cos(degrees) * pixel_distance;
+              x =  pixelxy.x + Math.sin(degrees) * pixel_distance;
+              var new_pixelxy = new GPoint(x,y);
+              lla.push(current_projection.fromPixelToLatLng(new_pixelxy,zoom,false));
+           }
+         gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
+         map.addOverlay(gp);
+         gp.show();               // Show the overlay
+         map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
+      },
+      error:    function() {
+        // We should handle error here
+      },
+      datatype: 'json'
+    });
+  }
+
+  $(document).ready(function()
+  {
+    initialize();
+    $(window).unload( function () { GUnload(); } );
+
+    registerElementTimer(function() { updateMapLocation(); },  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
+  })
+
+</script>
