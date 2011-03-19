@@ -78,7 +78,7 @@ body {
 }
 
 .beam_information {
-    width: 225px;
+    width: 250px;
     float: left;
     padding-left: 15px;
 }
@@ -94,7 +94,7 @@ body {
 
 .beam_information_center div {
     float: left;
-    padding-left: 50px;
+    padding-left: 25px;
 }
 
 .beam_status {
@@ -109,6 +109,7 @@ body {
 }
 
 .beam_location {
+    padding-top: 15px;
     text-align: center;
 }
 
@@ -131,8 +132,8 @@ body {
     background-image: url(/images/bg_frequency.png);
     background-position: center;
     background-repeat: no-repeat;
-    line-height: 100px;
-    height: 100px;
+    line-height: 80px;
+    height: 80px;
     vertical-align: middle;
     text-align: center;
     padding-left: 25px;

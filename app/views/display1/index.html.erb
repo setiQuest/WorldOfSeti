@@ -128,7 +128,7 @@
       url:      '<%= display1_frequency_coverage_path %>',
       data:     { id:id },
       success:  function(response) {
-
+        
         var freqHistory = response;
         for(var col = 0; col < freqHistory.length; col++) {
           var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
@@ -139,7 +139,7 @@
           }
           
           var thisFreq = col * 100 + 1000;
-          if(currFreq != null && (thisFreq <= currFreq && currFreq <= (thisFreq + 100)) )
+          if(currFreq != null && (thisFreq <= currFreq && currFreq < (thisFreq + 100)) )
           {
             $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
           }
