@@ -11,6 +11,11 @@
       <div style='width: 728px; height: 90px; background-image: url( http://vortex.accuweather.com/adcbin/netweather_v2/backgrounds/black_728x90_bg.jpg ); background-repeat: no-repeat; background-color: #000000;' ><div id='NetweatherContainer' style='height: 74px;' ><script src='http://netweather.accuweather.com/adcbin/netweather_v2/netweatherV2ex.asp?partner=netweather&tStyle=whteYell&logo=1&zipcode=96040&lang=eng&size=11&theme=black&metric=0&target=_self'></script></div><div style='text-align: center; font-family: arial, helvetica, verdana, sans-serif; font-size: 11px; line-height: 16px; color: #FFFFFF;' ><div style='float: left; padding-left: 10px;'><a style='color: #FFFFFF' href='http://www.accuweather.com/us/CA/HAT CREEK/96040/city-weather-forecast.asp?partner=accuweather&traveler=0' >Weather Forecast</a> | <a style='color: #FFFFFF' href='http://www.accuweather.com/maps-satellite.asp' >Weather Maps</a> | <a style='color: #FFFFFF' href='http://www.accuweather.com/index-radar.asp?partner=accuweather&traveler=0&zipcode=96040' >Weather Radar</a> | <a style='color: #FFFFFF' href='http://hurricane.accuweather.com/hurricane/index.asp' >Hurricane Center</a></div><img style='float: right; padding-right: 5px;' src='http://vortex.accuweather.com/adc2004/common/images/misc/netweather_v2/adcwhite.png' /></div></div>
     </div>
 
+  <div id="webcam">
+    <img id="webcamImage1" class="webcam-image" src="http://atacam.seti.org/panorama/Pan1.jpg"/>
+    <img id="webcamImage2" class="webcam-image" src="http://atacam.seti.org/panorama/Pan2.jpg"/>
+    <img id="webcamImage3" class="webcam-image" src="http://atacam.seti.org/panorama/Pan3.jpg"/>
+  </div>
 </div>
 
 <script type="text/javascript">
@@ -96,6 +101,32 @@
     $('#weatherForecast').html($('#weatherForecast').html());
   }
 
+  function updateWebCam() {
+    var MAX_NUM_IMAGES = 18
+    // initialize the panorama id if not defined yet (only happens the first time)
+    if(updateWebCam.panorama_id == undefined) {
+      updateWebCam.panorama_id = 1;
+    } else {
+      // goto the next panorama id and if it hits the max num of images, reset it
+      updateWebCam.panorama_id++;
+      if(updateWebCam.panorama_id > MAX_NUM_IMAGES) {
+        updateWebCam.panorama_id = 1;
+      }
+    }
+
+    // rotate the 3 webcam images to the next one in the list
+    updateWebCamImages(1, updateWebCam.panorama_id);
+    updateWebCamImages(2, (updateWebCam.panorama_id+1) % MAX_NUM_IMAGES);
+    updateWebCamImages(3, (updateWebCam.panorama_id+2) % MAX_NUM_IMAGES);
+  }
+
+  function updateWebCamImages(id, panorama_id)
+  {
+    // to bypass browser caching, we need to append a random parameter to the URL
+    d = new Date();
+    $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
+  }
+
   $(document).ready(function()
   {
     initialize();
@@ -103,6 +134,7 @@
 
     registerElementTimer(function() { updateMapLocation(); },  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
     registerElementTimer(function() { updateWeatherForecast(); },  <%= ApplicationController::TIMEOUT_WEATHER %>);
+    registerElementTimer(function() { updateWebCam(); },  <%= ApplicationController::TIMEOUT_WEBCAM %>);
   })
 
 </script>
