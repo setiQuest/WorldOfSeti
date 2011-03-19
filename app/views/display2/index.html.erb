@@ -6,7 +6,11 @@
 
 <div id="sky_map" style="height: 1080px;width: 1920px; overflow: hidden"></div>
 
-
+<div id="webcam">
+  <img id="webcamImage1" class="webcam-image" src="http://atacam.seti.org/panorama/Pan1.jpg"/>
+  <img id="webcamImage2" class="webcam-image" src="http://atacam.seti.org/panorama/Pan2.jpg"/>
+  <img id="webcamImage3" class="webcam-image" src="http://atacam.seti.org/panorama/Pan3.jpg"/>
+</div>
 
 <script type="text/javascript">
   var map; // Global map variable.
@@ -85,12 +89,39 @@
     });
   }
 
+  function updateWebCam() {
+    var MAX_NUM_IMAGES = 18
+    // initialize the panorama id if not defined yet (only happens the first time)
+    if(updateWebCam.panorama_id == undefined) {
+      updateWebCam.panorama_id = 1;
+    } else {
+      // goto the next panorama id and if it hits the max num of images, reset it
+      updateWebCam.panorama_id++;
+      if(updateWebCam.panorama_id > MAX_NUM_IMAGES) {
+        updateWebCam.panorama_id = 1;
+      }
+    }
+
+    // rotate the 3 webcam images to the next one in the list
+    updateWebCamImages(1, updateWebCam.panorama_id);
+    updateWebCamImages(2, (updateWebCam.panorama_id+1) % MAX_NUM_IMAGES);
+    updateWebCamImages(3, (updateWebCam.panorama_id+2) % MAX_NUM_IMAGES);
+  }
+
+  function updateWebCamImages(id, panorama_id)
+  {
+    // to bypass browser caching, we need to append a random parameter to the URL
+    d = new Date();
+    $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
+  }
+
   $(document).ready(function()
   {
     initialize();
     $(window).unload( function () { GUnload(); } );
 
     registerElementTimer(function() { updateMapLocation(); },  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
+    registerElementTimer(function() { updateWebCam(); },  <%= ApplicationController::TIMEOUT_WEBCAM %>);
   })
 
 </script>

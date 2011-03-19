@@ -186,3 +186,15 @@ body {
 .float-wall {
     clear: both;
 }
+
+#webcam {
+    position: absolute;
+    top: 875px;
+    left: 995px;
+    border: 2px solid white;
+    width: 922px;
+}
+
+.webcam-image {
+    width: 300px;
+}
