@@ -98,12 +98,17 @@ body {
 }
 
 .beam_status {
-    padding-left: 25px;
+    color: #faf58b;
+    height: 40px;
+    margin-top: 10px;
+    padding-top: 5px;
     text-align: center;
+    background-image: url(/images/icon_off.png);
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 
 .beam_location {
-    padding-left: 25px;
     text-align: center;
 }
 

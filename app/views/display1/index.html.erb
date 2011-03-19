@@ -76,6 +76,15 @@
       url:      '<%= display1_beam_path %>',
       data:     { id:id },
       success:  function(response) {
+        if(response.status.indexOf('ON') >= 0)
+        {
+          $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_on.png)");
+        }
+        else
+        {
+          $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_off.png)");
+        }
+        
         $('#beam' + id + ' .beam_status').text(response.status);
         $('#beam' + id + ' .beam_frequency').text(response.frequency + ' MHz');
       },

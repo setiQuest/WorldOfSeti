@@ -1,15 +1,15 @@
 <div  id="beam<%= beam_id %>">
   <div class="beam_information">
     <div class="text-large">Beam <%= beam_id %></div>
-    <div class="beam_status">&nbsp;<!-- ON/OFF image here --></div>
-    <div class="beam_frequency">&nbsp;<!-- MHz here --></div>
-    <div class="beam_location text-small">&nbsp;<!-- RA / DEC here --></div>
+    <div class="beam_status"><!-- ON/OFF image here --></div>
+    <div class="beam_frequency"><!-- MHz here --></div>
+    <div class="beam_location text-small"><!-- RA / DEC here --></div>
   </div>
 
   <div class="beam_information_center">
     <div>
       <%= render 'baseline', :baseline_id => beam_id %><br />
-      <div class="beam_description text-small">&nbsp;<!-- Description here --></div>
+      <div class="beam_description text-small"><!-- Description here --></div>
     </div>
     <div>
       <%= render 'waterfall', :waterfall_id => beam_id %>
