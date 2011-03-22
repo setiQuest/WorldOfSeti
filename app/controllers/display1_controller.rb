@@ -173,7 +173,6 @@ class Display1Controller < ApplicationController
     j = ActiveSupport::JSON.decode(response.body)
 
     j["data"] = Base64::decode64( j["data"] ).unpack("f*")
-    j["subChannel"] = rand(baseline_width).to_i;      # subChannel not provided yet from server; we'll use a placeholder for now
     
     # Convert hash keys to symbols
     return j.to_options
