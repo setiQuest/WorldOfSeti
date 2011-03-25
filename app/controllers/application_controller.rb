@@ -42,7 +42,8 @@ class ApplicationController < ActionController::Base
   # Constants either used in display 1 and/or display 2
 
   # Location for the SETI Server
-  SETI_SERVER = "http://174.129.14.98:8010"
+ # SETI_SERVER = "http://174.129.14.98:8010"
+  SETI_SERVER = "http://publish.seti.org:8010"
 
   # Timeout constants for timer updates in milliseconds
   TIMEOUT_ACTIVITY              = 60000
@@ -51,4 +52,8 @@ class ApplicationController < ActionController::Base
   TIMEOUT_BEAM_INFO             = 60000
   TIMEOUT_WEATHER               = 7200000
   TIMEOUT_WEBCAM                = 60000
+
+  # Screen sizes for total width
+  SCREENSIZE_WIDTH              = 1920
+  SCREENSIZE_HEIGHT             = 1080
 end

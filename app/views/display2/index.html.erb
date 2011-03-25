@@ -33,6 +33,7 @@
      map.setCenter(new GLatLng(latitude, longitude), 3);
      map.addControl(new GLargeMapControl());
      map.addControl(new GMapTypeControl());
+     map.enableContinuousZoom();
    }
   }
 
@@ -47,6 +48,12 @@
          // Clear all overlays and markers
          map.clearOverlays();
 
+// For testing map zooms
+//         response.primaryBeamLocation.ra = 0;
+//        response.primaryBeamLocation.dec = 0;
+//         response.fovBeamLocation.ra = 0;
+//         response.fovBeamLocation.dec = 10.0;
+
          // construct GLatLng primary beam loc
          var longitude = raToLng(decimalDegreesToString(response.primaryBeamLocation.ra));
          var latitude  = decToLat(decimalDegreesToString(response.primaryBeamLocation.dec));
@@ -57,21 +64,40 @@
          var fov_latitude  = decToLat(decimalDegreesToString(response.fovBeamLocation.dec));
          var fov_beam_ll = new GLatLng(fov_latitude, fov_longitude);
 
-         // Covert to pixels because it's easier to draw circle
-         var zoom = map.getZoom();
-         var current_projection = map.getCurrentMapType().getProjection();
-         var pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
-         var fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
-
-         // Calculate actual pixel distance from the two points
-         var pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
-
          // Add markers to show where FOV and beam loc is (mainly for debugging)
          var primary_marker = new GMarker(primary_beam_ll);
          var fov_marker = new GMarker(fov_beam_ll);
          map.addOverlay(primary_marker);
          map.addOverlay(fov_marker);
 
+         // Covert to pixels because it's easier to draw circle
+         var current_projection = map.getCurrentMapType().getProjection();
+
+         // Start zoom at 0 (entire sky) and gradually increase until
+         // radius is only 25% of vertical axis.
+         var zoom = 0;
+         var pixel_distance = 0; // Assume really high so we recalc.
+         var pixelxy;
+         var fov_pixelxy;
+
+         map.setZoom(zoom); // zoom out entirely first
+
+         // Start zoom at very far away ( zoom 0 is entire sky) and then
+         // gradually zoom in. Stop when the radius of the FOV is greater than
+         // 25% vertical screen (1080/4 = 270).
+         var max_vertical_div_4 = <%= ApplicationController::SCREENSIZE_HEIGHT %>/4;
+         while((zoom < 20) && (pixel_distance < max_vertical_div_4))
+         {
+             zoom++;   // Increase zoom
+             map.zoomIn(primary_beam_ll, true, true);  // Zoom in on map
+             pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
+             fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
+
+             // Calculate actual pixel distance from the two points
+             pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
+         }
+
+         
          // Draw circle
          var degrees = 0;
          var x, y;
