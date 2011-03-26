@@ -42,8 +42,9 @@ class ApplicationController < ActionController::Base
   # Constants either used in display 1 and/or display 2
 
   # Location for the SETI Server
- # SETI_SERVER = "http://174.129.14.98:8010"
-  SETI_SERVER = "http://publish.seti.org:8010"
+  # For access to the data server, please contact Avinesh Agrawal (avinash@seti.org)
+  # or Jon Richards (jrichards@seti.org)
+  SETI_SERVER = "Please contact above"
 
   # Timeout constants for timer updates in milliseconds
   TIMEOUT_ACTIVITY              = 60000
