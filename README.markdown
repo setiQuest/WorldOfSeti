@@ -9,6 +9,9 @@ This project is called “The World of SETI”, and its purpose is to give insig
 
 This project is open-sourced through the GPL3. A copy of it is in this project directory.
 
+For access to the SETI data server, please contact Avinesh Agrawal (avinash@seti.org) or Jon Richards (jrichards@seti.org).
+
+
 Contact Information
 ===================
 
