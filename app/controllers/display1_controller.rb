@@ -136,16 +136,15 @@ class Display1Controller < ApplicationController
   #
   #
   def get_json_waterfall(id, start_row, end_row)
-    if end_row.nil?
-      end_row = start_row + 1
-    end
-    
-    uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}&endRow=#{end_row}")
+    uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
     response = Net::HTTP.get_response(uri) 
-    j = ActiveSupport::JSON.decode(response.body)
+    j = ActiveSupport::JSON.decode(response.body).to_options
+
+    j[:startRow] = 1 if j[:startRow] < 1
+    j[:endRow] = waterfall_height if j[:endRow] > waterfall_height
     
     # Convert hash keys to symbols
-    return j.to_options
+    return j
   end
 
   #
