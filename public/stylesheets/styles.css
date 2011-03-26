@@ -216,3 +216,23 @@ body {
     height: 1050px;
     overflow: hidden;
 }
+
+.log-content {
+   font-size: 12px;
+}
+
+.log-content .log-time {
+   color: #ffffff;
+}
+
+.log-content .log-info {
+   color: #66ff00;
+}
+
+.log-content .log-error {
+   color: #ff0000;
+}
+
+.log-content .log-warning {
+   color: #fff000;
+}

@@ -47,7 +47,7 @@ class Display1Controller < ApplicationController
   #
   #
   def waterfall
-    waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, nil)
+    waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
     respond_to do |format|
       format.json { render :json => waterfall }
     end
@@ -135,13 +135,20 @@ class Display1Controller < ApplicationController
 
   #
   #
-  def get_json_waterfall(id, start_row, end_row)
+  def get_json_waterfall(id, start_row)
     uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
     response = Net::HTTP.get_response(uri) 
     j = ActiveSupport::JSON.decode(response.body).to_options
 
-    j[:startRow] = 1 if j[:startRow] < 1
-    j[:endRow] = waterfall_height if j[:endRow] > waterfall_height
+    if j[:startRow] < 1
+      logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
+      j[:startRow] = 1
+    end
+
+    if j[:endRow] > waterfall_height
+      logger.warn("Received waterfall#{id}.endRow = #{j[:endRow]}; reseting it to #{waterfall_height}.")
+      j[:endRow] = waterfall_height
+    end
     
     # Convert hash keys to symbols
     return j
