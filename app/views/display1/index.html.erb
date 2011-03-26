@@ -20,17 +20,18 @@
   {
     var waterfall_data = decode64(data64);
 
-    var processingInstance = null;
-    if (!processingInstance)
+    var processingInstance = Processing.getInstanceById('canvas_waterfall' + id);
+    if (processingInstance)
     {
-      processingInstance = Processing.getInstanceById('canvas_waterfall' + id);
-      processingInstance.drawWaterfallRows(id, start_row, end_row - start_row, waterfall_data);
+      processingInstance.drawWaterfallRows(id, start_row, end_row - start_row + 1, waterfall_data);
     }
   }
 
   // AJAX call to update JSON
   function updateWaterfall(id)
   {
+    var updateWaterfallCallback = function() { updateWaterfall(id); };
+
     if(updateWaterfall.waterfall_data == undefined)
     {
       updateWaterfall.waterfall_data = new Array();
@@ -48,16 +49,19 @@
       data:     { id:id, start_row:updateWaterfall.waterfall_data[id].last_row },
       success:  function(response) {
         // store the last row we have so far, so that the next query gets the subsequent rows
-        updateWaterfall.waterfall_data[id].last_row = response.endRow;
+        updateWaterfall.waterfall_data[id].last_row = response.endRow + 1;
         if(updateWaterfall.waterfall_data[id].last_row >= <%= waterfall_height %> )
         {
-          updateWaterfall.waterfall_data[id].last_row = 0;
+          updateWaterfall.waterfall_data[id].last_row = 1;
         }
 
         drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
+
+        setTimeout(updateWaterfallCallback, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
       },
       error:    function() {
         // We should handle error here
+        setTimeout(updateWaterfallCallback, <%=  ApplicationController::TIMEOUT_RETRY_SHORT %>);
       },
       datatype: 'json'
     });
@@ -153,26 +157,31 @@
   }
 
   // Register display for automatic updates
-  $(document).ready(function()
+  function initTimers()
   {
     // Use constants defined in ApplicationController.... is this the correct way
     // to reference static constants?
     registerElementTimer(function() { updateActivity(); }, <%= ApplicationController::TIMEOUT_ACTIVITY %> );
 
     // Time updates for antenna id 1
-    registerElementTimer(function() { updateWaterfall(1); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
+    updateWaterfall(1);
     registerElementTimer(function() { updateBaseline(1); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
     registerElementTimer(function() { updateBeamInfo(1); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
 
     // Time updates for antenna id 2
-    registerElementTimer(function() { updateWaterfall(2); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
+    updateWaterfall(2);
     registerElementTimer(function() { updateBaseline(2); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
     registerElementTimer(function() { updateBeamInfo(2); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
 
     // Time updates for antenna id 3
-    registerElementTimer(function() { updateWaterfall(3); }, <%=  ApplicationController::TIMEOUT_WATERFALL %>);
+    updateWaterfall(3);
     registerElementTimer(function() { updateBaseline(3); }, <%=  ApplicationController::TIMEOUT_BASELINE %>);
     registerElementTimer(function() { updateBeamInfo(3); }, <%=  ApplicationController::TIMEOUT_BEAM_INFO %>);
+  }
+
+  $(window).load(function()
+  {
+    initTimers();
   });
 
 </script>

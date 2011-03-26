@@ -48,7 +48,7 @@ class ApplicationController < ActionController::Base
 
   # Timeout constants for timer updates in milliseconds
   TIMEOUT_ACTIVITY              = 60000
-  TIMEOUT_WATERFALL             = 2000
+  TIMEOUT_WATERFALL             = 14000
   TIMEOUT_BASELINE              = 60000
   TIMEOUT_BEAM_INFO             = 60000
   TIMEOUT_WEATHER               = 7200000
@@ -57,4 +57,7 @@ class ApplicationController < ActionController::Base
   # Screen sizes for total width
   SCREENSIZE_WIDTH              = 1920
   SCREENSIZE_HEIGHT             = 1080
+
+  TIMEOUT_RETRY_SHORT           = 60000
+  TIMEOUT_RETRY_LONG            = 120000
 end
