@@ -102,7 +102,7 @@
          var degrees = 0;
          var x, y;
          var lla = new Array();
-         for(;degrees<=6.50; degrees+=.15)
+         for(;degrees<=Math.PI*2 + .15; degrees+=.15)
            {
               y =  pixelxy.y + Math.cos(degrees) * pixel_distance;
               x =  pixelxy.x + Math.sin(degrees) * pixel_distance;

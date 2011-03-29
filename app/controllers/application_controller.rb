@@ -60,4 +60,12 @@ class ApplicationController < ActionController::Base
 
   TIMEOUT_RETRY_SHORT           = 60000
   TIMEOUT_RETRY_LONG            = 120000
+
+  # Valid min and max values
+  MAX_DEC                       = 90
+  MIN_DEC                       = -90
+  MAX_RA                        = 24
+  MIN_RA                        = 0
+  MAX_ACTIVITY_STATUS_LENGTH    = 80
+  
 end
