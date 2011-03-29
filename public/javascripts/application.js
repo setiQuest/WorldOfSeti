@@ -73,6 +73,31 @@ if (window.addEventListener) {
   }, false);
 }
 
+function TimeoutManager()
+{
+    this.isObserving = false;
+    this.startObserving = function( startFunction ) {
+        startFunction;
+    };
+    this.setTimeout = function( fn_handle, interval_milliseconds ) {
+        if(timeoutManager.isObserving)
+        {
+            setTimeout(fn_handle, interval_milliseconds);
+        }
+    };
+    this.registerTimeout = function( fn_handle, interval_milliseconds ) {
+        // Create new function with timeout
+        var newfunction = function(){
+            fn_handle();
+            setTimeout(newfunction, interval_milliseconds);
+        }
+
+        // Call new function to register timeout
+        newfunction();
+    };
+}
+
+var timeoutManager = new TimeoutManager();
 
 /* Javascript update function */
 function registerElementTimer( fn_handle, interval_milliseconds )

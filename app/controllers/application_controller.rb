@@ -44,7 +44,7 @@ class ApplicationController < ActionController::Base
   # Location for the SETI Server
   # For access to the data server, please contact Avinesh Agrawal (avinash@seti.org)
   # or Jon Richards (jrichards@seti.org)
-  SETI_SERVER = "Please contact above"
+  SETI_SERVER = "http://publish.seti.org:8010"
 
   # Timeout constants for timer updates in milliseconds
   TIMEOUT_ACTIVITY              = 60000
