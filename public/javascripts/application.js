@@ -82,14 +82,15 @@ function TimeoutManager()
     this.setTimeout = function( fn_handle, interval_milliseconds ) {
         if(timeoutManager.isObserving)
         {
-            setTimeout(fn_handle, interval_milliseconds);
+            setTimeout(function(){fn_handle(variable); var variable = null}, interval_milliseconds);
         }
     };
     this.registerTimeout = function( fn_handle, interval_milliseconds ) {
         // Create new function with timeout
-        var newfunction = function(){
+        var newfunction = function(param){
             fn_handle();
-            setTimeout(newfunction, interval_milliseconds);
+            var param = null;
+            setTimeout(newfunction(param), interval_milliseconds);
         }
 
         // Call new function to register timeout
