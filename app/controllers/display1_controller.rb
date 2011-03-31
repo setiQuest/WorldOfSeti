@@ -54,8 +54,9 @@ class Display1Controller < ApplicationController
   end
 
   #
-  #
+  # Generate the baseline chart using the Google Maps API
   def baseline_chart
+    # get the baseline data from the seti web service
     baseline = get_json_baseline(params[:id])
     chart_data = baseline[:data].join(',')
     marker_index = baseline[:subChannel]
@@ -78,7 +79,7 @@ class Display1Controller < ApplicationController
     }
 
     uri = URI.parse("http://chart.googleapis.com/chart")
-    response = Net::HTTP.post_form(uri, chart_params)
+    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").post_form(uri, chart_params)
     send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
   end
 
@@ -86,7 +87,7 @@ class Display1Controller < ApplicationController
   #
   def activity
     uri = URI.parse("#{SETI_SERVER}/activity")
-    response = Net::HTTP.get_response(uri)
+    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
     j = ActiveSupport::JSON.decode(response.body).to_options
     
     # Do bounds checking on RA and DEC.
@@ -117,20 +118,18 @@ class Display1Controller < ApplicationController
       j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
     end
 
-   respond_to do |format|
+    respond_to do |format|
       format.json { render :json => j.to_options }
-   end
+    end
   end
 
   #
   #
   def beam
-    uri = URI.parse("#{SETI_SERVER}/beam?id=#{params[:id]}")
-    response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body)
-
+    beam = get_json_beam(params[:id])
+    
     respond_to do |format|
-      format.json { render :json => j.to_options }
+      format.json { render :json => beam }
     end
   end
 
@@ -165,7 +164,7 @@ class Display1Controller < ApplicationController
   #
   def get_json_waterfall(id, start_row)
     uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-    response = Net::HTTP.get_response(uri) 
+    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
     j = ActiveSupport::JSON.decode(response.body).to_options
 
     if j[:startRow] < 1
@@ -200,13 +199,39 @@ class Display1Controller < ApplicationController
   end
 
   #
-  #
+  # Sends an http request to the SETI webservice to retrieve the baseline data
+  # for the id passed in.
   def get_json_baseline(id)
-    uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id}")
-    response = Net::HTTP.get_response(uri)
+    uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
+    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+
     j = ActiveSupport::JSON.decode(response.body)
 
     j["data"] = Base64::decode64( j["data"] ).unpack("f*")
+    if j["data"].nil?
+      logger.error("Received baseline data = nil;")
+    end
+
+    # sanitize data
+    if !j["id"].nil?
+      j[:id] = j[:id].to_i
+      if j[:id] < 0
+        logger.warn("Received baseline id < 0; Setting it to 0 by default to prevent errors.")
+        j[:id] = 0
+      end
+    else
+      logger.error("Received baseline id = nil")
+    end
+
+    if !j["subChannel"].nil?
+      j[:subChannel] = j["subChannel"].to_i
+      if j[:subChannel] < 0
+        logger.warn("Received baseline subChannel < 0; Setting it to 0 by default to prevent errors.")
+        j[:subChannel] = 0
+      end
+    else
+      logger.error("Received baseline subChannel = nil")
+    end
     
     # Convert hash keys to symbols
     return j.to_options
@@ -219,7 +244,7 @@ class Display1Controller < ApplicationController
   def get_observational_history(id)
     # make the call to the seti webservice
     uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-    response = Net::HTTP.get_response(uri)
+    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 
     # get the values from the json returned
@@ -238,5 +263,95 @@ class Display1Controller < ApplicationController
     history[:observationHistory][:id] = id
     history[:observationHistory][:freqHistory] = 20.times.collect { rand(9000) + 1000 }
     return history
+  end
+
+  #
+  # Obtains the beam data from the SETI web service, performs data checking
+  # including for nil and values in range. Sets default values if the data is
+  # invalid. Returns the JSON as a map.
+  def get_json_beam(id)
+    uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
+    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+    j = ActiveSupport::JSON.decode(response.body)
+
+    # sanitize data
+    if !j["id"].nil?
+      j[:id] = j["id"].to_i
+      if j[:id] < 0
+        logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
+        j[:id] = 0
+      end
+    else
+      logger.error("Received beam id = nil")
+    end
+
+    if !j["targetId"].nil?
+      j[:targetId] = j["targetId"].to_i
+      if j[:targetId] < 0
+        logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
+        j[:targetId] = 0
+      end
+    else
+      logger.error("Received beam targetId = nil")
+    end
+
+    if !j["freq"].nil?
+      j[:frequency] = j["freq"].to_f
+      if j[:frequency] < 0
+        logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
+        j[:frequency] = 0.0
+      end
+    else
+      logger.error("Received beam frequency = nil")
+    end
+
+    if !j["ra"].nil?
+      j[:ra] = j["ra"].to_f
+      if j[:ra] < MIN_RA
+        logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
+        j[:ra] = MIN_RA
+      end
+      if j[:ra] > MAX_RA
+        logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
+        j[:ra] = MAX_RA
+      end
+    else
+      logger.error("Received beam ra = nil")
+    end
+
+    if !j["dec"].nil?
+      j[:dec] = j["dec"].to_f
+      if j[:dec] < MIN_DEC
+        logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
+        j[:dec] = MIN_DEC
+      end
+      if j[:dec] > MAX_DEC
+        logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
+        j[:dec] = MAX_DEC
+      end
+    else
+      logger.error("Received beam dec = nil")
+    end
+
+    if !j["status"].nil?
+      if !is_valid_beam_status(j["status"])
+        logger.error("Received an invalid beam status = #{j["status"]}")
+      end
+    else
+      logger.error("Received beam status = nil")
+    end
+
+    return j.to_options
+  end
+
+  # Determines if the passed in status is equal to one of the beam status enums
+  def is_valid_beam_status(status)
+    BEAM_STATUS_ENUMS.each { |x|
+      if status == x
+        return true
+      end
+    }
+
+    return false
   end
 end
