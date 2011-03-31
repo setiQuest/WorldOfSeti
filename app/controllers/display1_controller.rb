@@ -79,7 +79,7 @@ class Display1Controller < ApplicationController
     }
 
     uri = URI.parse("http://chart.googleapis.com/chart")
-    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").post_form(uri, chart_params)
+    response = Net::HTTP.post_form(uri, chart_params)
     send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
   end
 
@@ -87,7 +87,7 @@ class Display1Controller < ApplicationController
   #
   def activity
     uri = URI.parse("#{SETI_SERVER}/activity")
-    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+    response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body).to_options
     
     # Do bounds checking on RA and DEC.
@@ -164,7 +164,7 @@ class Display1Controller < ApplicationController
   #
   def get_json_waterfall(id, start_row)
     uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+    response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body).to_options
 
     if j[:startRow] < 1
@@ -203,7 +203,7 @@ class Display1Controller < ApplicationController
   # for the id passed in.
   def get_json_baseline(id)
     uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
-    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+    response = Net::HTTP.get_response(uri)
 
     j = ActiveSupport::JSON.decode(response.body)
 
@@ -244,7 +244,7 @@ class Display1Controller < ApplicationController
   def get_observational_history(id)
     # make the call to the seti webservice
     uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+    response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 
     # get the values from the json returned
@@ -271,7 +271,7 @@ class Display1Controller < ApplicationController
   # invalid. Returns the JSON as a map.
   def get_json_beam(id)
     uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
-    response = Net::HTTP.Proxy("proxy1.global.lmco.com", "8080").get_response(uri)
+    response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 
     # sanitize data
