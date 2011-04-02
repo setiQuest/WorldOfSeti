@@ -237,3 +237,29 @@ body {
 .log-content .log-warning {
    color: #fff000;
 }
+
+#contextual-info-container {
+    position: absolute;
+    top: 150px;
+    left: 150px;
+
+    width: 400px;
+    height: 700px;
+
+    border: none;
+
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+#contextual-info {
+    position: relative;
+    top: 0px;
+
+    width: 400px;
+    height: 2000px;
+
+    border: none;
+
+    overflow-x: hidden;
+    overflow-y: hidden;
+}

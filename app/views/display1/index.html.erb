@@ -57,11 +57,11 @@
 
         drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
 
-        timeoutManager.setTimeout(updateWaterfallCallback, <%= ApplicationController::TIMEOUT_WATERFALL %>);
+        timeoutManager.setObservingTimeout(updateWaterfallCallback, <%= ApplicationController::TIMEOUT_WATERFALL %>);
       },
       error:    function() {
         // We should handle error here
-        timeoutManager.setTimeout(updateWaterfallCallback, <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
+        timeoutManager.setObservingTimeout(updateWaterfallCallback, <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
       },
       datatype: 'json'
     });
@@ -70,7 +70,7 @@
   function updateBaseline(id)
   {
     var updateBaselineCallback = function() { updateBaseline(id); };
-    timeoutManager.setTimeout(updateBaselineCallback, <%= ApplicationController::TIMEOUT_BASELINE %>);
+    timeoutManager.setObservingTimeout(updateBaselineCallback, <%= ApplicationController::TIMEOUT_BASELINE %>);
 
     // to bypass browser caching, we need to append a random parameter to the URL
     var d = new Date();
@@ -105,11 +105,11 @@
         $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
         updateFrequencyCoverage(id, response.freq);
 
-        timeoutManager.setTimeout(updateBeamInfoCallback, <%= ApplicationController::TIMEOUT_BEAM_INFO %>);
+        timeoutManager.setObservingTimeout(updateBeamInfoCallback, <%= ApplicationController::TIMEOUT_BEAM_INFO %>);
       },
       error:    function() {
         // We should handle error here
-        timeoutManager.setTimeout(updateBeamInfoCallback, <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
+        timeoutManager.setObservingTimeout(updateBeamInfoCallback, <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
       },
       datatype: 'json'
     });

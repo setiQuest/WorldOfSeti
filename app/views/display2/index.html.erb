@@ -7,6 +7,10 @@
 <div id="display2">
   <div id="sky_map"></div>
 
+  <div id="contextual-info-container">
+    <iframe id="contextual-info" src="http://en.m.wikipedia.org/wiki?search=sun"></iframe>
+  </div>
+  
   <div id="weatherForecast">
     <div style='width: 728px; height: 90px; background-image: url( http://vortex.accuweather.com/adcbin/netweather_v2/backgrounds/black_728x90_bg.jpg ); background-repeat: no-repeat; background-color: #000000;' ><div id='NetweatherContainer' style='height: 74px;' ><script src='http://netweather.accuweather.com/adcbin/netweather_v2/netweatherV2ex.asp?partner=netweather&tStyle=whteYell&logo=1&zipcode=96040&lang=eng&size=11&theme=black&metric=0&target=_self'></script></div><div style='text-align: center; font-family: arial, helvetica, verdana, sans-serif; font-size: 11px; line-height: 16px; color: #FFFFFF;' ><div style='float: left; padding-left: 10px;'><a style='color: #FFFFFF' href='http://www.accuweather.com/us/CA/HAT CREEK/96040/city-weather-forecast.asp?partner=accuweather&traveler=0' >Weather Forecast</a> | <a style='color: #FFFFFF' href='http://www.accuweather.com/maps-satellite.asp' >Weather Maps</a> | <a style='color: #FFFFFF' href='http://www.accuweather.com/index-radar.asp?partner=accuweather&traveler=0&zipcode=96040' >Weather Radar</a> | <a style='color: #FFFFFF' href='http://hurricane.accuweather.com/hurricane/index.asp' >Hurricane Center</a></div><img style='float: right; padding-right: 5px;' src='http://vortex.accuweather.com/adc2004/common/images/misc/netweather_v2/adcwhite.png' /></div></div>
   </div>
@@ -116,11 +120,11 @@
          gp.show();               // Show the overlay
          map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
 
-        timeoutManager.setTimeout(updateMapLocationCallback,  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
+        timeoutManager.setObservingTimeout(updateMapLocationCallback,  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
       },
       error:    function() {
         // We should handle error here
-        timeoutManager.setTimeout(updateMapLocationCallback,  <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
+        timeoutManager.setObservingTimeout(updateMapLocationCallback,  <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
       },
       datatype: 'json'
     });
@@ -158,7 +162,6 @@
     $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
   }
 
-
   function updateActivity()
   {
     var updateActivityCallback = function() { updateActivity(); };
@@ -192,20 +195,51 @@
       datatype: 'json'
     });
   }
-
+  
   function initTimers()
   {
     updateMapLocation();
   }
 
-  $(document).ready(function()
+  var IsScrollDown = true;
+  function scrollContextualInfo()
   {
+    alert(the_height);
+    
+    var offset = $("#contextual-info").offset();
+    var offsetTop = offset.top;
+    
+    if(offsetTop < -1450 && IsScrollDown)
+    {
+      offsetTop += 10;
+      IsScrollDown = false;
+    }
+    else if(IsScrollDown)
+    {
+      offsetTop -= 10;
+    }
+    else
+    {
+      offsetTop += 10;
+    }
+
+    if(offsetTop > 0)
+    {
+      IsScrollDown = true;
+    }
+    
+    $("#contextual-info").offset({ top: offsetTop });
+  }
+
+  $(window).load(function()
+  {    
     initialize();
     $(window).unload( function () { GUnload(); } );
 
     updateActivity();
     timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  <%= ApplicationController::TIMEOUT_WEATHER %>);
     timeoutManager.registerTimeout(function() { updateWebCam(); },  <%= ApplicationController::TIMEOUT_WEBCAM %>);
-  })
+    setInterval(function(){scrollContextualInfo()}, 100);
+})
 
 </script>

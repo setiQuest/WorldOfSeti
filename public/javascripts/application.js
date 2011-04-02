@@ -79,22 +79,14 @@ function TimeoutManager()
     this.startObserving = function( startFunction ) {
         startFunction;
     };
-    this.setTimeout = function( fn_handle, interval_milliseconds ) {
+    this.setObservingTimeout = function( fn_handle, interval_milliseconds ) {
         if(timeoutManager.isObserving)
         {
             setTimeout(function(){fn_handle(variable); var variable = null}, interval_milliseconds);
         }
     };
     this.registerTimeout = function( fn_handle, interval_milliseconds ) {
-        // Create new function with timeout
-        var newfunction = function(param){
-            fn_handle();
-            var param = null;
-            setTimeout(newfunction(param), interval_milliseconds);
-        }
-
-        // Call new function to register timeout
-        newfunction();
+        setInterval(fn_handle, interval_milliseconds);
     };
 }
 

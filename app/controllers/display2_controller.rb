@@ -37,5 +37,4 @@ class Display2Controller < ApplicationController
     @title = 'Other Areas of Interest'
   end
 
-
 end
