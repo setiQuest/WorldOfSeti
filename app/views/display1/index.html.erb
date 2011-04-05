@@ -139,11 +139,11 @@
           timeoutManager.isObserving = false;
         }
 
-        setTimeout(updateActivityCallback, <%= ApplicationController::ApplicationController::TIMEOUT_ACTIVITY %>);
+        setTimeout(updateActivityCallback, <%= ApplicationController::TIMEOUT_ACTIVITY %>);
       },
       error:    function() {
         // We should handle error here
-        setTimeout(updateActivityCallback, <%= ApplicationController::ApplicationController::TIMEOUT_RETRY_LONG %>);
+        setTimeout(updateActivityCallback, <%= ApplicationController::TIMEOUT_RETRY_LONG %>);
       },
       datatype: 'json'
     });

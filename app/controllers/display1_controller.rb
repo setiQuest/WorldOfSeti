@@ -49,7 +49,13 @@ class Display1Controller < ApplicationController
   def waterfall
     waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
     respond_to do |format|
-      format.json { render :json => waterfall }
+      if waterfall.nil?
+         logger.error("ERROR: Waterfall object not valid, discarding object.")
+         # Respond with error, don't pass JSON, it's bad
+         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+         format.json { render :json => waterfall }
+      end
     end
   end
 
@@ -58,29 +64,33 @@ class Display1Controller < ApplicationController
   def baseline_chart
     # get the baseline data from the seti web service
     baseline = get_json_baseline(params[:id])
-    chart_data = baseline[:data].join(',')
-    marker_index = baseline[:subChannel]
+    if baseline    
+       chart_data = baseline[:data].join(',')
+       marker_index = baseline[:subChannel]
 
-    chart_params = {
-      :cht => 'lc',
-      :chs => '768x150',
-      :chds => '0,20000',
-      :chls => '3',							# Line thickness
-      :chf => 'bg,s,DDDDDD|c,s,FFFFFF',                                 # Color background
-      :chma => '1,1,10,1',
-      :chg => '5,20,1,0',                                               # Grid lines
-      :chxt => 'x,x,y,y',                                               # Show Axis for X and Y
-      :chxr => '0,0,7.68,.5|2,0,2,0.5',                                 # Custom range for X axis | Y axis
-      :chxl => '1:|sub-channel number|x10^2|3:|power|x10^4',
-      :chxs => '0,000000|1,000000|2,000000|3,000000',                   # Color axis labels to black
-      :chxtc => '0,10|2,10',                                            # Tick marks for the labels
-      :chem => "y;s=map_pin_icon;d=camping,FFFF00;dp=#{marker_index}",  # We are currently observing
-      :chd => "t:#{chart_data}"                                         # Values
-    }
+       chart_params = {
+          :cht => 'lc',
+          :chs => '768x150',
+          :chds => '0,20000',
+          :chls => '3',							# Line thickness
+          :chf => 'bg,s,DDDDDD|c,s,FFFFFF',                                 # Color background
+          :chma => '1,1,10,1',
+          :chg => '5,20,1,0',                                               # Grid lines
+          :chxt => 'x,x,y,y',                                               # Show Axis for X and Y
+          :chxr => '0,0,7.68,.5|2,0,2,0.5',                                 # Custom range for X axis | Y axis
+          :chxl => '1:|sub-channel number|x10^2|3:|power|x10^4',
+          :chxs => '0,000000|1,000000|2,000000|3,000000',                   # Color axis labels to black
+          :chxtc => '0,10|2,10',                                            # Tick marks for the labels
+          :chem => "y;s=map_pin_icon;d=camping,FFFF00;dp=#{marker_index}",  # We are currently observing
+          :chd => "t:#{chart_data}"                                         # Values
+       }
 
-    uri = URI.parse("http://chart.googleapis.com/chart")
-    response = Net::HTTP.post_form(uri, chart_params)
-    send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
+       uri = URI.parse("http://chart.googleapis.com/chart")
+       response = Net::HTTP.post_form(uri, chart_params)
+       send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
+    else
+       logger.error("ERROR: Baseline object not valid, discarding object.")
+    end
   end
 
   #
@@ -144,7 +154,13 @@ class Display1Controller < ApplicationController
     beam = get_json_beam(params[:id])
     
     respond_to do |format|
-        format.json { render :json => beam }
+      if beam.nil?
+         logger.error("ERROR: Beam object not valid, discarding object.")
+         # Respond with error, don't pass JSON, it's bad
+         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+         format.json { render :json => beam }
+      end
     end
   end
 
@@ -152,13 +168,21 @@ class Display1Controller < ApplicationController
   #
   def frequency_coverage
     observ_history = get_observational_history(params[:id])[:observationHistory]
-    freq_coverage = Array.new(frequency_num_elements){ false }
-    observ_history[:freqHistory].each do |item|
-      freq_coverage[(item / 100).to_i - 10] = true
+    if observ_history
+       freq_coverage = Array.new(frequency_num_elements){ false }
+       observ_history[:freqHistory].each do |item|
+          freq_coverage[(item / 100).to_i - 10] = true
+       end
     end
 
     respond_to do |format|
-      format.json { render :json => freq_coverage }
+      if observ_history.nil?
+         logger.error("ERROR: Observational history object not valid, discarding object.")
+         # Respond with error, don't pass JSON, it's bad
+         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+         format.json { render :json => freq_coverage }
+      end
     end
   end
 
@@ -178,6 +202,9 @@ class Display1Controller < ApplicationController
   #
   #
   def get_json_waterfall(id, start_row)
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false 
+
     uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body).to_options
@@ -192,8 +219,12 @@ class Display1Controller < ApplicationController
       j[:endRow] = waterfall_height
     end
     
-    # Convert hash keys to symbols
-    return j
+    # If there is an object error, invalidate the whole object
+    if format_error 
+       return nil
+    else
+       return j
+    end
   end
 
   #
@@ -217,6 +248,9 @@ class Display1Controller < ApplicationController
   # Sends an http request to the SETI webservice to retrieve the baseline data
   # for the id passed in.
   def get_json_baseline(id)
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false 
+
     uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
     response = Net::HTTP.get_response(uri)
 
@@ -248,8 +282,13 @@ class Display1Controller < ApplicationController
       logger.error("Received baseline subChannel = nil")
     end
     
-    # Convert hash keys to symbols
-    return j.to_options
+    # If there is an object error, invalidate the whole object
+    if format_error 
+       return nil
+    else
+       # Convert hash keys to symbols
+       return j.to_options
+    end
   end
 
   #
@@ -257,6 +296,9 @@ class Display1Controller < ApplicationController
   # and returns it as a map. The map includes the id and also the frequency
   # history, which is an array of doubles.
   def get_observational_history(id)
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false 
+
     # make the call to the seti webservice
     uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
     response = Net::HTTP.get_response(uri)
@@ -267,7 +309,14 @@ class Display1Controller < ApplicationController
     history[:observationHistory]= {}
     history[:observationHistory][:id] = j["id"]
     history[:observationHistory][:freqHistory] = j["freqHistory"]
-    return history
+
+    # If there is an object error, invalidate the whole object
+    if format_error 
+       return nil
+    else
+       # Convert hash keys to symbols
+       return history
+    end
   end
 
   #
@@ -285,6 +334,9 @@ class Display1Controller < ApplicationController
   # including for nil and values in range. Sets default values if the data is
   # invalid. Returns the JSON as a map.
   def get_json_beam(id)
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false 
+
     uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
@@ -356,7 +408,12 @@ class Display1Controller < ApplicationController
       logger.error("Received beam status = nil")
     end
 
-    return j.to_options
+    # If there is an object error, invalidate the whole object
+    if format_error
+       return nil
+    else
+       return j.to_options
+    end
   end
 
   # Determines if the passed in status is equal to one of the beam status enums
