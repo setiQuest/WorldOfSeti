@@ -42,92 +42,70 @@
   }
 
   // Updates the map location
-  function updateMapLocation()
+  function updateMapLocation(ra, dec, fov_ra, fov_dec)
   {
-    var updateMapLocationCallback = function() { updateMapLocation(); };
+    var longitude = raToLng(decimalDegreesToString(ra));
+    var latitude  = decToLat(decimalDegreesToString(dec));
+    var fov_longitude = raToLng(decimalDegreesToString(fov_ra));
+    var fov_latitude  = decToLat(decimalDegreesToString(fov_dec));
 
-    // Take id and make AJAX query
-    $.ajax({
-      type:     'GET',
-      url:      '<%= display1_activity_path %>',
-      success:  function(response) {
-         // Clear all overlays and markers
-         map.clearOverlays();
+    // Clear all overlays and markers
+    map.clearOverlays();
 
-// For testing map zooms
-//         response.primaryBeamLocation.ra = 0;
-//        response.primaryBeamLocation.dec = 0;
-//         response.fovBeamLocation.ra = 0;
-//         response.fovBeamLocation.dec = 10.0;
+    // construct GLatLng primary beam loc
+    var primary_beam_ll = new GLatLng(latitude, longitude);
 
-         // construct GLatLng primary beam loc
-         var longitude = raToLng(decimalDegreesToString(response.primaryBeamLocation.ra));
-         var latitude  = decToLat(decimalDegreesToString(response.primaryBeamLocation.dec));
-         var primary_beam_ll = new GLatLng(latitude, longitude);
+    // construct GLatLng fov beam loc
+    var fov_beam_ll = new GLatLng(fov_latitude, fov_longitude);
 
-         // construct GLatLng fov beam loc
-         var fov_longitude = raToLng(decimalDegreesToString(response.fovBeamLocation.ra));
-         var fov_latitude  = decToLat(decimalDegreesToString(response.fovBeamLocation.dec));
-         var fov_beam_ll = new GLatLng(fov_latitude, fov_longitude);
+    // Add markers to show where FOV and beam loc is (mainly for debugging)
+    var primary_marker = new GMarker(primary_beam_ll);
+    var fov_marker = new GMarker(fov_beam_ll);
+    map.addOverlay(primary_marker);
+    map.addOverlay(fov_marker);
 
-         // Add markers to show where FOV and beam loc is (mainly for debugging)
-         var primary_marker = new GMarker(primary_beam_ll);
-         var fov_marker = new GMarker(fov_beam_ll);
-         map.addOverlay(primary_marker);
-         map.addOverlay(fov_marker);
+    // Covert to pixels because it's easier to draw circle
+    var current_projection = map.getCurrentMapType().getProjection();
 
-         // Covert to pixels because it's easier to draw circle
-         var current_projection = map.getCurrentMapType().getProjection();
+    // Start zoom at 0 (entire sky) and gradually increase until
+    // radius is only 25% of vertical axis.
+    var zoom = 0;
+    var pixel_distance = 0; // Assume really high so we recalc.
+    var pixelxy;
+    var fov_pixelxy;
 
-         // Start zoom at 0 (entire sky) and gradually increase until
-         // radius is only 25% of vertical axis.
-         var zoom = 0;
-         var pixel_distance = 0; // Assume really high so we recalc.
-         var pixelxy;
-         var fov_pixelxy;
+    map.setZoom(zoom); // zoom out entirely first
 
-         map.setZoom(zoom); // zoom out entirely first
+    // Start zoom at very far away ( zoom 0 is entire sky) and then
+    // gradually zoom in. Stop when the radius of the FOV is greater than     
+    // 25% vertical screen (1080/4 = 270).
+    var max_vertical_div_4 = <%= ApplicationController::SCREENSIZE_HEIGHT %>/4;
+    while((zoom < 20) && (pixel_distance < max_vertical_div_4))
+    {
+       zoom++;   // Increase zoom
+       map.zoomIn(primary_beam_ll, true, true);  // Zoom in on map
+       pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
+       fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
 
-         // Start zoom at very far away ( zoom 0 is entire sky) and then
-         // gradually zoom in. Stop when the radius of the FOV is greater than
-         // 25% vertical screen (1080/4 = 270).
-         var max_vertical_div_4 = <%= ApplicationController::SCREENSIZE_HEIGHT %>/4;
-         while((zoom < 20) && (pixel_distance < max_vertical_div_4))
-         {
-             zoom++;   // Increase zoom
-             map.zoomIn(primary_beam_ll, true, true);  // Zoom in on map
-             pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
-             fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
+       // Calculate actual pixel distance from the two points
+       pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
+     }
 
-             // Calculate actual pixel distance from the two points
-             pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
-         }
-
-         
-         // Draw circle
-         var degrees = 0;
-         var x, y;
-         var lla = new Array();
-         for(;degrees<=Math.PI*2 + .15; degrees+=.15)
-           {
-              y =  pixelxy.y + Math.cos(degrees) * pixel_distance;
-              x =  pixelxy.x + Math.sin(degrees) * pixel_distance;
-              var new_pixelxy = new GPoint(x,y);
-              lla.push(current_projection.fromPixelToLatLng(new_pixelxy,zoom,false));
-           }
-         gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
-         map.addOverlay(gp);
-         gp.show();               // Show the overlay
-         map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
-
-        timeoutManager.setObservingTimeout(updateMapLocationCallback,  <%= ApplicationController::TIMEOUT_ACTIVITY %>);
-      },
-      error:    function() {
-        // We should handle error here
-        timeoutManager.setObservingTimeout(updateMapLocationCallback,  <%= ApplicationController::TIMEOUT_RETRY_SHORT %>);
-      },
-      datatype: 'json'
-    });
+     // Draw circle
+     var degrees = 0;
+     var x, y;
+     var lla = new Array();
+     for(;degrees<=Math.PI*2 + .15; degrees+=.15)
+     {
+        y =  pixelxy.y + Math.cos(degrees) * pixel_distance;
+        x =  pixelxy.x + Math.sin(degrees) * pixel_distance;
+        var new_pixelxy = new GPoint(x,y);
+        lla.push(current_projection.fromPixelToLatLng(new_pixelxy,zoom,false));
+     }
+     gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
+     map.addOverlay(gp);
+     gp.show();               // Show the overlay
+     map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
   }
 
   // Updates the weather forecast
@@ -180,17 +158,23 @@
             timeoutManager.isObserving = true;
             timeoutManager.startObserving(initTimers());
           }
+         
+          // Call update map location
+          updateMapLocation(response.primaryBeamLocation.ra, 
+                            response.primaryBeamLocation.dec,
+                            response.fovBeamLocation.ra,
+                            response.fovBeamLocation.dec);
         }
         else
         {
           timeoutManager.isObserving = false;
         }
 
-        setTimeout(updateActivityCallback, <%= ApplicationController::ApplicationController::TIMEOUT_ACTIVITY %>);
+        setTimeout(updateActivityCallback, <%= ApplicationController::TIMEOUT_ACTIVITY %>);
       },
       error:    function() {
         // We should handle error here
-        setTimeout(updateActivityCallback, <%= ApplicationController::ApplicationController::TIMEOUT_RETRY_LONG %>);
+        setTimeout(updateActivityCallback, <%= ApplicationController::TIMEOUT_RETRY_LONG %>);
       },
       datatype: 'json'
     });
@@ -198,7 +182,6 @@
   
   function initTimers()
   {
-    updateMapLocation();
   }
 
   var IsScrollDown = true;
