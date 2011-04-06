@@ -304,11 +304,25 @@ class Display1Controller < ApplicationController
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body)
 
-    # get the values from the json returned
     history = {}
     history[:observationHistory]= {}
-    history[:observationHistory][:id] = j["id"]
-    history[:observationHistory][:freqHistory] = j["freqHistory"]
+
+    # sanitize data
+    if !j["id"].nil?
+      history[:observationHistory][:id] = j["id"]
+      if history[:observationHistory][:id] < 0
+        logger.warn("Received observation history id < 0; Setting it to 0 by default to prevent errors.")
+        history[:observationHistory][:id] = 0
+      end
+    else
+      logger.error("Received observation history id = nil")
+    end
+
+    if !j["freqHistory"].nil?
+      history[:observationHistory][:freqHistory] = j["freqHistory"]
+    else
+      logger.error("Received frequency history = nil")
+    end
 
     # If there is an object error, invalidate the whole object
     if format_error 
