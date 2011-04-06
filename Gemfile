@@ -6,7 +6,7 @@ gem 'ruby-debug19'
 gem 'ruby-debug-ide19'
 
 group :development do
-  gem 'rspec-rails',        '2.3.0'
+  gem 'rspec-rails'
   gem 'annotate-models'
   gem 'faker'
 
@@ -17,7 +17,7 @@ group :development do
 end
 
 group :test do
-  gem 'rspec',              '2.3.0'
+  gem 'rspec'
   gem 'webrat',             '0.7.2'
   gem 'factory_girl_rails'
 end

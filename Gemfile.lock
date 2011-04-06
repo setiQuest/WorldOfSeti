@@ -121,8 +121,8 @@ DEPENDENCIES
   hirb
   mysql2
   rails (= 3.0.3)
-  rspec (= 2.3.0)
-  rspec-rails (= 2.3.0)
+  rspec
+  rspec-rails
   ruby-debug-ide19
   ruby-debug19
   webrat (= 0.7.2)

@@ -263,8 +263,10 @@ class Display1Controller < ApplicationController
     # Decode the json to an object and convert hash keys to symbols
     j = ActiveSupport::JSON.decode(response.body).to_options
 
-    j[:data] = Base64::decode64( j[:data] ).unpack("f*")
-    if j[:data].nil?
+    
+    if !j[:data].nil?
+      j[:data] = Base64::decode64( j[:data] ).unpack("f*")
+    else
       logger.error("Received baseline data = nil;")
       format_error = true
     end
