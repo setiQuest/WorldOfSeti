@@ -9,7 +9,7 @@ group :development do
   gem 'rspec-rails'
   gem 'annotate-models'
   gem 'faker'
-
+  gem 'pathy'
   gem 'wirble'
   gem 'hirb'
   gem 'awesome_print', :require => 'ap'

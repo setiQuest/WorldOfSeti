@@ -149,7 +149,7 @@ class Display1Controller < ApplicationController
         # Respond with error, don't pass JSON, it's bad
         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-        format.json { render :json => j.to_options }
+        format.json { render :json => j }
       end
     end
   end
