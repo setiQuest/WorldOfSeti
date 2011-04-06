@@ -50,11 +50,11 @@ class Display1Controller < ApplicationController
     waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
     respond_to do |format|
       if waterfall.nil?
-         logger.error("ERROR: Waterfall object not valid, discarding object.")
-         # Respond with error, don't pass JSON, it's bad
-         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+        logger.error("ERROR: Waterfall object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-         format.json { render :json => waterfall }
+        format.json { render :json => waterfall }
       end
     end
   end
@@ -65,31 +65,31 @@ class Display1Controller < ApplicationController
     # get the baseline data from the seti web service
     baseline = get_json_baseline(params[:id])
     if baseline    
-       chart_data = baseline[:data].join(',')
-       marker_index = baseline[:subChannel]
+      chart_data = baseline[:data].join(',')
+      marker_index = baseline[:subChannel]
 
-       chart_params = {
-          :cht => 'lc',
-          :chs => '768x150',
-          :chds => '0,20000',
-          :chls => '3',							# Line thickness
-          :chf => 'bg,s,DDDDDD|c,s,FFFFFF',                                 # Color background
-          :chma => '1,1,10,1',
-          :chg => '5,20,1,0',                                               # Grid lines
-          :chxt => 'x,x,y,y',                                               # Show Axis for X and Y
-          :chxr => '0,0,7.68,.5|2,0,2,0.5',                                 # Custom range for X axis | Y axis
-          :chxl => '1:|sub-channel number|x10^2|3:|power|x10^4',
-          :chxs => '0,000000|1,000000|2,000000|3,000000',                   # Color axis labels to black
-          :chxtc => '0,10|2,10',                                            # Tick marks for the labels
-          :chem => "y;s=map_pin_icon;d=camping,FFFF00;dp=#{marker_index}",  # We are currently observing
-          :chd => "t:#{chart_data}"                                         # Values
-       }
+      chart_params = {
+        :cht => 'lc',
+        :chs => '768x150',
+        :chds => '0,20000',
+        :chls => '3',							# Line thickness
+        :chf => 'bg,s,DDDDDD|c,s,FFFFFF',                                 # Color background
+        :chma => '1,1,10,1',
+        :chg => '5,20,1,0',                                               # Grid lines
+        :chxt => 'x,x,y,y',                                               # Show Axis for X and Y
+        :chxr => '0,0,7.68,.5|2,0,2,0.5',                                 # Custom range for X axis | Y axis
+        :chxl => '1:|sub-channel number|x10^2|3:|power|x10^4',
+        :chxs => '0,000000|1,000000|2,000000|3,000000',                   # Color axis labels to black
+        :chxtc => '0,10|2,10',                                            # Tick marks for the labels
+        :chem => "y;s=map_pin_icon;d=camping,FFFF00;dp=#{marker_index}",  # We are currently observing
+        :chd => "t:#{chart_data}"                                         # Values
+      }
 
-       uri = URI.parse("http://chart.googleapis.com/chart")
-       response = Net::HTTP.post_form(uri, chart_params)
-       send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
+      uri = URI.parse("http://chart.googleapis.com/chart")
+      response = Net::HTTP.post_form(uri, chart_params)
+      send_data response.body, :filename => "baseline-#{params[:id]}_chart.png", :type => 'image/png', :disposition => 'inline'
     else
-       logger.error("ERROR: Baseline object not valid, discarding object.")
+      logger.error("ERROR: Baseline object not valid, discarding object.")
     end
   end
 
@@ -104,46 +104,52 @@ class Display1Controller < ApplicationController
     
     # Check JSON format
     if j[:primaryBeamLocation].nil? || j[:primaryBeamLocation]["ra"].nil? || j[:primaryBeamLocation]["dec"].nil? \
-       || j[:fovBeamLocation].nil? || j[:fovBeamLocation]["ra"].nil? || j[:fovBeamLocation]["dec"].nil? \
-       || j[:id].nil? || j[:status].nil?
-       format_error = true;
+        || j[:fovBeamLocation].nil? || j[:fovBeamLocation]["ra"].nil? || j[:fovBeamLocation]["dec"].nil? \
+        || j[:id].nil? || j[:status].nil?
+      format_error = true;
     else
-       # Do bounds checking on RA and DEC.
-       if j[:primaryBeamLocation]["ra"].to_f > MAX_RA
-          logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} greater than MAX_RA; reseting it to #{MAX_RA}.")
-          j[:primaryBeamLocation]["ra"] = MAX_RA
-       end
-       if j[:primaryBeamLocation]["ra"].to_f < MIN_RA
-          logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} less than MIN_RA; reseting it to #{MIN_RA}.")
-          j[:primaryBeamLocation]["ra"] = MIN_RA
-       end
+      # Do bounds checking on RA and DEC.
+      if j[:primaryBeamLocation]["ra"].to_f > MAX_RA
+        logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} greater than MAX_RA; reseting it to #{MAX_RA}.")
+        j[:primaryBeamLocation]["ra"] = MAX_RA
+      end
+      if j[:primaryBeamLocation]["ra"].to_f < MIN_RA
+        logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} less than MIN_RA; reseting it to #{MIN_RA}.")
+        j[:primaryBeamLocation]["ra"] = MIN_RA
+      end
 
-       if j[:primaryBeamLocation]["dec"].to_f > MAX_DEC
-          logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} greater than MAX_DEC; reseting it to #{MAX_DEC}.")
-          j[:primaryBeamLocation]["dec"] = MAX_DEC
-       end
-       if j[:primaryBeamLocation]["dec"].to_f < MIN_DEC
-          logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} less than MIN_DEC; reseting it to #{MIN_DEC}.")
-          j[:primaryBeamLocation]["dec"] = MIN_DEC
-       end
+      if j[:primaryBeamLocation]["dec"].to_f > MAX_DEC
+        logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} greater than MAX_DEC; reseting it to #{MAX_DEC}.")
+        j[:primaryBeamLocation]["dec"] = MAX_DEC
+      end
+      if j[:primaryBeamLocation]["dec"].to_f < MIN_DEC
+        logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} less than MIN_DEC; reseting it to #{MIN_DEC}.")
+        j[:primaryBeamLocation]["dec"] = MIN_DEC
+      end
 
-       # Force activity ID to be an integer
-       j[:id] = j[:id].to_i
+      # Force activity ID to be an integer
+      j[:id] = j[:id].to_i
 
-       # Cap "status" to be less than 80 characters.
-       if j[:status].length > MAX_ACTIVITY_STATUS_LENGTH
-          logger.warn("Received activity status with length > MAX_ACTIVITY_STATUS_LENGTH; trimming it to #{MAX_ACTIVITY_STATUS_LENGTH}.")
-          j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
-       end
+      # Cap "status" to be less than 80 characters.
+      if j[:status].length > MAX_ACTIVITY_STATUS_LENGTH
+        logger.warn("Received activity status with length > MAX_ACTIVITY_STATUS_LENGTH; trimming it to #{MAX_ACTIVITY_STATUS_LENGTH}.")
+        j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
+      end
+
+      # If in development mode, set the status to Observing so that the display will function when the real
+      # display is not observing
+      if Rails.env.development?
+        j[:status] = "Observing"
+      end
     end
 
     respond_to do |format|
       if format_error
-         logger.error("ERROR: Activity object not valid, discarding object.")
-         # Respond with error, don't pass JSON, it's bad
-         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+        logger.error("ERROR: Activity object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-         format.json { render :json => j.to_options }
+        format.json { render :json => j.to_options }
       end
     end
   end
@@ -155,11 +161,11 @@ class Display1Controller < ApplicationController
     
     respond_to do |format|
       if beam.nil?
-         logger.error("ERROR: Beam object not valid, discarding object.")
-         # Respond with error, don't pass JSON, it's bad
-         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+        logger.error("ERROR: Beam object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-         format.json { render :json => beam }
+        format.json { render :json => beam }
       end
     end
   end
@@ -169,19 +175,19 @@ class Display1Controller < ApplicationController
   def frequency_coverage
     observ_history = get_observational_history(params[:id])[:observationHistory]
     if observ_history
-       freq_coverage = Array.new(frequency_num_elements){ false }
-       observ_history[:freqHistory].each do |item|
-          freq_coverage[(item / 100).to_i - 10] = true
-       end
+      freq_coverage = Array.new(frequency_num_elements){ false }
+      observ_history[:freqHistory].each do |item|
+        freq_coverage[(item / 100).to_i - 10] = true
+      end
     end
 
     respond_to do |format|
       if observ_history.nil?
-         logger.error("ERROR: Observational history object not valid, discarding object.")
-         # Respond with error, don't pass JSON, it's bad
-         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+        logger.error("ERROR: Observational history object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-         format.json { render :json => freq_coverage }
+        format.json { render :json => freq_coverage }
       end
     end
   end
@@ -221,9 +227,9 @@ class Display1Controller < ApplicationController
     
     # If there is an object error, invalidate the whole object
     if format_error 
-       return nil
+      return nil
     else
-       return j
+      return j
     end
   end
 
@@ -254,15 +260,17 @@ class Display1Controller < ApplicationController
     uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
     response = Net::HTTP.get_response(uri)
 
-    j = ActiveSupport::JSON.decode(response.body)
+    # Decode the json to an object and convert hash keys to symbols
+    j = ActiveSupport::JSON.decode(response.body).to_options
 
-    j["data"] = Base64::decode64( j["data"] ).unpack("f*")
-    if j["data"].nil?
+    j[:data] = Base64::decode64( j[:data] ).unpack("f*")
+    if j[:data].nil?
       logger.error("Received baseline data = nil;")
+      format_error = true
     end
 
     # sanitize data
-    if !j["id"].nil?
+    if !j[:id].nil?
       j[:id] = j[:id].to_i
       if j[:id] < 0
         logger.warn("Received baseline id < 0; Setting it to 0 by default to prevent errors.")
@@ -270,24 +278,25 @@ class Display1Controller < ApplicationController
       end
     else
       logger.error("Received baseline id = nil")
+      format_error = true
     end
 
-    if !j["subChannel"].nil?
-      j[:subChannel] = j["subChannel"].to_i
+    if !j[:subChannel].nil?
+      j[:subChannel] = j[:subChannel].to_i
       if j[:subChannel] < 0
         logger.warn("Received baseline subChannel < 0; Setting it to 0 by default to prevent errors.")
         j[:subChannel] = 0
       end
     else
       logger.error("Received baseline subChannel = nil")
+      format_error = true
     end
     
     # If there is an object error, invalidate the whole object
     if format_error 
-       return nil
+      return nil
     else
-       # Convert hash keys to symbols
-       return j.to_options
+      return j
     end
   end
 
@@ -302,34 +311,37 @@ class Display1Controller < ApplicationController
     # make the call to the seti webservice
     uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
     response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body)
+
+    # Decode the json to an object and convert hash keys to symbols
+    j = ActiveSupport::JSON.decode(response.body).to_options
 
     history = {}
     history[:observationHistory]= {}
 
     # sanitize data
-    if !j["id"].nil?
-      history[:observationHistory][:id] = j["id"]
+    if !j[:id].nil?
+      history[:observationHistory][:id] = j[:id]
       if history[:observationHistory][:id] < 0
         logger.warn("Received observation history id < 0; Setting it to 0 by default to prevent errors.")
         history[:observationHistory][:id] = 0
       end
     else
       logger.error("Received observation history id = nil")
+      format_error = true
     end
 
-    if !j["freqHistory"].nil?
-      history[:observationHistory][:freqHistory] = j["freqHistory"]
+    if !j[:freqHistory].nil?
+      history[:observationHistory][:freqHistory] = j[:freqHistory]
     else
       logger.error("Received frequency history = nil")
+      format_error = true
     end
 
     # If there is an object error, invalidate the whole object
     if format_error 
-       return nil
+      return nil
     else
-       # Convert hash keys to symbols
-       return history
+      return history
     end
   end
 
@@ -353,41 +365,46 @@ class Display1Controller < ApplicationController
 
     uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
     response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body)
+
+    # Decode the json to an object and convert hash keys to symbols
+    j = ActiveSupport::JSON.decode(response.body).to_options
 
     # sanitize data
-    if !j["id"].nil?
-      j[:id] = j["id"].to_i
+    if !j[:id].nil?
+      j[:id] = j[:id].to_i
       if j[:id] < 0
         logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
         j[:id] = 0
       end
     else
       logger.error("Received beam id = nil")
+      format_error = true
     end
 
-    if !j["targetId"].nil?
-      j[:targetId] = j["targetId"].to_i
+    if !j[:targetId].nil?
+      j[:targetId] = j[:targetId].to_i
       if j[:targetId] < 0
         logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
         j[:targetId] = 0
       end
     else
       logger.error("Received beam targetId = nil")
+      format_error = true
     end
 
-    if !j["freq"].nil?
-      j[:frequency] = j["freq"].to_f
+    if !j[:freq].nil?
+      j[:frequency] = j[:freq].to_f
       if j[:frequency] < 0
         logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
         j[:frequency] = 0.0
       end
     else
       logger.error("Received beam frequency = nil")
+      format_error = true
     end
 
-    if !j["ra"].nil?
-      j[:ra] = j["ra"].to_f
+    if !j[:ra].nil?
+      j[:ra] = j[:ra].to_f
       if j[:ra] < MIN_RA
         logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
         j[:ra] = MIN_RA
@@ -398,10 +415,11 @@ class Display1Controller < ApplicationController
       end
     else
       logger.error("Received beam ra = nil")
+      format_error = true
     end
 
-    if !j["dec"].nil?
-      j[:dec] = j["dec"].to_f
+    if !j[:dec].nil?
+      j[:dec] = j[:dec].to_f
       if j[:dec] < MIN_DEC
         logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
         j[:dec] = MIN_DEC
@@ -412,21 +430,23 @@ class Display1Controller < ApplicationController
       end
     else
       logger.error("Received beam dec = nil")
+      format_error = true
     end
 
-    if !j["status"].nil?
-      if !is_valid_beam_status(j["status"])
-        logger.error("Received an invalid beam status = #{j["status"]}")
+    if !j[:status].nil?
+      if !is_valid_beam_status(j[:status])
+        logger.error("Received an invalid beam status = #{j[:status]}")
       end
     else
       logger.error("Received beam status = nil")
+      format_error = true
     end
 
     # If there is an object error, invalidate the whole object
     if format_error
-       return nil
+      return nil
     else
-       return j.to_options
+      return j
     end
   end
 
