@@ -326,6 +326,7 @@ class Display1Controller < ApplicationController
         history[:observationHistory][:id] = 0
       end
     else
+      format_error = true
       logger.error("Received observation history id = nil")
       format_error = true
     end
@@ -333,6 +334,7 @@ class Display1Controller < ApplicationController
     if !j[:freqHistory].nil?
       history[:observationHistory][:freqHistory] = j[:freqHistory]
     else
+      format_error = true
       logger.error("Received frequency history = nil")
       format_error = true
     end
