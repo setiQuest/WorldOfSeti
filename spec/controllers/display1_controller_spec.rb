@@ -5,6 +5,13 @@ require 'fixtures'
 describe Display1Controller do
   before :all do
     Object.pathy!
+
+    # Define constants
+    @MAX_DEC                       = 90
+    @MIN_DEC                       = -90
+    @MAX_RA                        = 24
+    @MIN_RA                        = 0
+    @MAX_ACTIVITY_STATUS_LENGTH    = 80
   end
   
   describe "GET 'index'" do
@@ -36,8 +43,8 @@ describe Display1Controller do
       # test that primaryBeamLocation's dec has valid values
       json.at_json_path("primaryBeamLocation").has_json_path?("dec").should be_true
       primaryBeamLocation_dec = json.at_json_path("primaryBeamLocation").at_json_path("dec")
-      primaryBeamLocation_dec_valid = primaryBeamLocation_dec.is_a?(Float) || primaryBeamLocation_dec.is_a?(Integer)
-      primaryBeamLocation_dec_valid.should be_true
+      is_primaryBeamLocation_dec_valid = primaryBeamLocation_dec.is_a?(Float) || primaryBeamLocation_dec.is_a?(Integer)
+      is_primaryBeamLocation_dec_valid.should be_true
 
       # test for presence of fovBeamLocation
       json.has_json_path?("fovBeamLocation").should be_true
@@ -62,6 +69,51 @@ describe Display1Controller do
       json.has_json_path?("status").should be_true
       json.at_json_path("status").is_a?(String).should be_true
       
+    end
+
+    it "should set the primaryBeamLocation's and fovBeamLocation's RA and DEC to the valid max value if the value is greater than the max" do
+      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(@MAX_RA+1, @MAX_DEC+1, @MAX_RA+1, @MAX_DEC+1, 0, "Observing"))
+
+      get :activity, :format => :json
+      response.should be_success
+      
+      json = ActiveSupport::JSON.decode(response.body)
+
+      primaryBeamLocation = json.at_json_path("primaryBeamLocation")
+      primaryBeamLocation.at_json_path("ra").should equal @MAX_RA
+      primaryBeamLocation.at_json_path("dec").should equal @MAX_DEC
+
+      fovBeamLocation = json.at_json_path("primaryBeamLocation")
+      fovBeamLocation.at_json_path("ra").should equal @MAX_RA
+      fovBeamLocation.at_json_path("dec").should equal @MAX_DEC
+    end
+
+    it "should set the primaryBeamLocation's and fovBeamLocation's RA and DEC to the valid min value if the value is less than the min" do
+      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(@MIN_RA-1, @MIN_DEC-1, @MIN_RA-1, @MIN_DEC-1, 0, "Observing"))
+
+      get :activity, :format => :json
+      response.should be_success
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      primaryBeamLocation = json.at_json_path("primaryBeamLocation")
+      primaryBeamLocation.at_json_path("ra").should equal @MIN_RA
+      primaryBeamLocation.at_json_path("dec").should equal @MIN_DEC
+
+      fovBeamLocation = json.at_json_path("primaryBeamLocation")
+      fovBeamLocation.at_json_path("ra").should equal @MIN_RA
+      fovBeamLocation.at_json_path("dec").should equal @MIN_DEC
+    end
+
+    it "should cap the status length to @MAX_ACTIVITY_STATUS_LENGTH if it is greater than @MAX_ACTIVITY_STATUS_LENGTH" do
+      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(0, 0, 0, 0, 0, "a" * (@MAX_ACTIVITY_STATUS_LENGTH+1)))
+
+      get :activity, :format => :json
+      response.should be_success
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("status").length.should equal @MAX_ACTIVITY_STATUS_LENGTH
     end
   end
 

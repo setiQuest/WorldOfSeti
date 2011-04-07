@@ -94,14 +94,12 @@ class Display1Controller < ApplicationController
   end
 
   #
-  #
+  # Obtains the activity data from the SETI server and returns it to the client
+  # as JSON. If there was an error in the data, it will log an error and return
+  # a HTTP 500 status to the client.
   def activity
-    # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
-    uri = URI.parse("#{SETI_SERVER}/activity")
-    response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body).to_options
-    
+    j = get_activity_data
+
     # Check JSON format
     if j[:primaryBeamLocation].nil? || j[:primaryBeamLocation]["ra"].nil? || j[:primaryBeamLocation]["dec"].nil? \
         || j[:fovBeamLocation].nil? || j[:fovBeamLocation]["ra"].nil? || j[:fovBeamLocation]["dec"].nil? \
@@ -194,6 +192,62 @@ class Display1Controller < ApplicationController
 
   protected
 
+  def get_activity_data
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false
+    uri = URI.parse("#{SETI_SERVER}/activity")
+    response = Net::HTTP.get_response(uri)
+    j = ActiveSupport::JSON.decode(response.body).to_options
+
+    # Check JSON format
+    if j[:primaryBeamLocation].nil? || j[:primaryBeamLocation]["ra"].nil? || j[:primaryBeamLocation]["dec"].nil? \
+        || j[:fovBeamLocation].nil? || j[:fovBeamLocation]["ra"].nil? || j[:fovBeamLocation]["dec"].nil? \
+        || j[:id].nil? || j[:status].nil?
+      format_error = true;
+    else
+      # Do bounds checking on RA and DEC.
+      if j[:primaryBeamLocation]["ra"].to_f > MAX_RA
+        logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} greater than MAX_RA; reseting it to #{MAX_RA}.")
+        j[:primaryBeamLocation]["ra"] = MAX_RA
+      end
+      if j[:primaryBeamLocation]["ra"].to_f < MIN_RA
+        logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} less than MIN_RA; reseting it to #{MIN_RA}.")
+        j[:primaryBeamLocation]["ra"] = MIN_RA
+      end
+
+      if j[:primaryBeamLocation]["dec"].to_f > MAX_DEC
+        logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} greater than MAX_DEC; reseting it to #{MAX_DEC}.")
+        j[:primaryBeamLocation]["dec"] = MAX_DEC
+      end
+      if j[:primaryBeamLocation]["dec"].to_f < MIN_DEC
+        logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} less than MIN_DEC; reseting it to #{MIN_DEC}.")
+        j[:primaryBeamLocation]["dec"] = MIN_DEC
+      end
+
+      # Force activity ID to be an integer
+      j[:id] = j[:id].to_i
+
+      # Cap "status" to be less than 80 characters.
+      if j[:status].length > MAX_ACTIVITY_STATUS_LENGTH
+        logger.warn("Received activity status with length > MAX_ACTIVITY_STATUS_LENGTH; trimming it to #{MAX_ACTIVITY_STATUS_LENGTH}.")
+        j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
+      end
+
+      # If in development mode, set the status to Observing so that the display will function when the real
+      # display is not observing
+      if Rails.env.development?
+        j[:status] = "Observing"
+      end
+
+      # If there is an object error, invalidate the whole object
+      if format_error
+        return nil
+      else
+        return j
+      end
+    end
+  end
+
   #
   #
   def get_random_waterfall_data
@@ -209,7 +263,7 @@ class Display1Controller < ApplicationController
   #
   def get_json_waterfall(id, start_row)
     # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
+    format_error = false
 
     uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
     response = Net::HTTP.get_response(uri)
@@ -226,7 +280,7 @@ class Display1Controller < ApplicationController
     end
     
     # If there is an object error, invalidate the whole object
-    if format_error 
+    if format_error
       return nil
     else
       return j
@@ -255,7 +309,7 @@ class Display1Controller < ApplicationController
   # for the id passed in.
   def get_json_baseline(id)
     # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
+    format_error = false
 
     uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
     response = Net::HTTP.get_response(uri)
@@ -295,7 +349,7 @@ class Display1Controller < ApplicationController
     end
     
     # If there is an object error, invalidate the whole object
-    if format_error 
+    if format_error
       return nil
     else
       return j
@@ -308,7 +362,7 @@ class Display1Controller < ApplicationController
   # history, which is an array of doubles.
   def get_observational_history(id)
     # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
+    format_error = false
 
     # make the call to the seti webservice
     uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
@@ -340,7 +394,7 @@ class Display1Controller < ApplicationController
     end
 
     # If there is an object error, invalidate the whole object
-    if format_error 
+    if format_error
       return nil
     else
       return history
@@ -363,7 +417,7 @@ class Display1Controller < ApplicationController
   # invalid. Returns the JSON as a map.
   def get_json_beam(id)
     # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
+    format_error = false
 
     uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
     response = Net::HTTP.get_response(uri)
