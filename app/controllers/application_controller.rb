@@ -68,7 +68,7 @@ class ApplicationController < ActionController::Base
   MIN_DEC                       = -90
   MAX_RA                        = 24
   MIN_RA                        = 0
-  MAX_ACTIVITY_STATUS_LENGTH    = 80
+  MAX_ACTIVITY_STATUS_LENGTH    = 30 
 
   # Beam status enums
   BEAM_STATUS_ENUMS             = ["ON1", "ON2", "ON3", "OFF1", "OFF2", "OFF3"]

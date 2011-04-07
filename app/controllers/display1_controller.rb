@@ -62,8 +62,17 @@ class Display1Controller < ApplicationController
   #
   # Generate the baseline chart using the Google Maps API
   def baseline_chart
-    # get the baseline data from the seti web service
-    baseline = get_json_baseline(params[:id])
+
+    json = params[:jsonobject]
+    format_error = false
+    if json.nil?
+       # get the baseline data from the seti web service
+       baseline = get_json_baseline(params[:id])
+    else
+       # get the baseline data from the seti web service
+       baseline = get_json_baseline(params[:id], json)
+    end
+
     if baseline    
       chart_data = baseline[:data].join(',')
       marker_index = baseline[:subChannel]
@@ -97,11 +106,16 @@ class Display1Controller < ApplicationController
   #
   def activity
     # Do we have a format error (such as nil objects in JSON)
+    json = params[:jsonobject]
     format_error = false 
-    uri = URI.parse("#{SETI_SERVER}/activity")
-    response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body).to_options
-    
+    if json.nil?
+       uri = URI.parse("#{SETI_SERVER}/activity")
+       response = Net::HTTP.get_response(uri)
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       j = ActiveSupport::JSON.decode(json).to_options
+    end
+
     # Check JSON format
     if j[:primaryBeamLocation].nil? || j[:primaryBeamLocation]["ra"].nil? || j[:primaryBeamLocation]["dec"].nil? \
         || j[:fovBeamLocation].nil? || j[:fovBeamLocation]["ra"].nil? || j[:fovBeamLocation]["dec"].nil? \
@@ -130,7 +144,7 @@ class Display1Controller < ApplicationController
       # Force activity ID to be an integer
       j[:id] = j[:id].to_i
 
-      # Cap "status" to be less than 80 characters.
+      # Cap "status" to be less than MAX_ACTIVITY_STATUS_LENGTH characters.
       if j[:status].length > MAX_ACTIVITY_STATUS_LENGTH
         logger.warn("Received activity status with length > MAX_ACTIVITY_STATUS_LENGTH; trimming it to #{MAX_ACTIVITY_STATUS_LENGTH}.")
         j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
@@ -156,9 +170,14 @@ class Display1Controller < ApplicationController
 
   #
   #
-  def beam
-    beam = get_json_beam(params[:id])
-    
+  def beam()
+    json = params[:jsonobject]
+    if json.nil?
+       beam = get_json_beam(params[:id])
+    else
+       beam = get_json_beam(params[:id], json)
+    end
+
     respond_to do |format|
       if beam.nil?
         logger.error("ERROR: Beam object not valid, discarding object.")
@@ -173,10 +192,20 @@ class Display1Controller < ApplicationController
   #
   #
   def frequency_coverage
-    observ_history = get_observational_history(params[:id])[:observationHistory]
+   json = params[:jsonobject]
+    if json.nil?
+       observ_history = get_observational_history(params[:id])[:observationHistory]
+    else
+       observ_history = get_observational_history(params[:id], json)[:observationHistory]
+    end
+
     if observ_history
       freq_coverage = Array.new(frequency_num_elements){ false }
       observ_history[:freqHistory].each do |item|
+      item=item.to_i
+        if item>=10000
+       item = 9999
+    end
         freq_coverage[(item / 100).to_i - 10] = true
       end
     end
@@ -253,12 +282,16 @@ class Display1Controller < ApplicationController
   #
   # Sends an http request to the SETI webservice to retrieve the baseline data
   # for the id passed in.
-  def get_json_baseline(id)
+  def get_json_baseline(id, json=nil)
     # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
-
-    uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
-    response = Net::HTTP.get_response(uri)
+    format_error = false
+    if json.nil?
+       uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
+       response = Net::HTTP.get_response(uri)
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       j = ActiveSupport::JSON.decode(json).to_options
+    end
 
     # Decode the json to an object and convert hash keys to symbols
     j = ActiveSupport::JSON.decode(response.body).to_options
@@ -306,16 +339,19 @@ class Display1Controller < ApplicationController
   # Obtains the observation history from the SETI webservice, parses the data
   # and returns it as a map. The map includes the id and also the frequency
   # history, which is an array of doubles.
-  def get_observational_history(id)
+  def get_observational_history(id, json=nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false 
+    if json.nil?
+       uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
+       response = Net::HTTP.get_response(uri)
+       # make the call to the seti webservice
+       # Decode the json to an object and convert hash keys to symbols
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       j = ActiveSupport::JSON.decode(json).to_options
+    end
 
-    # make the call to the seti webservice
-    uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-    response = Net::HTTP.get_response(uri)
-
-    # Decode the json to an object and convert hash keys to symbols
-    j = ActiveSupport::JSON.decode(response.body).to_options
 
     history = {}
     history[:observationHistory]= {}
@@ -361,15 +397,17 @@ class Display1Controller < ApplicationController
   # Obtains the beam data from the SETI web service, performs data checking
   # including for nil and values in range. Sets default values if the data is
   # invalid. Returns the JSON as a map.
-  def get_json_beam(id)
+  def get_json_beam(id, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false 
-
-    uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
-    response = Net::HTTP.get_response(uri)
-
-    # Decode the json to an object and convert hash keys to symbols
-    j = ActiveSupport::JSON.decode(response.body).to_options
+    if json.nil?
+       uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
+       response = Net::HTTP.get_response(uri)
+       # Decode the json to an object and convert hash keys to symbols
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       j = ActiveSupport::JSON.decode(json).to_options
+    end
 
     # sanitize data
     if !j[:id].nil?
@@ -438,6 +476,7 @@ class Display1Controller < ApplicationController
     if !j[:status].nil?
       if !is_valid_beam_status(j[:status])
         logger.error("Received an invalid beam status = #{j[:status]}")
+        j[:status] = "?"
       end
     else
       logger.error("Received beam status = nil")

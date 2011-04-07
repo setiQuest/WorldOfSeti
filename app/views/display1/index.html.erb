@@ -1,9 +1,26 @@
+
+  <form id="TestActivityForm" onsubmit="return false;" method="post">
+   <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Activity object here..." </textarea>
+   <input type="button" value="Submit" onclick="updateActivity(this.form)"/>
+  </form>
+<hr>
+  <form id="TestBeamForm" onsubmit="return false;" method="post">
+   <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Beam object here..." </textarea>
+   <input type="button" value="Submit" onclick="updateBeamInfo(1, this.form)"/>
+  </form>
+  <form id="TestFreqForm" onsubmit="return false;" method="post">
+   <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Freq object here..." </textarea>
+   <input type="button" value="Submit" onclick="updateFrequencyCoverage(1, null, this.form)"/>
+  </form>
+
 <div id="display1_header">
   <div class="text-large"><%= image_tag "logo_seti.png" %></div>
-  <div class="text-title-yellow" style="padding-left:25px; width:1150px;">Current Observation Status: <span id="current-observation-id">?</span></div>
+  <div class="text-title-yellow" style="padding-left:25px; width:1150px;">Current Status: <span id="current-observation-id">?</span></div>
   <div class="text-title-yellow">Activity ID: <span id="activity-id">?</span></div>
   <div class="float-wall"></div>
 </div>
+
+
 
 <div class="divider-horizontal"></div>
 <%= render 'beam', :beam_id => 1 %>
@@ -77,8 +94,40 @@
     $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime());
   }
 
-  function updateBeamInfo(id)
+  function updateBeamInfo(id, text)
   {
+     if(text != undefined)
+    {
+
+   // Make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_beam_path %>',
+      data: {jsonobject:text.jsonobject.value},
+      success:  function(response) {
+if(response.status.indexOf('ON') >= 0)
+        {
+          $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_on.png)");
+        }
+        else
+        {
+          $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_off.png)");
+        }
+
+        var longitude = lngToRa(response.ra);
+        var latitude = latToDec(response.dec);
+
+        $('#beam' + id + ' .beam_status').text(response.status);
+        $('#beam' + id + ' .beam_location').text(longitude + ' - ' + latitude);
+        $('#beam' + id + ' .beam_description').text(response.description);
+        $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
+        updateFrequencyCoverage(id, response.freq);
+      },
+      datatype: 'json'
+    });
+   }
+    else
+{
     var updateBeamInfoCallback = function() { updateBeamInfo(id); };
 
     // Take id and make AJAX query
@@ -113,9 +162,28 @@
       },
       datatype: 'json'
     });
+}
   }
 
-  function updateActivity()
+
+ function updateActivity(text)
+  {
+    if(text != undefined)
+    {
+   // Make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_activity_path %>',
+      data: {jsonobject:text.jsonobject.value},
+      success:  function(response) {
+        $('#activity-id').text(response.id);
+        $('#current-observation-id').text(response.status);
+      },
+      datatype: 'json'
+    });
+
+    }
+    else
   {
     var updateActivityCallback = function() { updateActivity(); };
     // Take id and make AJAX query
@@ -126,7 +194,7 @@
         $('#activity-id').text(response.id);
         $('#current-observation-id').text(response.status);
 
-        if(response.status == "Observing")
+        if(1)//response.status == "Observing")
         {
           if(!timeoutManager.isObserving)
           {
@@ -148,8 +216,41 @@
       datatype: 'json'
     });
   }
+  }
 
-  function updateFrequencyCoverage(id, currFreq) {
+  function updateFrequencyCoverage(id, currFreq, text) {
+
+   if(text != undefined)
+    {
+   // Make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_frequency_coverage_path %>',
+      data: {id:id, jsonobject:text.jsonobject.value},
+      success:  function(response) {
+  var freqHistory = response;
+        for(var col = 0; col < freqHistory.length; col++) {
+          var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
+          if(freqHistory[col]) {
+            cell.attr("class", "on");
+          } else {
+            cell.attr("class", "off");
+          }
+          
+          var thisFreq = col * 100 + 1000;
+          if(currFreq != null && (thisFreq <= currFreq && currFreq < (thisFreq + 100)) )
+          {
+            $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
+          }
+        }
+
+      },
+      datatype: 'json'
+    });
+
+    }
+    else
+{
     // Take id and make AJAX query
     $.ajax({
       type:     'GET',
@@ -178,7 +279,7 @@
       },
       datatype: 'json'
     });
-  }
+ } }
 
   // Register display for automatic updates
   function initTimers()

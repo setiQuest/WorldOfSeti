@@ -4,6 +4,11 @@
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <% end %>
 
+  <form id="TestActivityForm" onsubmit="return false;" method="post">
+   <textarea rows="3" cols="70" name="jsonobject" />"Enter JSON object here..." </textarea>
+   <input type="button" value="Submit" onclick="updateActivity(this.form)"/>
+  </form>
+
 <div id="display2">
   <div id="sky_map"></div>
 
@@ -140,10 +145,40 @@
     $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
   }
 
-  function updateActivity()
+ function updateActivity(text)
   {
+    if(text != undefined)
+    {
+   // Make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_activity_path %>',
+      data: {jsonobject:text.jsonobject.value},
+      success:  function(response) {
+        $('#activity-id').text(response.id);
+        $('#current-observation-id').text(response.status);
+
+        if(response.status == "Observing")
+        {
+          // Call update map location
+          updateMapLocation(response.primaryBeamLocation.ra,
+                            response.primaryBeamLocation.dec,
+                            response.fovBeamLocation.ra,
+                            response.fovBeamLocation.dec);
+        }
+        else
+        {
+          timeoutManager.isObserving = false;
+        }
+      },
+      datatype: 'json'
+    });
+
+    }
+    else
+    {
     var updateActivityCallback = function() { updateActivity(); };
-    // Take id and make AJAX query
+    // Make AJAX query
     $.ajax({
       type:     'GET',
       url:      '<%= display1_activity_path %>',
@@ -178,8 +213,8 @@
       },
       datatype: 'json'
     });
-  }
-  
+    }
+  } 
   function initTimers()
   {
   }
@@ -217,7 +252,7 @@
     initialize();
     $(window).unload( function () { GUnload(); } );
 
-    updateActivity();
+   // updateActivity();
     timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  <%= ApplicationController::TIMEOUT_WEATHER %>);
     timeoutManager.registerTimeout(function() { updateWebCam(); },  <%= ApplicationController::TIMEOUT_WEBCAM %>);
     setInterval(function(){scrollContextualInfo()}, 100);
