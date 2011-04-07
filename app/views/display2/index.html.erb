@@ -68,7 +68,7 @@
     $(window).unload( function () { GUnload(); } );
 
     updateActivity();
-    timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  ApplicationController::TIMEOUT_WEATHER );
+    timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  TIMEOUT_WEATHER );
     timeoutManager.registerTimeout(function() { updateWebCam(); },  TIMEOUT_WEBCAM );
     setInterval(function(){scrollContextualInfo()}, 100);
 })
