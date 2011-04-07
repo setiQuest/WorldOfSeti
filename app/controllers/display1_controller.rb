@@ -47,7 +47,13 @@ class Display1Controller < ApplicationController
   #
   #
   def waterfall
-    waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
+    json = params[:jsonobject]
+    if json.nil?
+       waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
+    else
+       waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i,json)
+    end
+
     respond_to do |format|
       if waterfall.nil?
         logger.error("ERROR: Waterfall object not valid, discarding object.")
@@ -236,13 +242,16 @@ class Display1Controller < ApplicationController
 
   #
   #
-  def get_json_waterfall(id, start_row)
+  def get_json_waterfall(id, start_row, json=nil)
     # Do we have a format error (such as nil objects in JSON)
-    format_error = false 
-
-    uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-    response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body).to_options
+    format_error = false
+    if json.nil?
+       uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
+       response = Net::HTTP.get_response(uri)
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       j = ActiveSupport::JSON.decode(json).to_options
+    end
 
     if j[:startRow] < 1
       logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")

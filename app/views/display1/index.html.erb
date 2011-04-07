@@ -13,6 +13,20 @@
    <input type="button" value="Submit" onclick="updateFrequencyCoverage(1, null, this.form)"/>
   </form>
 
+<hr>
+  <form id="TestWaterfallForm" onsubmit="return false;" method="post">
+   <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Waterfall  object here..." </textarea>
+   <input type="button" value="Submit" onclick="updateWaterfall(1, this.form)"/>
+  </form>
+
+<hr>
+  <form id="TestBaselineForm" onsubmit="return false;" method="post">
+   <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..." </textarea>
+   <input type="button" value="Submit" onclick="updateBaseline(1, this.form)"/>
+  </form>
+
+
+
 <div id="display1_header">
   <div class="text-large"><%= image_tag "logo_seti.png" %></div>
   <div class="text-title-yellow" style="padding-left:25px; width:1150px;">Current Status: <span id="current-observation-id">?</span></div>
@@ -45,7 +59,7 @@
   }
 
   // AJAX call to update JSON
-  function updateWaterfall(id)
+  function updateWaterfall(id, text)
   {
     var updateWaterfallCallback = function() { updateWaterfall(id); };
 
@@ -58,7 +72,31 @@
     {
       updateWaterfall.waterfall_data[id] = {data:"", last_row:1};
     }
+  if(text != undefined)
+    {
+alert(text.jsonobject.value);
+   // Make AJAX query
+    $.ajax({
+      type:     'GET',
+      url:      '<%= display1_waterfall_path %>',
+      data: {id:id,  start_row:updateWaterfall.waterfall_data[id].last_row, jsonobject:text.jsonobject.value},
+      success:  function(response) {
+        // store the last row we have so far, so that the next query gets the subsequent rows
+        updateWaterfall.waterfall_data[id].last_row = response.endRow + 1;
+        if(updateWaterfall.waterfall_data[id].last_row >= <%= waterfall_height %> )
+        {
+          updateWaterfall.waterfall_data[id].last_row = 1;
+        }
 
+        drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
+
+      },
+
+      datatype: 'json'
+    });
+   }
+    else
+{
     // Take id and make AJAX query
     $.ajax({
       type:     'GET',
@@ -83,14 +121,18 @@
       datatype: 'json'
     });
   }
+}
 
-  function updateBaseline(id)
-  {
+  function updateBaseline(id, text)
+ {
     var updateBaselineCallback = function() { updateBaseline(id); };
     timeoutManager.setObservingTimeout(updateBaselineCallback, <%= ApplicationController::TIMEOUT_BASELINE %>);
 
     // to bypass browser caching, we need to append a random parameter to the URL
     var d = new Date();
+if(text != undefined)
+    $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime() + "&" + text.jsonobject.value);
+else
     $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime());
   }
 
@@ -242,6 +284,8 @@ if(response.status.indexOf('ON') >= 0)
           {
             $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
           }
+          else
+            $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "none");
         }
 
       },
@@ -272,6 +316,8 @@ if(response.status.indexOf('ON') >= 0)
           {
             $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
           }
+          else
+            $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "none");
         }
       },
       error:    function() {
