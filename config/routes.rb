@@ -45,6 +45,8 @@ SetiWorld::Application.routes.draw do
 
   get "debug_log/index"
 
+  get "tests/index"
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
