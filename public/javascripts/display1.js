@@ -156,6 +156,10 @@ function updateFrequencyCoverage(id, currFreq) {
           {
             $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
           }
+          else
+          {
+            $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "none");
+          }
         }
       },
       error:    function() {

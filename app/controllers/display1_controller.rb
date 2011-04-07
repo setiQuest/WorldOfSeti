@@ -175,7 +175,19 @@ class Display1Controller < ApplicationController
     if observ_history
       freq_coverage = Array.new(frequency_num_elements){ false }
       observ_history[:freqHistory].each do |item|
-        freq_coverage[(item / 100).to_i - 10] = true
+        # Check bounds
+        item = item.to_i
+        if item >= MAX_FREQ_MHZ 
+           item = MAX_FREQ_MHZ - 1
+           logger.warn("Received observational frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
+        end
+        if item < MIN_FREQ_MHZ 
+           item = MIN_FREQ_MHZ
+           logger.warn("Received observational frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
+        end
+
+        index = (item/100).to_i - 10
+        freq_coverage[index] = true
       end
     end
 
