@@ -129,9 +129,9 @@ class Display1Controller < ApplicationController
       j[:id] = j[:id].to_i
 
       # Cap "status" to be less than 80 characters.
-      if j[:status].length > MAX_ACTIVITY_STATUS_LENGTH
-        logger.warn("Received activity status with length > MAX_ACTIVITY_STATUS_LENGTH; trimming it to #{MAX_ACTIVITY_STATUS_LENGTH}.")
-        j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
+      if j[:status].length > ACTIVITY_STATUS_MAX_LENGTH
+        logger.warn("Received activity status with length > ACTIVITY_STATUS_MAX_LENGTH; trimming it to #{ACTIVITY_STATUS_MAX_LENGTH}.")
+        j[:status] = j[:status].slice(0,ACTIVITY_STATUS_MAX_LENGTH)
       end
 
       # If in development mode, set the status to Observing so that the display will function when the real
@@ -450,9 +450,13 @@ class Display1Controller < ApplicationController
 
     if !j[:freq].nil?
       j[:frequency] = j[:freq].to_f
-      if j[:frequency] < 0
-        logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
-        j[:frequency] = 0.0
+      if j[:frequency] < MIN_FREQ_MHZ
+        logger.warn("Received beam frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
+        j[:frequency] = MIN_FREQ_MHZ
+      end
+      if j[:frequency] > MAX_FREQ_MHZ
+        logger.warn("Received beam frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
+        j[:frequency] = MAX_FREQ_MHZ 
       end
     else
       logger.error("Received beam frequency = nil")
@@ -492,6 +496,7 @@ class Display1Controller < ApplicationController
     if !j[:status].nil?
       if !is_valid_beam_status(j[:status])
         logger.error("Received an invalid beam status = #{j[:status]}")
+        j[:status] = "?"
       end
     else
       logger.error("Received beam status = nil")
