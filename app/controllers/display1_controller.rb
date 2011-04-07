@@ -155,15 +155,91 @@ class Display1Controller < ApplicationController
   #
   #
   def beam
-    beam = get_json_beam(params[:id])
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false
     
+    j = get_json_beam(params[:id])
+
+    # sanitize data
+    if !j[:id].nil?
+      j[:id] = j[:id].to_i
+      if j[:id] < 0
+        logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
+        j[:id] = 0
+      end
+    else
+      logger.error("Received beam id = nil")
+      format_error = true
+    end
+
+    if !j[:targetId].nil?
+      j[:targetId] = j[:targetId].to_i
+      if j[:targetId] < 0
+        logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
+        j[:targetId] = 0
+      end
+    else
+      logger.error("Received beam targetId = nil")
+      format_error = true
+    end
+
+    if !j[:freq].nil?
+      j[:frequency] = j[:freq].to_f
+      if j[:frequency] < 0
+        logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
+        j[:frequency] = 0.0
+      end
+    else
+      logger.error("Received beam frequency = nil")
+      format_error = true
+    end
+
+    if !j[:ra].nil?
+      j[:ra] = j[:ra].to_f
+      if j[:ra] < MIN_RA
+        logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
+        j[:ra] = MIN_RA
+      end
+      if j[:ra] > MAX_RA
+        logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
+        j[:ra] = MAX_RA
+      end
+    else
+      logger.error("Received beam ra = nil")
+      format_error = true
+    end
+
+    if !j[:dec].nil?
+      j[:dec] = j[:dec].to_f
+      if j[:dec] < MIN_DEC
+        logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
+        j[:dec] = MIN_DEC
+      end
+      if j[:dec] > MAX_DEC
+        logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
+        j[:dec] = MAX_DEC
+      end
+    else
+      logger.error("Received beam dec = nil")
+      format_error = true
+    end
+
+    if !j[:status].nil?
+      if !is_valid_beam_status(j[:status])
+        logger.error("Received an invalid beam status = #{j[:status]}")
+      end
+    else
+      logger.error("Received beam status = nil")
+      format_error = true
+    end
+
     respond_to do |format|
-      if beam.nil?
+      if format_error
         logger.error("ERROR: Beam object not valid, discarding object.")
         # Respond with error, don't pass JSON, it's bad
         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-        format.json { render :json => beam }
+        format.json { render :json => j }
       end
     end
   end
@@ -412,98 +488,15 @@ class Display1Controller < ApplicationController
   end
 
   #
-  # Obtains the beam data from the SETI web service, performs data checking
-  # including for nil and values in range. Sets default values if the data is
-  # invalid. Returns the JSON as a map.
+  # Obtains the beam data from the SETI web service. Returns the JSON as a map.
   def get_json_beam(id)
-    # Do we have a format error (such as nil objects in JSON)
-    format_error = false
-
     uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
     response = Net::HTTP.get_response(uri)
 
     # Decode the json to an object and convert hash keys to symbols
     j = ActiveSupport::JSON.decode(response.body).to_options
 
-    # sanitize data
-    if !j[:id].nil?
-      j[:id] = j[:id].to_i
-      if j[:id] < 0
-        logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
-        j[:id] = 0
-      end
-    else
-      logger.error("Received beam id = nil")
-      format_error = true
-    end
-
-    if !j[:targetId].nil?
-      j[:targetId] = j[:targetId].to_i
-      if j[:targetId] < 0
-        logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
-        j[:targetId] = 0
-      end
-    else
-      logger.error("Received beam targetId = nil")
-      format_error = true
-    end
-
-    if !j[:freq].nil?
-      j[:frequency] = j[:freq].to_f
-      if j[:frequency] < 0
-        logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
-        j[:frequency] = 0.0
-      end
-    else
-      logger.error("Received beam frequency = nil")
-      format_error = true
-    end
-
-    if !j[:ra].nil?
-      j[:ra] = j[:ra].to_f
-      if j[:ra] < MIN_RA
-        logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
-        j[:ra] = MIN_RA
-      end
-      if j[:ra] > MAX_RA
-        logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
-        j[:ra] = MAX_RA
-      end
-    else
-      logger.error("Received beam ra = nil")
-      format_error = true
-    end
-
-    if !j[:dec].nil?
-      j[:dec] = j[:dec].to_f
-      if j[:dec] < MIN_DEC
-        logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
-        j[:dec] = MIN_DEC
-      end
-      if j[:dec] > MAX_DEC
-        logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
-        j[:dec] = MAX_DEC
-      end
-    else
-      logger.error("Received beam dec = nil")
-      format_error = true
-    end
-
-    if !j[:status].nil?
-      if !is_valid_beam_status(j[:status])
-        logger.error("Received an invalid beam status = #{j[:status]}")
-      end
-    else
-      logger.error("Received beam status = nil")
-      format_error = true
-    end
-
-    # If there is an object error, invalidate the whole object
-    if format_error
-      return nil
-    else
-      return j
-    end
+    return j
   end
 
   # Determines if the passed in status is equal to one of the beam status enums
