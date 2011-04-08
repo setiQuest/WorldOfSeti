@@ -100,49 +100,8 @@ class Display1Controller < ApplicationController
   def activity
     j = get_activity_data
 
-    # Check JSON format
-    if j[:primaryBeamLocation].nil? || j[:primaryBeamLocation]["ra"].nil? || j[:primaryBeamLocation]["dec"].nil? \
-        || j[:fovBeamLocation].nil? || j[:fovBeamLocation]["ra"].nil? || j[:fovBeamLocation]["dec"].nil? \
-        || j[:id].nil? || j[:status].nil?
-      format_error = true;
-    else
-      # Do bounds checking on RA and DEC.
-      if j[:primaryBeamLocation]["ra"].to_f > MAX_RA
-        logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} greater than MAX_RA; reseting it to #{MAX_RA}.")
-        j[:primaryBeamLocation]["ra"] = MAX_RA
-      end
-      if j[:primaryBeamLocation]["ra"].to_f < MIN_RA
-        logger.warn("Received activity primaryBeamLocation.ra = #{j[:primaryBeamLocation]["ra"]} less than MIN_RA; reseting it to #{MIN_RA}.")
-        j[:primaryBeamLocation]["ra"] = MIN_RA
-      end
-
-      if j[:primaryBeamLocation]["dec"].to_f > MAX_DEC
-        logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} greater than MAX_DEC; reseting it to #{MAX_DEC}.")
-        j[:primaryBeamLocation]["dec"] = MAX_DEC
-      end
-      if j[:primaryBeamLocation]["dec"].to_f < MIN_DEC
-        logger.warn("Received activity primaryBeamLocation.dec = #{j[:primaryBeamLocation]["dec"]} less than MIN_DEC; reseting it to #{MIN_DEC}.")
-        j[:primaryBeamLocation]["dec"] = MIN_DEC
-      end
-
-      # Force activity ID to be an integer
-      j[:id] = j[:id].to_i
-
-      # Cap "status" to be less than 80 characters.
-      if j[:status].length > ACTIVITY_STATUS_MAX_LENGTH
-        logger.warn("Received activity status with length > ACTIVITY_STATUS_MAX_LENGTH; trimming it to #{ACTIVITY_STATUS_MAX_LENGTH}.")
-        j[:status] = j[:status].slice(0,ACTIVITY_STATUS_MAX_LENGTH)
-      end
-
-      # If in development mode, set the status to Observing so that the display will function when the real
-      # display is not observing
-      if Rails.env.development?
-        j[:status] = "Observing"
-      end
-    end
-
     respond_to do |format|
-      if format_error
+      if j.nil? 
         logger.error("ERROR: Activity object not valid, discarding object.")
         # Respond with error, don't pass JSON, it's bad
         format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
@@ -207,6 +166,7 @@ class Display1Controller < ApplicationController
   def get_activity_data
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
+
     uri = URI.parse("#{SETI_SERVER}/activity")
     response = Net::HTTP.get_response(uri)
     j = ActiveSupport::JSON.decode(response.body).to_options
@@ -240,9 +200,9 @@ class Display1Controller < ApplicationController
       j[:id] = j[:id].to_i
 
       # Cap "status" to be less than 80 characters.
-      if j[:status].length > MAX_ACTIVITY_STATUS_LENGTH
-        logger.warn("Received activity status with length > MAX_ACTIVITY_STATUS_LENGTH; trimming it to #{MAX_ACTIVITY_STATUS_LENGTH}.")
-        j[:status] = j[:status].slice(0,MAX_ACTIVITY_STATUS_LENGTH)
+      if j[:status].length > ACTIVITY_STATUS_MAX_LENGTH
+        logger.warn("Received activity status with length > ACTIVITY_STATUS_MAX_LENGTH; trimming it to #{ACTIVITY_STATUS_MAX_LENGTH}.")
+        j[:status] = j[:status].slice(0,ACTIVITY_STATUS_MAX_LENGTH)
       end
 
       # If in development mode, set the status to Observing so that the display will function when the real
