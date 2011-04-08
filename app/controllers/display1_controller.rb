@@ -295,15 +295,19 @@ class Display1Controller < ApplicationController
        end
     end
 
+    # Confirm that all waterfall data exist
+    if j[:startRow].nil? || j[:endRow].nil? || j[:id].nil? || j[:data].nil?
+       format_error = true
+    else
+       if j[:startRow] < 1
+          logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
+          j[:startRow] = 1
+       end
 
-    if j[:startRow] < 1
-      logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
-      j[:startRow] = 1
-    end
-
-    if j[:endRow] > waterfall_height
-      logger.warn("Received waterfall#{id}.endRow = #{j[:endRow]}; reseting it to #{waterfall_height}.")
-      j[:endRow] = waterfall_height
+       if j[:endRow] > waterfall_height
+          logger.warn("Received waterfall#{id}.endRow = #{j[:endRow]}; reseting it to #{waterfall_height}.")
+          j[:endRow] = waterfall_height
+       end
     end
     
     # If there is an object error, invalidate the whole object
