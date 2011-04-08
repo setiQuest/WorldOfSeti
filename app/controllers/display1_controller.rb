@@ -385,6 +385,16 @@ class Display1Controller < ApplicationController
       format_error = true
     end
     
+    # confirm that the data is exactly baseline width 
+    if j[:data].size > baseline_width
+       logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, truncation will be done.")
+       j[:data] = j[:data][0..baseline_width-1] 
+    end
+    if j[:data].size < baseline_width
+       logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, padding will be done.")
+       j[:data].fill(0.0,j[:data].size..baseline_width) 
+    end
+
     # If there is an object error, invalidate the whole object
     if format_error
       return nil

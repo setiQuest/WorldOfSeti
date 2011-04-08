@@ -49,7 +49,7 @@ class ApplicationController < ActionController::Base
   SETI_SERVER = "http://publish.seti.org:8010"
 
   # Manual test variables
-  WOS_MANUAL_TESTS		= false   # change to "true" if doing manual tests
+  WOS_MANUAL_TESTS		= true   # change to "true" if doing manual tests
 
   # Timeout constants for timer updates in milliseconds
   TIMEOUT_ACTIVITY              = 60000
