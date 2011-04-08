@@ -98,7 +98,16 @@ class Display1Controller < ApplicationController
   # as JSON. If there was an error in the data, it will log an error and return
   # a HTTP 500 status to the client.
   def activity
-    j = get_activity_data
+    json = params[:jsonobject]
+    if !json.nil? 
+       # Only do this if we are in manual testing, otherwise, if we are not
+       # and we get an object, return format error.
+       if WOS_MANUAL_TESTS == true
+          j = get_activity_data(json);
+       end
+    else
+       j = get_activity_data
+    end
 
     respond_to do |format|
       if j.nil? 
@@ -163,13 +172,24 @@ class Display1Controller < ApplicationController
 
   protected
 
-  def get_activity_data
+  def get_activity_data(json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
 
-    uri = URI.parse("#{SETI_SERVER}/activity")
-    response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body).to_options
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS == false
+       uri = URI.parse("#{SETI_SERVER}/activity")
+       response = Net::HTTP.get_response(uri)
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       if !json.nil?
+          j = ActiveSupport::JSON.decode(json).to_options
+       else
+          uri = URI.parse("#{SETI_SERVER}/activity")
+          response = Net::HTTP.get_response(uri)
+          j = ActiveSupport::JSON.decode(response.body).to_options
+       end
+    end
 
     # Check JSON format
     if j[:primaryBeamLocation].nil? || j[:primaryBeamLocation]["ra"].nil? || j[:primaryBeamLocation]["dec"].nil? \

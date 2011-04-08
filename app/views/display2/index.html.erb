@@ -29,7 +29,7 @@
   </div>
 </div>
 
-<% javascript_tag do %>
+<%= javascript_tag do %>
   var display1_activity_path = '<%= display1_activity_path %>';
   var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>
   var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>
@@ -75,10 +75,13 @@
     initialize();
     $(window).unload( function () { GUnload(); } );
 
+<% # No updates for manual tests %>
+<% if ApplicationController::WOS_MANUAL_TESTS == false %>
     updateActivity();
     timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  TIMEOUT_WEATHER );
     timeoutManager.registerTimeout(function() { updateWebCam(); },  TIMEOUT_WEBCAM );
     setInterval(function(){scrollContextualInfo()}, 100);
+<% end %>
 })
 
 </script>
