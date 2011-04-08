@@ -41,13 +41,20 @@ class Display1Controller < ApplicationController
   #
   #
   def index
-    @baseline1 = get_random_json_baseline
   end
 
   #
   #
   def waterfall
-    waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+       waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, params[:jsonobject])
+    else
+       # get the data from the seti web service
+       waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
+    end
+
     respond_to do |format|
       if waterfall.nil?
         logger.error("ERROR: Waterfall object not valid, discarding object.")
@@ -62,8 +69,15 @@ class Display1Controller < ApplicationController
   #
   # Generate the baseline chart using the Google Maps API
   def baseline_chart
-    # get the baseline data from the seti web service
-    baseline = get_json_baseline(params[:id])
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+       baseline = get_json_baseline(params[:id], params[:jsonobject]);
+    else
+       # get the baseline data from the seti web service
+       baseline = get_json_baseline(params[:id])
+    end
+
     if baseline    
       chart_data = baseline[:data].join(',')
       marker_index = baseline[:subChannel]
@@ -98,13 +112,10 @@ class Display1Controller < ApplicationController
   # as JSON. If there was an error in the data, it will log an error and return
   # a HTTP 500 status to the client.
   def activity
-    json = params[:jsonobject]
-    if !json.nil? 
-       # Only do this if we are in manual testing, otherwise, if we are not
-       # and we get an object, return format error.
-       if WOS_MANUAL_TESTS == true
-          j = get_activity_data(json);
-       end
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+       j = get_activity_data(params[:jsonobject]);
     else
        j = get_activity_data
     end
@@ -123,7 +134,13 @@ class Display1Controller < ApplicationController
   #
   #
   def beam
-    beam = get_json_beam(params[:id])
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+       beam = get_json_beam(params[:id], params[:jsonobject])
+    else
+       beam = get_json_beam(params[:id])
+    end
     
     respond_to do |format|
       if beam.nil?
@@ -139,7 +156,13 @@ class Display1Controller < ApplicationController
   #
   #
   def frequency_coverage
-    observ_history = get_observational_history(params[:id])[:observationHistory]
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+       observ_history = get_observational_history(params[:id], params[:jsonobject])[:observationHistory]
+    else
+       observ_history = get_observational_history(params[:id])[:observationHistory]
+    end
+
     if observ_history
       freq_coverage = Array.new(frequency_num_elements){ false }
       observ_history[:freqHistory].each do |item|
@@ -177,7 +200,7 @@ class Display1Controller < ApplicationController
     format_error = false
 
     # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS == false
+    if WOS_MANUAL_TESTS != true
        uri = URI.parse("#{SETI_SERVER}/activity")
        response = Net::HTTP.get_response(uri)
        j = ActiveSupport::JSON.decode(response.body).to_options
@@ -230,13 +253,13 @@ class Display1Controller < ApplicationController
       if Rails.env.development?
         j[:status] = "Observing"
       end
+    end
 
-      # If there is an object error, invalidate the whole object
-      if format_error
-        return nil
-      else
-        return j
-      end
+    # If there is an object error, invalidate the whole object
+    if format_error
+       return nil
+    else
+      return j
     end
   end
 
@@ -253,13 +276,25 @@ class Display1Controller < ApplicationController
 
   #
   #
-  def get_json_waterfall(id, start_row)
+  def get_json_waterfall(id, start_row, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
 
-    uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-    response = Net::HTTP.get_response(uri)
-    j = ActiveSupport::JSON.decode(response.body).to_options
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS != true
+       uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
+       response = Net::HTTP.get_response(uri)
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       if !json.nil?
+          j = ActiveSupport::JSON.decode(json).to_options
+       else
+          uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
+          response = Net::HTTP.get_response(uri)
+          j = ActiveSupport::JSON.decode(response.body).to_options
+       end
+    end
+
 
     if j[:startRow] < 1
       logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
@@ -299,17 +334,27 @@ class Display1Controller < ApplicationController
   #
   # Sends an http request to the SETI webservice to retrieve the baseline data
   # for the id passed in.
-  def get_json_baseline(id)
+  def get_json_baseline(id, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
 
-    uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
-    response = Net::HTTP.get_response(uri)
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS != true
+       uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
+       response = Net::HTTP.get_response(uri)
 
-    # Decode the json to an object and convert hash keys to symbols
-    j = ActiveSupport::JSON.decode(response.body).to_options
+       # Decode the json to an object and convert hash keys to symbols
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       if !json.nil?
+          j = ActiveSupport::JSON.decode(json).to_options
+       else
+          uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
+          response = Net::HTTP.get_response(uri)
+          j = ActiveSupport::JSON.decode(response.body).to_options
+       end
+    end
 
-    
     if !j[:data].nil?
       j[:data] = Base64::decode64( j[:data] ).unpack("f*")
     else
@@ -352,16 +397,27 @@ class Display1Controller < ApplicationController
   # Obtains the observation history from the SETI webservice, parses the data
   # and returns it as a map. The map includes the id and also the frequency
   # history, which is an array of doubles.
-  def get_observational_history(id)
+  def get_observational_history(id, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
 
-    # make the call to the seti webservice
-    uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-    response = Net::HTTP.get_response(uri)
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS != true
+       # make the call to the seti webservice
+       uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
+       response = Net::HTTP.get_response(uri)
 
-    # Decode the json to an object and convert hash keys to symbols
-    j = ActiveSupport::JSON.decode(response.body).to_options
+       # Decode the json to an object and convert hash keys to symbols
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       if !json.nil?
+          j = ActiveSupport::JSON.decode(json).to_options
+       else
+          uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
+          response = Net::HTTP.get_response(uri)
+          j = ActiveSupport::JSON.decode(response.body).to_options
+       end
+    end
 
     history = {}
     history[:observationHistory]= {}
@@ -407,15 +463,26 @@ class Display1Controller < ApplicationController
   # Obtains the beam data from the SETI web service, performs data checking
   # including for nil and values in range. Sets default values if the data is
   # invalid. Returns the JSON as a map.
-  def get_json_beam(id)
+  def get_json_beam(id, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
 
-    uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
-    response = Net::HTTP.get_response(uri)
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS != true
+       uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
+       response = Net::HTTP.get_response(uri)
 
-    # Decode the json to an object and convert hash keys to symbols
-    j = ActiveSupport::JSON.decode(response.body).to_options
+       # Decode the json to an object and convert hash keys to symbols
+       j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+       if !json.nil?
+          j = ActiveSupport::JSON.decode(json).to_options
+       else
+          uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
+          response = Net::HTTP.get_response(uri)
+          j = ActiveSupport::JSON.decode(response.body).to_options
+       end
+    end
 
     # sanitize data
     if !j[:id].nil?
