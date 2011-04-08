@@ -1,4 +1,5 @@
-
+<% test = false %>
+<% if test == true %>
   <form id="TestActivityForm" onsubmit="return false;" method="post">
    <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Activity object here..." </textarea>
    <input type="button" value="Submit" onclick="updateActivity(this.form)"/>
@@ -24,7 +25,11 @@
    <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..." </textarea>
    <input type="button" value="Submit" onclick="updateBaseline(1, this.form)"/>
   </form>
-
+<% else %>
+<script type="text/javascript">
+var test = <%= test %>;
+</script>
+<% end %>
 
 
 <div id="display1_header">
@@ -131,7 +136,7 @@ alert(text.jsonobject.value);
     // to bypass browser caching, we need to append a random parameter to the URL
     var d = new Date();
 if(text != undefined)
-    $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime() + "&" + text.jsonobject.value);
+    $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime() + "&jsonobject=" + text.jsonobject.value);
 else
     $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime());
   }

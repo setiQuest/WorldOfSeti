@@ -297,14 +297,11 @@ class Display1Controller < ApplicationController
     if json.nil?
        uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
        response = Net::HTTP.get_response(uri)
+       # Decode the json to an object and convert hash keys to symbols
        j = ActiveSupport::JSON.decode(response.body).to_options
     else
        j = ActiveSupport::JSON.decode(json).to_options
     end
-
-    # Decode the json to an object and convert hash keys to symbols
-    j = ActiveSupport::JSON.decode(response.body).to_options
-
     
     if !j[:data].nil?
       j[:data] = Base64::decode64( j[:data] ).unpack("f*")
