@@ -1,6 +1,41 @@
+<% # Form fields for manual testing %>
+<% if ApplicationController::WOS_MANUAL_TESTS == true %>
+<table border = 1>
+   <tr><td>
+   <form id="TestActivityForm" onsubmit="return false;" method="post">
+      <textarea rows="3" cols="70" name="jsonobject" />"Enter Activity JSON object here..." </textarea>
+      <input type="button" value="Submit" onclick="updateActivity(this.form)"/>
+   </form>
+   </td></tr>
+   <tr><td>
+      <form id="TestBeamForm" onsubmit="return false;" method="post">
+         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Beam object here..." </textarea>
+         <input type="button" value="Submit" onclick="updateBeamInfo(1, this.form)"/>
+      </form>
+   </td><td>
+      <form id="TestFreqForm" onsubmit="return false;" method="post">
+         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Freq object here..." </textarea>
+         <input type="button" value="Submit" onclick="updateFrequencyCoverage(1, null, this.form)"/>
+      </form>
+   </td></tr>
+   <tr><td>
+      <form id="TestWaterfallForm" onsubmit="return false;" method="post">
+         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Waterfall  object here..." </textarea>
+         <input type="button" value="Submit" onclick="updateWaterfall(1, this.form)"/>
+      </form>
+   </td></tr>
+   <tr><td>
+      <form id="TestBaselineForm" onsubmit="return false;" method="post">
+         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..." </textarea>
+         <input type="button" value="Submit" onclick="updateBaseline(1, this.form)"/>
+      </form>
+   </td></tr>
+</table>
+<% end %>
+
 <div id="display1_header">
   <div class="text-large"><%= image_tag "logo_seti.png" %></div>
-  <div class="text-title-yellow" style="padding-left:25px; width:1150px;">Current Observation Status: <span id="current-observation-id">?</span></div>
+  <div class="text-title-yellow" style="padding-left:25px; width:1150px;">Current Status: <span id="current-observation-id">?</span></div>
   <div class="text-title-yellow">Activity ID: <span id="activity-id">?</span></div>
   <div class="float-wall"></div>
 </div>
@@ -12,7 +47,7 @@
 <div class="divider-horizontal"></div>
 <%= render 'beam', :beam_id => 3 %>
 
-<% javascript_tag do %>
+<%= javascript_tag do %>
   var display1_waterfall_path = '<%= display1_waterfall_path %>';
   var display1_beam_path = '<%= display1_beam_path %>';
   var display1_activity_path = '<%= display1_activity_path %>';
@@ -31,7 +66,10 @@
 
   $(window).load(function()
   {
+<% # No updates for manual tests %>
+<% if ApplicationController::WOS_MANUAL_TESTS == false %>
     updateActivity();
+<% end %>
   });
 
 </script>

@@ -116,42 +116,61 @@
     $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
   }
 
-  function updateActivity()
+  function updateActivity(json)
   {
-    var updateActivityCallback = function() { updateActivity(); };
-    // Take id and make AJAX query
-    $.ajax({
-      type:     'GET',
-      url:      display1_activity_path,
-      success:  function(response) {
-        $('#activity-id').text(response.id);
-        $('#current-observation-id').text(response.status);
-
-        if(response.status == "Observing")
-        {
-          if(!timeoutManager.isObserving)
-          {
-            timeoutManager.isObserving = true;
-            timeoutManager.startObserving(function() {});
-          }
-
-          // Call update map location
-          updateMapLocation(response.primaryBeamLocation.ra,
+     if(json == undefined)
+     {  
+         var updateActivityCallback = function() { updateActivity(); };
+         // Take id and make AJAX query
+         $.ajax({
+            type:     'GET',
+            url:      display1_activity_path,
+            success:  function(response) {
+               if(response.status == "Observing")
+               {
+                  if(!timeoutManager.isObserving)
+                  {
+                     timeoutManager.isObserving = true;
+                     timeoutManager.startObserving(function() {});
+                  }
+                  // Call update map location
+                  updateMapLocation(response.primaryBeamLocation.ra,
                             response.primaryBeamLocation.dec,
                             response.fovBeamLocation.ra,
                             response.fovBeamLocation.dec);
-        }
-        else
-        {
-          timeoutManager.isObserving = false;
-        }
+               }
+               else
+               {
+                  timeoutManager.isObserving = false;
+               }
 
-        setTimeout(updateActivityCallback, TIMEOUT_ACTIVITY );
-      },
-      error:    function() {
-        // We should handle error here
-        setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
-      },
-      datatype: 'json'
-    });
+               setTimeout(updateActivityCallback, TIMEOUT_ACTIVITY );
+            },
+            error:    function() {
+               // We should handle error here
+               errors = true;
+               setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
+            },
+            datatype: 'json'
+         });
+     }
+     else
+     {
+        $.ajax({
+           type:     'GET',
+           url:      display1_activity_path,
+           data:     {jsonobject:json.jsonobject.value},
+           success:  function(response) {
+              if(response.status == "Observing")
+              {
+                 // Call update map location
+                 updateMapLocation(response.primaryBeamLocation.ra,
+                            response.primaryBeamLocation.dec,
+                            response.fovBeamLocation.ra,
+                            response.fovBeamLocation.dec);
+              }
+           },
+           datatype: 'json'
+       });
+     }
   }
