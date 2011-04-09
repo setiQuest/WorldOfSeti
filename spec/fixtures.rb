@@ -12,7 +12,7 @@ module TestFixtures
   end
 
   # returns sample activity data in JSON format
-  def self.get_activity_data(primaryBeam_ra, primaryBeam_dec, fovBeam_ra, fovBeam_dec, id, status)
+  def self.get_json_activity(primaryBeam_ra, primaryBeam_dec, fovBeam_ra, fovBeam_dec, id, status)
     activity = { }
 
     activity[:primaryBeamLocation] = {}

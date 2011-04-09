@@ -24,8 +24,8 @@ describe Display1Controller do
 
   describe "GET 'activity'" do
     it "should get data successful" do
-      sample_activity = TestFixtures::get_activity_data(1, 1, 1000.0, 0, 0, "ON1")
-      controller.stub(:get_json_beam).and_return(sample_activity)
+      sample_activity = TestFixtures::get_json_activity(1, 1, 1000.0, 0, 0, "ON1")
+      controller.stub(:get_json_activity).and_return(sample_activity)
 
       get 'activity', :format => :json
       json = ActiveSupport::JSON.decode(response.body)
@@ -34,14 +34,14 @@ describe Display1Controller do
 
       # primaryBeam_ra, primaryBeam_dec, fovBeam_ra, fovBeam_dec, id, status
       primaryBeamLocation = json.at_json_path("primaryBeamLocation")
-      primaryBeamLocation.at_json_path("ra").should equal sample_activity[:primaryBeamLocation][:ra]
-      primaryBeamLocation.at_json_path("dec").should equal sample_activity[:primaryBeamLocation][:dec]
+      primaryBeamLocation.at_json_path("ra").should == sample_activity[:primaryBeamLocation][:ra]
+      primaryBeamLocation.at_json_path("dec").should == sample_activity[:primaryBeamLocation][:dec]
       fovBeamLocation = json.at_json_path("fovBeamLocation")
-      fovBeamLocation.at_json_path("ra").should equal sample_activity[:fovBeamLocation][:ra]
-      fovBeamLocation.at_json_path("dec").should equal sample_activity[:fovBeamLocation][:dec]
+      fovBeamLocation.at_json_path("ra").should == sample_activity[:fovBeamLocation][:ra]
+      fovBeamLocation.at_json_path("dec").should == sample_activity[:fovBeamLocation][:dec]
 
-      json.at_json_path("id").should equal sample_activity[:id]
-      json.at_json_path("status").should equal sample_activity[:status]
+      json.at_json_path("id").should == sample_activity[:id]
+      json.at_json_path("status").should == sample_activity[:status]
     end
 
     it "should follow the JSON spec by having all keys and fields within valid range" do
@@ -89,7 +89,7 @@ describe Display1Controller do
     end
 
     it "should set the primaryBeamLocation's and fovBeamLocation's RA and DEC to the valid max value if the value is greater than the max" do
-      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(@MAX_RA+1, @MAX_DEC+1, @MAX_RA+1, @MAX_DEC+1, 0, "Observing"))
+      controller.stub(:get_json_activity).and_return(TestFixtures::get_json_activity(@MAX_RA+1, @MAX_DEC+1, @MAX_RA+1, @MAX_DEC+1, 0, "Observing"))
 
       get :activity, :format => :json
       response.should be_success
@@ -97,16 +97,16 @@ describe Display1Controller do
       json = ActiveSupport::JSON.decode(response.body)
 
       primaryBeamLocation = json.at_json_path("primaryBeamLocation")
-      primaryBeamLocation.at_json_path("ra").should equal @MAX_RA
-      primaryBeamLocation.at_json_path("dec").should equal @MAX_DEC
+      primaryBeamLocation.at_json_path("ra").should == @MAX_RA
+      primaryBeamLocation.at_json_path("dec").should == @MAX_DEC
 
       fovBeamLocation = json.at_json_path("primaryBeamLocation")
-      fovBeamLocation.at_json_path("ra").should equal @MAX_RA
-      fovBeamLocation.at_json_path("dec").should equal @MAX_DEC
+      fovBeamLocation.at_json_path("ra").should == @MAX_RA
+      fovBeamLocation.at_json_path("dec").should == @MAX_DEC
     end
 
     it "should set the primaryBeamLocation's and fovBeamLocation's RA and DEC to the valid min value if the value is less than the min" do
-      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(@MIN_RA-1, @MIN_DEC-1, @MIN_RA-1, @MIN_DEC-1, 0, "Observing"))
+      controller.stub(:get_json_activity).and_return(TestFixtures::get_json_activity(@MIN_RA-1, @MIN_DEC-1, @MIN_RA-1, @MIN_DEC-1, 0, "Observing"))
 
       get :activity, :format => :json
       response.should be_success
@@ -114,23 +114,23 @@ describe Display1Controller do
       json = ActiveSupport::JSON.decode(response.body)
 
       primaryBeamLocation = json.at_json_path("primaryBeamLocation")
-      primaryBeamLocation.at_json_path("ra").should equal @MIN_RA
-      primaryBeamLocation.at_json_path("dec").should equal @MIN_DEC
+      primaryBeamLocation.at_json_path("ra").should == @MIN_RA
+      primaryBeamLocation.at_json_path("dec").should == @MIN_DEC
 
       fovBeamLocation = json.at_json_path("primaryBeamLocation")
-      fovBeamLocation.at_json_path("ra").should equal @MIN_RA
-      fovBeamLocation.at_json_path("dec").should equal @MIN_DEC
+      fovBeamLocation.at_json_path("ra").should == @MIN_RA
+      fovBeamLocation.at_json_path("dec").should == @MIN_DEC
     end
 
     it "should cap the status length to @MAX_ACTIVITY_STATUS_LENGTH if it is greater than @MAX_ACTIVITY_STATUS_LENGTH" do
-      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(0, 0, 0, 0, 0, "a" * (@MAX_ACTIVITY_STATUS_LENGTH+1)))
+      controller.stub(:get_json_activity).and_return(TestFixtures::get_json_activity(0, 0, 0, 0, 0, "a" * (@MAX_ACTIVITY_STATUS_LENGTH+1)))
 
       get :activity, :format => :json
       response.should be_success
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("status").length.should equal @MAX_ACTIVITY_STATUS_LENGTH
+      json.at_json_path("status").length.should == @MAX_ACTIVITY_STATUS_LENGTH
     end
   end
 
@@ -145,12 +145,12 @@ describe Display1Controller do
       json = ActiveSupport::JSON.decode(response.body)
       
       # id, targetId, freq, ra, dec, status
-      json.at_json_path("id").should equal sample_beam[:id]
-      json.at_json_path("targetId").should equal sample_beam[:targetId]
-      json.at_json_path("freq").should equal sample_beam[:freq]
-      json.at_json_path("ra").should equal sample_beam[:ra]
-      json.at_json_path("dec").should equal sample_beam[:dec]
-      json.at_json_path("status").should equal sample_beam[:status]
+      json.at_json_path("id").should == sample_beam[:id]
+      json.at_json_path("targetId").should == sample_beam[:targetId]
+      json.at_json_path("freq").should == sample_beam[:freq]
+      json.at_json_path("ra").should == sample_beam[:ra]
+      json.at_json_path("dec").should == sample_beam[:dec]
+      json.at_json_path("status").should == sample_beam[:status]
     end
 
     it "should set the id to 0 if it is set to < 0" do
@@ -159,7 +159,7 @@ describe Display1Controller do
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("id").should equal 0
+      json.at_json_path("id").should == 0
     end
 
     it "should set the targetId to 0 if it is set to < 0" do
@@ -170,7 +170,7 @@ describe Display1Controller do
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("targetId").should equal 0
+      json.at_json_path("targetId").should == 0
     end
 
     it "should set the freq to 0.0 if it is set to < 0" do
@@ -181,7 +181,7 @@ describe Display1Controller do
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("frequency").should equal 0.0
+      json.at_json_path("frequency").should == 0.0
     end
 
     it "should set the RA and DEC to the valid min value if the value is less than the min" do
@@ -192,8 +192,8 @@ describe Display1Controller do
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("ra").should equal @MIN_RA
-      json.at_json_path("dec").should equal @MIN_DEC
+      json.at_json_path("ra").should == @MIN_RA
+      json.at_json_path("dec").should == @MIN_DEC
     end
 
     it "should set the RA and DEC to the valid max value if the value is greater than the max" do
@@ -204,8 +204,8 @@ describe Display1Controller do
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("ra").should equal @MAX_RA
-      json.at_json_path("dec").should equal @MAX_DEC
+      json.at_json_path("ra").should == @MAX_RA
+      json.at_json_path("dec").should == @MAX_DEC
     end
   end
 
