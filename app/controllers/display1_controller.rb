@@ -158,14 +158,14 @@ class Display1Controller < ApplicationController
   def frequency_coverage
     # and we get an object, return format error.
     if WOS_MANUAL_TESTS == true
-       observ_history = get_observational_history(params[:id], params[:jsonobject])[:observationHistory]
+       observ_history = get_observational_history(params[:id], params[:jsonobject])
     else
-       observ_history = get_observational_history(params[:id])[:observationHistory]
+       observ_history = get_observational_history(params[:id])
     end
 
     if observ_history
       freq_coverage = Array.new(frequency_num_elements){ false }
-      observ_history[:freqHistory].each do |item|
+      observ_history[:observationHistory][:freqHistory].each do |item|
         # Check bounds
         item = item.to_i
         if item >= MAX_FREQ_MHZ 
@@ -407,6 +407,15 @@ class Display1Controller < ApplicationController
     end
   end
 
+  def get_observational_history_from_server(id)
+    # make the call to the seti webservice
+       uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
+       response = Net::HTTP.get_response(uri)
+
+       # Decode the json to an object and convert hash keys to symbols
+       return ActiveSupport::JSON.decode(response.body)
+  end
+
   #
   # Obtains the observation history from the SETI webservice, parses the data
   # and returns it as a map. The map includes the id and also the frequency
@@ -416,21 +425,10 @@ class Display1Controller < ApplicationController
     format_error = false
 
     # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS != true
-       # make the call to the seti webservice
-       uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-       response = Net::HTTP.get_response(uri)
-
-       # Decode the json to an object and convert hash keys to symbols
-       j = ActiveSupport::JSON.decode(response.body).to_options
+    if WOS_MANUAL_TESTS != true || json.nil?
+       j = get_observational_history_from_server(id).to_options
     else
-       if !json.nil?
-          j = ActiveSupport::JSON.decode(json).to_options
-       else
-          uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-          response = Net::HTTP.get_response(uri)
-          j = ActiveSupport::JSON.decode(response.body).to_options
-       end
+       j = ActiveSupport::JSON.decode(json).to_options
     end
 
     history = {}

@@ -127,10 +127,41 @@ describe Display1Controller do
 
       response.should be_success
 
-      json.at_json_path("id").should == sample_waterfall[:id]
-      json.at_json_path("startRow").should == sample_waterfall[:startRow]
-      json.at_json_path("endRow").should == sample_waterfall[:endRow]
-      json.at_json_path("data").should == sample_waterfall[:data]
+      json.at_json_path("id").should == sample_waterfall["id"]
+      json.at_json_path("startRow").should == sample_waterfall["startRow"]
+      json.at_json_path("endRow").should == sample_waterfall["endRow"]
+      json.at_json_path("data").should == sample_waterfall["data"]
+    end
+  end
+
+  describe "frequency coverage" do
+    it "should get data successfully" do
+      sample_observation_history = TestFixtures::sample_observation_history
+      controller.stub(:get_observational_history_from_server).and_return(sample_observation_history)
+
+      get :frequency_coverage, :id => 23456, :format => :json
+      json = ActiveSupport::JSON.decode(response.body)
+
+      response.should be_success
+      json.count.should == frequency_num_elements
+      0..frequency_num_elements do |i|
+        if i == 2 || i == 3 || i == 4
+          json[i].should == true
+        else
+          json[i].should == false
+        end
+      end
+      
+    end
+
+    it "should return HTTP status 500 when incorrect data is returned from server" do
+      invalid_observation_history = TestFixtures::invalid_observation_history
+      controller.stub(:get_observational_history_from_server).and_return(invalid_observation_history)
+
+      get :frequency_coverage, :id => 23456, :format => :json
+      json = ActiveSupport::JSON.decode(response.body)
+
+      response.code.should == "500"
     end
   end
 
