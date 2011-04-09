@@ -242,6 +242,16 @@ class Display1Controller < ApplicationController
       # Force activity ID to be an integer
       j[:id] = j[:id].to_i
 
+      # ID should never be less than min or greater than max
+      if j[:id] > ACTIVITY_ID_MAX_VALUE
+         logger.warn("Received activity id value > ACTIVITY_ID_MAX_VALUE; trimming it to #{ACTIVITY_ID_MAX_VALUE}.")
+         j[:id] = ACTIVITY_ID_MAX_VALUE
+      end
+      if j[:id] < ACTIVITY_ID_MIN_VALUE
+         logger.warn("Received activity id value < ACTIVITY_ID_MIN_VALUE; trimming it to #{ACTIVITY_ID_MIN_VALUE}.")
+         j[:id] = ACTIVITY_ID_MIN_VALUE
+      end
+
       # Cap "status" to be less than 80 characters.
       if j[:status].length > ACTIVITY_STATUS_MAX_LENGTH
         logger.warn("Received activity status with length > ACTIVITY_STATUS_MAX_LENGTH; trimming it to #{ACTIVITY_STATUS_MAX_LENGTH}.")
