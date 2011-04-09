@@ -19,7 +19,12 @@ void drawWaterfallRows(id, start_row, num_rows, data)
       pixels[(i+start_row-1)*width+j] = color(value);
     }
   }
-
+  
   updatePixels(0, 0, width, num_rows);
+}
+
+void getWaterfallPixel(i)
+{
+  return pixels[i];
 }
 </script>

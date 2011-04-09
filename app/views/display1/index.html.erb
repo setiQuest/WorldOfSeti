@@ -13,17 +13,17 @@
 <%= render 'beam', :beam_id => 3 %>
 
 <% javascript_tag do %>
+  var display1_activity_path = '<%= display1_activity_path %>';
   var display1_waterfall_path = '<%= display1_waterfall_path %>';
   var display1_beam_path = '<%= display1_beam_path %>';
-  var display1_activity_path = '<%= display1_activity_path %>';
   var display1_frequency_coverage_path = '<%= display1_frequency_coverage_path %>';
   var waterfall_height = <%=  waterfall_height %>
+  var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>
   var TIMEOUT_WATERFALL = <%= ApplicationController::TIMEOUT_WATERFALL %>
-  var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>
-  var TIMEOUT_RETRY_SHORT = <%= ApplicationController::TIMEOUT_RETRY_SHORT %>
   var TIMEOUT_BASELINE = <%= ApplicationController::TIMEOUT_BASELINE %>
   var TIMEOUT_BEAM_INFO = <%= ApplicationController::TIMEOUT_BEAM_INFO %>
-  var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>
+  var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>
+  var TIMEOUT_RETRY_SHORT = <%= ApplicationController::TIMEOUT_RETRY_SHORT %>
 <% end %>
 <%= javascript_include_tag "display1.js" %>
 
