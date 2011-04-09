@@ -140,7 +140,7 @@
                             response.fovBeamLocation.dec);
 
                   $('#contextual-info').attr('src', '/display1/activity_contextual_info');
-                  $("#contextual-info").height($("#contextual-info").contents().find("html").height());
+                  $("#contextual-info").load( function(){$("#contextual-info").height($("#contextual-info").contents().find("html").height());} )
                }
                else
                {

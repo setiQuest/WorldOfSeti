@@ -15,7 +15,7 @@
   <div id="sky_map"></div>
 
   <div id="contextual-info-container">
-    <iframe id="contextual-info" src="/display1/activity_contextual_info"></iframe>
+    <iframe id="contextual-info" src="http://www.bayareatours.org/test.htm"></iframe>
   </div>
   
   <div id="weatherForecast">
@@ -35,7 +35,9 @@
   var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>;
   var TIMEOUT_WEATHER = <%= ApplicationController::TIMEOUT_WEATHER %>;
   var TIMEOUT_WEBCAM = <%= ApplicationController::TIMEOUT_WEBCAM %>;
+  var TIMEOUT_CONTEXTUAL_SCROLL = <%= ApplicationController::TIMEOUT_CONTEXTUAL_SCROLL %>;
   var SCREENSIZE_HEIGHT = <%= ApplicationController::SCREENSIZE_HEIGHT %>;
+  var CONTEXTUAL_INFO_SCROLL_PIXEL = <%= ApplicationController::CONTEXTUAL_INFO_SCROLL_PIXEL %>
 <% end %>
 <%= javascript_include_tag "display2.js" %>
 
@@ -48,7 +50,7 @@
     var iframeContainerHeight = $("#contextual-info-container").height();
     var offsetTop = offset.top;
     
-    offsetTop -= 1;
+    offsetTop -= CONTEXTUAL_INFO_SCROLL_PIXEL;
     if(offsetTop < -iframeHeight + $("#contextual-info-container").offset().top)
     {
       offsetTop = iframeContainerHeight + $("#contextual-info-container").offset().top;
@@ -67,7 +69,7 @@
     updateActivity();
     timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  TIMEOUT_WEATHER );
     timeoutManager.registerTimeout(function() { updateWebCam(); },  TIMEOUT_WEBCAM );
-    setInterval(function(){scrollContextualInfo()}, 20);
+    setInterval(function(){scrollContextualInfo()}, TIMEOUT_CONTEXTUAL_SCROLL);
 <% end %>
 })
 

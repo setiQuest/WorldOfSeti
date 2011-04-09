@@ -58,6 +58,7 @@ class ApplicationController < ActionController::Base
   TIMEOUT_BEAM_INFO             = 60000
   TIMEOUT_WEATHER               = 7200000
   TIMEOUT_WEBCAM                = 60000
+  TIMEOUT_CONTEXTUAL_SCROLL     = 20
 
   # Screen sizes for total width
   SCREENSIZE_WIDTH              = 1920
@@ -80,4 +81,7 @@ class ApplicationController < ActionController::Base
   BEAM_DESCRIPTION_MAX_LENGTH   = 45 
   MAX_FREQ_MHZ			= 10000
   MIN_FREQ_MHZ			= 1000
+
+  # Pixel(s) to scroll for contextual info
+  CONTEXTUAL_INFO_SCROLL_PIXEL      = 1
 end
