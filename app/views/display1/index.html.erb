@@ -20,13 +20,13 @@
    </td></tr>
    <tr><td>
       <form id="TestWaterfallForm" onsubmit="return false;" method="post">
-         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Waterfall  object here..." </textarea>
+         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Waterfall  object here..."
          <input type="button" value="Submit" onclick="updateWaterfall(1, this.form)"/>
       </form>
    </td></tr>
    <tr><td>
       <form id="TestBaselineForm" onsubmit="return false;" method="post">
-         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..." </textarea>
+         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..."
          <input type="button" value="Submit" onclick="updateBaseline(1, this.form)"/>
       </form>
    </td></tr>
@@ -52,13 +52,13 @@
   var display1_beam_path = '<%= display1_beam_path %>';
   var display1_activity_path = '<%= display1_activity_path %>';
   var display1_frequency_coverage_path = '<%= display1_frequency_coverage_path %>';
-  var waterfall_height = <%=  waterfall_height %>
-  var TIMEOUT_WATERFALL = <%= ApplicationController::TIMEOUT_WATERFALL %>
-  var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>
-  var TIMEOUT_RETRY_SHORT = <%= ApplicationController::TIMEOUT_RETRY_SHORT %>
-  var TIMEOUT_BASELINE = <%= ApplicationController::TIMEOUT_BASELINE %>
-  var TIMEOUT_BEAM_INFO = <%= ApplicationController::TIMEOUT_BEAM_INFO %>
-  var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>
+  var waterfall_height = <%= waterfall_height %>;
+  var TIMEOUT_WATERFALL = <%= ApplicationController::TIMEOUT_WATERFALL %>;
+  var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>;
+  var TIMEOUT_RETRY_SHORT = <%= ApplicationController::TIMEOUT_RETRY_SHORT %>;
+  var TIMEOUT_BASELINE = <%= ApplicationController::TIMEOUT_BASELINE %>;
+  var TIMEOUT_BEAM_INFO = <%= ApplicationController::TIMEOUT_BEAM_INFO %>;
+  var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>;
 <% end %>
 <%= javascript_include_tag "display1.js" %>
 

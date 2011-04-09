@@ -31,11 +31,11 @@
 
 <%= javascript_tag do %>
   var display1_activity_path = '<%= display1_activity_path %>';
-  var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>
-  var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>
-  var TIMEOUT_WEATHER = <%= ApplicationController::TIMEOUT_WEATHER %>
-  var TIMEOUT_WEBCAM = <%= ApplicationController::TIMEOUT_WEBCAM %>
-  var SCREENSIZE_HEIGHT = <%= ApplicationController::SCREENSIZE_HEIGHT %>
+  var TIMEOUT_RETRY_LONG = <%= ApplicationController::TIMEOUT_RETRY_LONG %>;
+  var TIMEOUT_ACTIVITY = <%= ApplicationController::TIMEOUT_ACTIVITY %>;
+  var TIMEOUT_WEATHER = <%= ApplicationController::TIMEOUT_WEATHER %>;
+  var TIMEOUT_WEBCAM = <%= ApplicationController::TIMEOUT_WEBCAM %>;
+  var SCREENSIZE_HEIGHT = <%= ApplicationController::SCREENSIZE_HEIGHT %>;
 <% end %>
 <%= javascript_include_tag "display2.js" %>
 
