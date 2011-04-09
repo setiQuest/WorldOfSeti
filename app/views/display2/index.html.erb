@@ -15,7 +15,7 @@
   <div id="sky_map"></div>
 
   <div id="contextual-info-container">
-    <iframe id="contextual-info" src="http://en.m.wikipedia.org/wiki?search=sun"></iframe>
+    <iframe id="contextual-info" src="/display1/activity_contextual_info"></iframe>
   </div>
   
   <div id="weatherForecast">
@@ -41,29 +41,17 @@
 
 <script type="text/javascript">
 
-  var IsScrollDown = true;
   function scrollContextualInfo()
   {    
     var offset = $("#contextual-info").offset();
+    var iframeHeight = $("#contextual-info").height();
+    var iframeContainerHeight = $("#contextual-info-container").height();
     var offsetTop = offset.top;
     
-    if(offsetTop < -1450 && IsScrollDown)
+    offsetTop -= 1;
+    if(offsetTop < -iframeHeight + $("#contextual-info-container").offset().top)
     {
-      offsetTop += 10;
-      IsScrollDown = false;
-    }
-    else if(IsScrollDown)
-    {
-      offsetTop -= 10;
-    }
-    else
-    {
-      offsetTop += 10;
-    }
-
-    if(offsetTop > 0)
-    {
-      IsScrollDown = true;
+      offsetTop = iframeContainerHeight + $("#contextual-info-container").offset().top;
     }
     
     $("#contextual-info").offset({ top: offsetTop });
@@ -79,7 +67,7 @@
     updateActivity();
     timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  TIMEOUT_WEATHER );
     timeoutManager.registerTimeout(function() { updateWebCam(); },  TIMEOUT_WEBCAM );
-    setInterval(function(){scrollContextualInfo()}, 100);
+    setInterval(function(){scrollContextualInfo()}, 20);
 <% end %>
 })
 

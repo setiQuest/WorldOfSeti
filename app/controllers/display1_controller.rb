@@ -35,6 +35,8 @@
 require 'base64'
 require "net/http"
 require "uri"
+require 'nokogiri'
+require 'open-uri'
 
 class Display1Controller < ApplicationController
 
@@ -173,6 +175,29 @@ class Display1Controller < ApplicationController
         format.json { render :json => j }
       end
     end
+  end
+
+  def activity_contextual_info
+    j = get_json_activity
+
+    j[:url] = 'http://www.bayareatours.org/test.htm' if j[:url].nil?
+
+    doc = Nokogiri::HTML(open(j[:url]))
+      domain_name = /http[s]?:\/\/[^\/]+/.match(j[:url])[0]
+
+      doc.xpath('//img').each do |img_tag|
+        if (img_tag.attribute('src').value =~ /^http/) == nil
+          img_tag.attribute('src').value = domain_name + img_tag.attribute('src').value
+        end
+      end
+
+    doc.xpath('//link').each do |link_tag|
+      if (link_tag.attribute('href').value =~ /^http/) == nil
+        link_tag.attribute('href').value = domain_name + link_tag.attribute('href').value
+      end
+    end
+
+    render :text => doc.to_s
   end
 
   #

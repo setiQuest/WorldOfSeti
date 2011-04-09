@@ -130,6 +130,7 @@ DEPENDENCIES
   faker
   hirb
   mysql2
+  nokogiri
   pathy
   rails (= 3.0.6)
   rspec

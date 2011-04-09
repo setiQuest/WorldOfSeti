@@ -7,6 +7,7 @@ gem 'ruby-debug-ide19'
 gem 'exception_notification',
       :git => 'https://github.com/smartinez87/exception_notification',
       :require => 'exception_notifier'
+gem 'nokogiri'
 
 group :development do
   gem 'rspec-rails'

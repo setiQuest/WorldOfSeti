@@ -38,6 +38,7 @@ SetiWorld::Application.routes.draw do
   get "display1/waterfall"
   get "display1/beam"
   get "display1/activity"
+  get "display1/activity_contextual_info"
   get "display1/frequency_coverage"
   get "display1/baseline_chart/:id" => 'display1#baseline_chart', :as => :display1_baseline_chart
 

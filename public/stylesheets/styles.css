@@ -250,6 +250,8 @@ body {
 
     overflow-x: hidden;
     overflow-y: hidden;
+
+    background-color: #999;
 }
 #contextual-info {
     position: relative;
@@ -262,4 +264,6 @@ body {
 
     overflow-x: hidden;
     overflow-y: hidden;
+
+    background-color: #fff;
 }
