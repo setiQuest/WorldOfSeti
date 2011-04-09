@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.0.3'
+gem 'rails', '3.0.6'
 gem 'mysql2'
 gem 'ruby-debug19'
 gem 'ruby-debug-ide19'
@@ -21,6 +21,6 @@ end
 
 group :test do
   gem 'rspec'
-  gem 'webrat',             '0.7.2'
+  gem 'webrat'
   gem 'factory_girl_rails'
 end
