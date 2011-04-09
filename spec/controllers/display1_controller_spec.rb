@@ -7,6 +7,9 @@ describe Display1Controller do
   before :all do
     # give all ruby objects the pathy gem methods
     Object.pathy!
+
+    # define constants
+    @HTTP_500 = "500"
   end
   
   describe "GET 'index'" do
@@ -127,6 +130,15 @@ describe Display1Controller do
 
       json.at_json_path("status").length.should == ApplicationController::ACTIVITY_STATUS_MAX_LENGTH
     end
+
+    it "should return HTTP status 500 when incorrect data is returned from server" do
+      invalid_activity = TestFixtures::get_json_activity(nil, nil, nil, nil, nil, nil)
+      controller.stub(:get_json_activity).and_return(invalid_activity)
+
+      get :activity, :format => :json
+      
+      response.code.should == @HTTP_500
+    end
   end
 
   describe "beam" do
@@ -205,6 +217,15 @@ describe Display1Controller do
       json.at_json_path("ra").should == ApplicationController::MAX_RA
       json.at_json_path("dec").should == ApplicationController::MAX_DEC
     end
+
+    it "should return HTTP status 500 when incorrect data is returned from server" do
+      invalid_beam = TestFixtures::get_json_beam(nil, nil, nil, nil, nil, nil)
+      controller.stub(:get_json_beam).and_return(invalid_beam)
+
+      get :beam, :format => :json
+
+      response.code.should == @HTTP_500
+    end
   end
 
   describe "waterfall" do
@@ -249,9 +270,8 @@ describe Display1Controller do
       controller.stub(:get_observational_history_from_server).and_return(invalid_observation_history)
 
       get :frequency_coverage, :id => 23456, :format => :json
-      json = ActiveSupport::JSON.decode(response.body)
-
-      response.code.should == "500"
+      
+      response.code.should == @HTTP_500
     end
   end
 
