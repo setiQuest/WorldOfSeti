@@ -1,15 +1,28 @@
 
-var beam_frequency = null;
-
-function drawWaterfallRows(id, start_row, end_row, data64)
+function ajaxError(callback_fn, timeout)
 {
-    var waterfall_data = decode64(data64);
+    timeoutManager.setObservingTimeout(callback_fn, timeout );
+}
+
+function updateWaterfallAjaxSuccess(response, id, updateWaterfallCallback_fn)
+{
+    // store the last row we have so far, so that the next query gets the subsequent rows
+    updateWaterfall.waterfall_data[id].last_row = response.endRow + 1;
+    if(updateWaterfall.waterfall_data[id].last_row >= waterfall_height )
+    {
+      updateWaterfall.waterfall_data[id].last_row = 1;
+    }
+
+    // drawWaterfallRows
+    var waterfall_data = decode64(response.data);
 
     var processingInstance = Processing.getInstanceById('canvas_waterfall' + id);
     if (processingInstance)
     {
-      processingInstance.drawWaterfallRows(id, start_row, end_row - start_row + 1, waterfall_data);
+      processingInstance.drawWaterfallRows(response.id, response.startRow, response.endRow - response.startRow + 1, waterfall_data);
     }
+
+    timeoutManager.setObservingTimeout(updateWaterfallCallback_fn, TIMEOUT_WATERFALL );
 }
 
 // AJAX call to update JSON
@@ -35,20 +48,10 @@ function updateWaterfall(id, json)
           url:      display1_waterfall_path,
           data:     { id:id, start_row:updateWaterfall.waterfall_data[id].last_row },
           success:  function(response) {
-             // store the last row we have so far, so that the next query gets the subsequent rows
-             updateWaterfall.waterfall_data[id].last_row = response.endRow + 1;
-             if(updateWaterfall.waterfall_data[id].last_row >= waterfall_height )
-             {
-                updateWaterfall.waterfall_data[id].last_row = 1;
-             }
-
-             drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
-
-             timeoutManager.setObservingTimeout(updateWaterfallCallback, TIMEOUT_WATERFALL );
+             updateWaterfallAjaxSuccess(response, id, updateWaterfallCallback);
           },
           error:    function() {
-             // We should handle error here
-             timeoutManager.setObservingTimeout(updateWaterfallCallback, TIMEOUT_RETRY_SHORT );
+             ajaxError(updateWaterfallCallback, TIMEOUT_RETRY_SHORT);
           },
           datatype: 'json'
       });
@@ -60,15 +63,8 @@ function updateWaterfall(id, json)
        url:      display1_waterfall_path,
        data: {id:id,  start_row:updateWaterfall.waterfall_data[id].last_row, jsonobject:json.jsonobject.value},
        success:  function(response) {
-          // store the last row we have so far, so that the next query gets the subsequent rows
-          updateWaterfall.waterfall_data[id].last_row = response.endRow + 1;
-          if(updateWaterfall.waterfall_data[id].last_row >= waterfall_height )
-          {
-             updateWaterfall.waterfall_data[id].last_row = 1;
-          }
-
-          drawWaterfallRows(response.id, response.startRow, response.endRow, response.data);
-      },
+          updateWaterfallAjaxSuccess(response, id, updateWaterfallCallback);
+       },
       datatype: 'json'
     });
    }
@@ -90,7 +86,31 @@ function updateBaseline(id, json)
       $('#baseline' + id).attr('src', '/display1/baseline_chart/' + id + '?' + d.getTime() + "&jsonobject=" + json.jsonobject.value);
 }
 
-function updateBeamInfo(id, json)
+function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, updateFrequencyCoverageCallback_fn)
+{
+    if(response.status.indexOf('ON') >= 0)
+    {
+      $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_on.png)");
+    }
+    else
+    {
+      $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_off.png)");
+    }
+
+    var longitude = lngToRa(response.ra);
+    var latitude = latToDec(response.dec);
+
+    $('#beam' + id + ' .beam_status').text(response.status);
+    $('#beam' + id + ' .beam_location').text(longitude + ' - ' + latitude);
+    $('#beam' + id + ' .beam_description').text(response.description);
+    $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
+
+    updateFrequencyCoverageCallback_fn();
+
+    timeoutManager.setObservingTimeout(updateBeamInfoCallback_fn, TIMEOUT_BEAM_INFO );
+}
+
+function updateBeamInfo(id)
 {
    if(json == undefined)
    {
@@ -102,29 +122,10 @@ function updateBeamInfo(id, json)
          url:      display1_beam_path,
          data:     { id:id },
          success:  function(response) {
-            if(response.status.indexOf('ON') >= 0)
-            {
-               $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_on.png)");
-            }
-            else
-            {
-               $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_off.png)");
-            }
-
-            var longitude = lngToRa(response.ra);
-            var latitude = latToDec(response.dec);
-
-            $('#beam' + id + ' .beam_status').text(response.status);
-            $('#beam' + id + ' .beam_location').text(longitude + ' - ' + latitude);
-            $('#beam' + id + ' .beam_description').text(response.description);
-            $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
-            updateFrequencyCoverage(id, response.freq);
-
-            timeoutManager.setObservingTimeout(updateBeamInfoCallback, TIMEOUT_BEAM_INFO );
+            updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback, function(){updateFrequencyCoverage(id, response.freq);});
             },
          error:    function() {
-            // We handle error here
-            timeoutManager.setObservingTimeout(updateBeamInfoCallback, TIMEOUT_RETRY_SHORT );
+            ajaxError(updateBeamInfoCallback, TIMEOUT_RETRY_SHORT);
             },
          datatype: 'json'
      });
@@ -136,27 +137,40 @@ function updateBeamInfo(id, json)
          url:      display1_beam_path,
          data:     {id:id, jsonobject:json.jsonobject.value},
          success:  function(response) {
-            if(response.status.indexOf('ON') >= 0)
-            {
-               $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_on.png)");
-            }
-            else
-            {
-               $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_off.png)");
-            }
-
-            var longitude = lngToRa(response.ra);
-            var latitude = latToDec(response.dec);
-
-            $('#beam' + id + ' .beam_status').text(response.status);
-            $('#beam' + id + ' .beam_location').text(longitude + ' - ' + latitude);
-            $('#beam' + id + ' .beam_description').text(response.description);
-            $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
-            updateFrequencyCoverage(id, response.freq);
+            updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback, function(){updateFrequencyCoverage(id, response.freq);});
          },
          datatype: 'json'
       });
    }
+}
+
+function updateActivityAjaxSuccess(response, updateActivityCallback_fn, initCallback_fn, bSetObserving)
+{
+    $('#activity-id').text(response.id);
+    $('#current-observation-id').text(response.status);
+
+    if(bSetObserving)
+    {
+        if(response.status == "Observing")
+        {
+          if(!timeoutManager.isObserving)
+          {
+            timeoutManager.isObserving = true;
+            timeoutManager.startObserving(initCallback_fn);
+          }
+        }
+        else
+        {
+          timeoutManager.isObserving = false;
+        }
+
+        setTimeout(updateActivityCallback_fn, TIMEOUT_ACTIVITY );
+    }
+}
+
+function updateActivityAjaxError(updateActivityCallback_fn, timeout)
+{
+    setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
 }
 
 //  Function to update the activity. Updating the activity to a observational state
@@ -171,27 +185,10 @@ function updateActivity(json)
          type:     'GET',
          url:      display1_activity_path,
          success:  function(response) {
-            $('#activity-id').text(response.id);
-            $('#current-observation-id').text(response.status);
-
-            if(response.status == "Observing")
-            {
-               if(!timeoutManager.isObserving)
-               {
-                  timeoutManager.isObserving = true;
-                  timeoutManager.startObserving(initTimers());
-               }
-            }
-            else
-            {
-               timeoutManager.isObserving = false;
-            }
-
-            setTimeout(updateActivityCallback, TIMEOUT_ACTIVITY );
+            updateActivityAjaxSuccess(response, updateActivityCallback, initTimers(), true);
           },
           error:    function() {
-             // We handle error here
-             setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
+             updateActivityAjaxError(updateActivityCallback, TIMEOUT_RETRY_LONG );
           },
           datatype: 'json'
       });
@@ -203,14 +200,36 @@ function updateActivity(json)
          url:      display1_activity_path,
          data:     {jsonobject:json.jsonobject.value},
          success:  function(response) {
-            $('#activity-id').text(response.id);
-            $('#current-observation-id').text(response.status);
+            updateActivityAjaxSuccess(response, updateActivityCallback, initTimers(), false);
          },
          datatype: 'json'
       });
    }
 }
 
+function updateFrequencyCoverageAjaxSuccess(response, id, currFreq, bUpdateCurrentFrequencyPointer)
+{
+    var freqHistory = response;
+    for(var col = 0; col < freqHistory.length; col++) {
+      var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
+      if(freqHistory[col]) {
+        cell.attr("class", "on");
+      } else {
+        cell.attr("class", "off");
+      }
+
+      if(bUpdateCurrentFrequencyPointer)
+      {
+          var thisFreq = col * 100 + 1000;
+          var displayValue = "none";
+          if(currFreq != null && (thisFreq <= currFreq && currFreq < (thisFreq + 100)) )
+          {
+            displayValue = "block";
+          }
+          $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", displayValue);
+      }
+    }
+}
 
 function updateFrequencyCoverage(id, currFreq, json) {
    if(json == undefined)
@@ -221,26 +240,7 @@ function updateFrequencyCoverage(id, currFreq, json) {
          url:      display1_frequency_coverage_path,
          data:     { id:id },
          success:  function(response) {
-            var freqHistory = response;
-            for(var col = 0; col < freqHistory.length; col++) {
-               var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
-               if(freqHistory[col]) {
-                  cell.attr("class", "on");
-               } else {
-                  cell.attr("class", "off");
-               }
-
-               var thisFreq = col * 100 + 1000;
-               if(currFreq != null && (thisFreq <= currFreq && currFreq < (thisFreq + 100)) )
-               {
-                  $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "block");
-               }
-               else
-               {
-                  $('#frequency_cover_data_table' + id + ' tr:nth-child(1) td:nth-child(' + (col+1) + ')').children().css("display", "none");
-               }
-            }
-
+            updateFrequencyCoverageAjaxSuccess(response, id, currFreq, true);
          },
          error:    function() {
          },
@@ -254,15 +254,7 @@ function updateFrequencyCoverage(id, currFreq, json) {
          url:      display1_frequency_coverage_path,
          data:     {id:id, jsonobject:json.jsonobject.value},
          success:  function(response) {
-            var freqHistory = response;
-            for(var col = 0; col < freqHistory.length; col++) {
-               var cell = $('#frequency_cover_data_table' + id + ' tr:nth-child(2) td:nth-child(' + (col+1) + ')');
-               if(freqHistory[col]) {
-                  cell.attr("class", "on");
-               } else {
-                  cell.attr("class", "off");
-               }
-            }
+            updateFrequencyCoverageAjaxSuccess(response, id, currFreq, false);
          },
          datatype: 'json'
     });
