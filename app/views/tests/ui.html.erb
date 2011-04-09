@@ -31,7 +31,7 @@
            var id = 1;
            var response = {"primaryBeamLocation":{"ra":6.487040996551514,"dec":10.933698654174805},"fovBeamLocation":{"ra":6.487040996551514,"dec":13.035578727722168},"id":id,"status":"Observing"};
 
-           updateActivityAjaxSuccess(response, function(){}, function(){});
+           updateActivityAjaxSuccess(response, function(){}, function(){}, true);
 
            var expected = timeoutManager.isObserving;
            var result = timeoutManager.isObserving;
@@ -47,7 +47,7 @@
            var id = 1;
            var response = {"primaryBeamLocation":{"ra":6.487040996551514,"dec":10.933698654174805},"fovBeamLocation":{"ra":6.487040996551514,"dec":13.035578727722168},"id":id,"status":"Idle"};
 
-           updateActivityAjaxSuccess(response, function(){}, function(){})
+           updateActivityAjaxSuccess(response, function(){}, function(){}, true)
 
            var expected = timeoutManager.isObserving;
            var result = false;
@@ -94,7 +94,7 @@
           var expected;
           var result;
 
-          updateFrequencyCoverageAjaxSuccess(response, id, currFreq);
+          updateFrequencyCoverageAjaxSuccess(response, id, currFreq, true);
 
 
           for(var col = 0; col < response.length; col++) {

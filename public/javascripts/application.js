@@ -77,7 +77,7 @@ function TimeoutManager()
 {
     this.isObserving = false;
     this.startObserving = function( startFunction ) {
-        startFunction;
+        startFunction();
     };
     this.setObservingTimeout = function( fn_handle, interval_milliseconds ) {
         if(timeoutManager.isObserving)

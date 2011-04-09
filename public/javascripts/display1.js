@@ -110,7 +110,7 @@ function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, upda
     timeoutManager.setObservingTimeout(updateBeamInfoCallback_fn, TIMEOUT_BEAM_INFO );
 }
 
-function updateBeamInfo(id)
+function updateBeamInfo(id, json)
 {
    if(json == undefined)
    {
@@ -177,15 +177,17 @@ function updateActivityAjaxError(updateActivityCallback_fn, timeout)
 //  will turn on all other updates.
 function updateActivity(json)
 {
+  var updateActivityCallback = function() { updateActivity(); };
+  var initTimerCallback = function() { initTimers(); };
+  
    if(json == undefined)
-   {   
-      var updateActivityCallback = function() { updateActivity(); };
+   {
       // Take id and make AJAX query
       $.ajax({
          type:     'GET',
          url:      display1_activity_path,
          success:  function(response) {
-            updateActivityAjaxSuccess(response, updateActivityCallback, initTimers(), true);
+            updateActivityAjaxSuccess(response, updateActivityCallback, initTimerCallback, true);
           },
           error:    function() {
              updateActivityAjaxError(updateActivityCallback, TIMEOUT_RETRY_LONG );
@@ -200,7 +202,7 @@ function updateActivity(json)
          url:      display1_activity_path,
          data:     {jsonobject:json.jsonobject.value},
          success:  function(response) {
-            updateActivityAjaxSuccess(response, updateActivityCallback, initTimers(), false);
+            updateActivityAjaxSuccess(response, updateActivityCallback, initTimerCallback, false);
          },
          datatype: 'json'
       });
@@ -217,7 +219,7 @@ function updateFrequencyCoverageAjaxSuccess(response, id, currFreq, bUpdateCurre
       } else {
         cell.attr("class", "off");
       }
-
+      
       if(bUpdateCurrentFrequencyPointer)
       {
           var thisFreq = col * 100 + 1000;
