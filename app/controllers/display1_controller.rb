@@ -49,10 +49,10 @@ class Display1Controller < ApplicationController
     # Only do this if we are in manual testing, otherwise, if we are not
     # and we get an object, return format error.
     if WOS_MANUAL_TESTS == true
-       waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, params[:jsonobject])
+      waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i, params[:jsonobject])
     else
-       # get the data from the seti web service
-       waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
+      # get the data from the seti web service
+      waterfall = get_json_waterfall(params[:id].to_i,params[:start_row].to_i)
     end
 
     respond_to do |format|
@@ -72,10 +72,10 @@ class Display1Controller < ApplicationController
     # Only do this if we are in manual testing, otherwise, if we are not
     # and we get an object, return format error.
     if WOS_MANUAL_TESTS == true
-       baseline = get_json_baseline(params[:id], params[:jsonobject]);
+      baseline = get_json_baseline(params[:id], params[:jsonobject]);
     else
-       # get the baseline data from the seti web service
-       baseline = get_json_baseline(params[:id])
+      # get the baseline data from the seti web service
+      baseline = get_json_baseline(params[:id])
     end
 
     if baseline    
@@ -112,106 +112,15 @@ class Display1Controller < ApplicationController
   # as JSON. If there was an error in the data, it will log an error and return
   # a HTTP 500 status to the client.
   def activity
-    # Only do this if we are in manual testing, otherwise, if we are not
-    # and we get an object, return format error.
-    if WOS_MANUAL_TESTS == true
-       j = get_activity_data(params[:jsonobject]);
-    else
-       j = get_activity_data
-    end
-
-    respond_to do |format|
-      if j.nil? 
-        logger.error("ERROR: Activity object not valid, discarding object.")
-        # Respond with error, don't pass JSON, it's bad
-        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
-      else
-        format.json { render :json => j }
-      end
-    end
-  end
-
-  #
-  #
-  def beam
-    # Only do this if we are in manual testing, otherwise, if we are not
-    # and we get an object, return format error.
-    if WOS_MANUAL_TESTS == true
-       beam = get_json_beam(params[:id], params[:jsonobject])
-    else
-       beam = get_json_beam(params[:id])
-    end
-    
-    respond_to do |format|
-      if beam.nil?
-        logger.error("ERROR: Beam object not valid, discarding object.")
-        # Respond with error, don't pass JSON, it's bad
-        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
-      else
-        format.json { render :json => beam }
-      end
-    end
-  end
-
-  #
-  #
-  def frequency_coverage
-    # and we get an object, return format error.
-    if WOS_MANUAL_TESTS == true
-       observ_history = get_observational_history(params[:id], params[:jsonobject])
-    else
-       observ_history = get_observational_history(params[:id])
-    end
-
-    if observ_history
-      freq_coverage = Array.new(frequency_num_elements){ false }
-      observ_history[:observationHistory][:freqHistory].each do |item|
-        # Check bounds
-        item = item.to_i
-        if item >= MAX_FREQ_MHZ 
-           item = MAX_FREQ_MHZ - 1
-           logger.warn("Received observational frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
-        end
-        if item < MIN_FREQ_MHZ 
-           item = MIN_FREQ_MHZ
-           logger.warn("Received observational frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
-        end
-
-        index = (item/100).to_i - 10
-        freq_coverage[index] = true
-      end
-    end
-
-    respond_to do |format|
-      if observ_history.nil?
-        logger.error("ERROR: Observational history object not valid, discarding object.")
-        # Respond with error, don't pass JSON, it's bad
-        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
-      else
-        format.json { render :json => freq_coverage }
-      end
-    end
-  end
-
-  protected
-
-  def get_activity_data(json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
-
-    # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS != true
-       uri = URI.parse("#{SETI_SERVER}/activity")
-       response = Net::HTTP.get_response(uri)
-       j = ActiveSupport::JSON.decode(response.body).to_options
+    
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+      j = get_json_activity(params[:jsonobject]);
     else
-       if !json.nil?
-          j = ActiveSupport::JSON.decode(json).to_options
-       else
-          uri = URI.parse("#{SETI_SERVER}/activity")
-          response = Net::HTTP.get_response(uri)
-          j = ActiveSupport::JSON.decode(response.body).to_options
-       end
+      j = get_json_activity
     end
 
     # Check JSON format
@@ -242,35 +151,187 @@ class Display1Controller < ApplicationController
       # Force activity ID to be an integer
       j[:id] = j[:id].to_i
 
-      # ID should never be less than min or greater than max
-      if j[:id] > ACTIVITY_ID_MAX_VALUE
-         logger.warn("Received activity id value > ACTIVITY_ID_MAX_VALUE; trimming it to #{ACTIVITY_ID_MAX_VALUE}.")
-         j[:id] = ACTIVITY_ID_MAX_VALUE
-      end
-      if j[:id] < ACTIVITY_ID_MIN_VALUE
-         logger.warn("Received activity id value < ACTIVITY_ID_MIN_VALUE; trimming it to #{ACTIVITY_ID_MIN_VALUE}.")
-         j[:id] = ACTIVITY_ID_MIN_VALUE
-      end
-
       # Cap "status" to be less than 80 characters.
       if j[:status].length > ACTIVITY_STATUS_MAX_LENGTH
         logger.warn("Received activity status with length > ACTIVITY_STATUS_MAX_LENGTH; trimming it to #{ACTIVITY_STATUS_MAX_LENGTH}.")
         j[:status] = j[:status].slice(0,ACTIVITY_STATUS_MAX_LENGTH)
       end
+    end
 
-      # If in development mode, set the status to Observing so that the display will function when the real
-      # display is not observing
-      if Rails.env.development?
-        j[:status] = "Observing"
+    respond_to do |format|
+      if format_error
+        logger.error("ERROR: Activity object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+        format.json { render :json => j }
+      end
+    end
+  end
+
+  #
+  #
+  def beam
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false
+
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+      j = get_json_beam(params[:id], params[:jsonobject])
+    else
+      j = get_json_beam(params[:id])
+    end
+
+    # sanitize data
+    if !j[:id].nil?
+      j[:id] = j[:id].to_i
+      if j[:id] < 0
+        logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
+        j[:id] = 0
+      end
+    else
+      logger.error("Received beam id = nil")
+      format_error = true
+    end
+
+    if !j[:targetId].nil?
+      j[:targetId] = j[:targetId].to_i
+      if j[:targetId] < 0
+        logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
+        j[:targetId] = 0
+      end
+    else
+      logger.error("Received beam targetId = nil")
+      format_error = true
+    end
+
+    if !j[:freq].nil?
+      j[:frequency] = j[:freq].to_f
+      if j[:frequency] < 0
+        logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
+        j[:frequency] = 0.0
+      end
+    else
+      logger.error("Received beam frequency = nil")
+      format_error = true
+    end
+
+    if !j[:ra].nil?
+      j[:ra] = j[:ra].to_f
+      if j[:ra] < MIN_RA
+        logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
+        j[:ra] = MIN_RA
+      end
+      if j[:ra] > MAX_RA
+        logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
+        j[:ra] = MAX_RA
+      end
+    else
+      logger.error("Received beam ra = nil")
+      format_error = true
+    end
+
+    if !j[:dec].nil?
+      j[:dec] = j[:dec].to_f
+      if j[:dec] < MIN_DEC
+        logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
+        j[:dec] = MIN_DEC
+      end
+      if j[:dec] > MAX_DEC
+        logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
+        j[:dec] = MAX_DEC
+      end
+    else
+      logger.error("Received beam dec = nil")
+      format_error = true
+    end
+
+    if !j[:status].nil?
+      if !is_valid_beam_status(j[:status])
+        logger.error("Received an invalid beam status = #{j[:status]}")
+      end
+    else
+      logger.error("Received beam status = nil")
+      format_error = true
+    end
+
+    respond_to do |format|
+      if format_error
+        logger.error("ERROR: Beam object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+        format.json { render :json => j }
+      end
+    end
+  end
+
+  #
+  #
+  def frequency_coverage
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+      observ_history = get_observational_history(params[:id], params[:jsonobject])
+    else
+      observ_history = get_observational_history(params[:id])
+    end
+
+    if observ_history
+      freq_coverage = Array.new(frequency_num_elements){ false }
+      observ_history[:observationHistory][:freqHistory].each do |item|
+        # Check bounds
+        item = item.to_i
+        if item >= MAX_FREQ_MHZ
+          item = MAX_FREQ_MHZ - 1
+          logger.warn("Received observational frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
+        end
+        if item < MIN_FREQ_MHZ
+          item = MIN_FREQ_MHZ
+          logger.warn("Received observational frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
+        end
+
+        index = (item/100).to_i - 10
+        freq_coverage[index] = true
       end
     end
 
-    # If there is an object error, invalidate the whole object
-    if format_error
-       return nil
-    else
-      return j
+    respond_to do |format|
+      if observ_history.nil?
+        logger.error("ERROR: Observational history object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+        format.json { render :json => freq_coverage }
+      end
     end
+  end
+
+  protected
+
+  def get_json_activity(json = nil)
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS != true
+      uri = URI.parse("#{SETI_SERVER}/activity")
+      response = Net::HTTP.get_response(uri)
+      j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+      if !json.nil?
+        j = ActiveSupport::JSON.decode(json).to_options
+      else
+        uri = URI.parse("#{SETI_SERVER}/activity")
+        response = Net::HTTP.get_response(uri)
+        j = ActiveSupport::JSON.decode(response.body).to_options
+      end
+    end
+
+    # If in development mode, set the status to Observing so that the display will function when the real
+    # display is not observing
+    if Rails.env.development?
+      j[:status] = "Observing"
+    end
+
+    return j
   end
 
   #
@@ -292,32 +353,32 @@ class Display1Controller < ApplicationController
 
     # Never process the JSON object if we are not in manual test mode
     if WOS_MANUAL_TESTS != true
-       uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-       response = Net::HTTP.get_response(uri)
-       j = ActiveSupport::JSON.decode(response.body).to_options
+      uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
+      response = Net::HTTP.get_response(uri)
+      j = ActiveSupport::JSON.decode(response.body).to_options
     else
-       if !json.nil?
-          j = ActiveSupport::JSON.decode(json).to_options
-       else
-          uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-          response = Net::HTTP.get_response(uri)
-          j = ActiveSupport::JSON.decode(response.body).to_options
-       end
+      if !json.nil?
+        j = ActiveSupport::JSON.decode(json).to_options
+      else
+        uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
+        response = Net::HTTP.get_response(uri)
+        j = ActiveSupport::JSON.decode(response.body).to_options
+      end
     end
 
     # Confirm that all waterfall data exist
     if j[:startRow].nil? || j[:endRow].nil? || j[:id].nil? || j[:data].nil?
-       format_error = true
+      format_error = true
     else
-       if j[:startRow] < 1
-          logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
-          j[:startRow] = 1
-       end
+      if j[:startRow] < 1
+        logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
+        j[:startRow] = 1
+      end
 
-       if j[:endRow] > waterfall_height
-          logger.warn("Received waterfall#{id}.endRow = #{j[:endRow]}; reseting it to #{waterfall_height}.")
-          j[:endRow] = waterfall_height
-       end
+      if j[:endRow] > waterfall_height
+        logger.warn("Received waterfall#{id}.endRow = #{j[:endRow]}; reseting it to #{waterfall_height}.")
+        j[:endRow] = waterfall_height
+      end
     end
     
     # If there is an object error, invalidate the whole object
@@ -354,19 +415,19 @@ class Display1Controller < ApplicationController
 
     # Never process the JSON object if we are not in manual test mode
     if WOS_MANUAL_TESTS != true
-       uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
-       response = Net::HTTP.get_response(uri)
+      uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
+      response = Net::HTTP.get_response(uri)
 
-       # Decode the json to an object and convert hash keys to symbols
-       j = ActiveSupport::JSON.decode(response.body).to_options
+      # Decode the json to an object and convert hash keys to symbols
+      j = ActiveSupport::JSON.decode(response.body).to_options
     else
-       if !json.nil?
-          j = ActiveSupport::JSON.decode(json).to_options
-       else
-          uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
-          response = Net::HTTP.get_response(uri)
-          j = ActiveSupport::JSON.decode(response.body).to_options
-       end
+      if !json.nil?
+        j = ActiveSupport::JSON.decode(json).to_options
+      else
+        uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
+        response = Net::HTTP.get_response(uri)
+        j = ActiveSupport::JSON.decode(response.body).to_options
+      end
     end
 
     if !j[:data].nil?
@@ -399,14 +460,14 @@ class Display1Controller < ApplicationController
       format_error = true
     end
     
-    # confirm that the data is exactly baseline width 
+    # confirm that the data is exactly baseline width
     if j[:data].size > baseline_width
-       logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, truncation will be done.")
-       j[:data] = j[:data][0..baseline_width-1] 
+      logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, truncation will be done.")
+      j[:data] = j[:data][0..baseline_width-1]
     end
     if j[:data].size < baseline_width
-       logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, padding will be done.")
-       j[:data].fill(0.0,j[:data].size..baseline_width) 
+      logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, padding will be done.")
+      j[:data].fill(0.0,j[:data].size..baseline_width)
     end
 
     # If there is an object error, invalidate the whole object
@@ -419,11 +480,11 @@ class Display1Controller < ApplicationController
 
   def get_observational_history_from_server(id)
     # make the call to the seti webservice
-       uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
-       response = Net::HTTP.get_response(uri)
+    uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
+    response = Net::HTTP.get_response(uri)
 
-       # Decode the json to an object and convert hash keys to symbols
-       return ActiveSupport::JSON.decode(response.body)
+    # Decode the json to an object and convert hash keys to symbols
+    return ActiveSupport::JSON.decode(response.body)
   end
 
   #
@@ -436,9 +497,9 @@ class Display1Controller < ApplicationController
 
     # Never process the JSON object if we are not in manual test mode
     if WOS_MANUAL_TESTS != true || json.nil?
-       j = get_observational_history_from_server(id).to_options
+      j = get_observational_history_from_server(id).to_options
     else
-       j = ActiveSupport::JSON.decode(json).to_options
+      j = ActiveSupport::JSON.decode(json).to_options
     end
 
     history = {}
@@ -481,115 +542,26 @@ class Display1Controller < ApplicationController
     return history
   end
 
-  #
-  # Obtains the beam data from the SETI web service, performs data checking
-  # including for nil and values in range. Sets default values if the data is
-  # invalid. Returns the JSON as a map.
+  # Obtains the beam data from the SETI web service. Returns the JSON as a map.
   def get_json_beam(id, json = nil)
-    # Do we have a format error (such as nil objects in JSON)
-    format_error = false
-
     # Never process the JSON object if we are not in manual test mode
     if WOS_MANUAL_TESTS != true
-       uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
-       response = Net::HTTP.get_response(uri)
+      uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
+      response = Net::HTTP.get_response(uri)
 
-       # Decode the json to an object and convert hash keys to symbols
-       j = ActiveSupport::JSON.decode(response.body).to_options
+      # Decode the json to an object and convert hash keys to symbols
+      j = ActiveSupport::JSON.decode(response.body).to_options
     else
-       if !json.nil?
-          j = ActiveSupport::JSON.decode(json).to_options
-       else
-          uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
-          response = Net::HTTP.get_response(uri)
-          j = ActiveSupport::JSON.decode(response.body).to_options
-       end
+      if !json.nil?
+        j = ActiveSupport::JSON.decode(json).to_options
+      else
+        uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
+        response = Net::HTTP.get_response(uri)
+        j = ActiveSupport::JSON.decode(response.body).to_options
+      end
     end
 
-    # sanitize data
-    if !j[:id].nil?
-      j[:id] = j[:id].to_i
-      if j[:id] < 0
-        logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
-        j[:id] = 0
-      end
-    else
-      logger.error("Received beam id = nil")
-      format_error = true
-    end
-
-    if !j[:targetId].nil?
-      j[:targetId] = j[:targetId].to_i
-      if j[:targetId] < 0
-        logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
-        j[:targetId] = 0
-      end
-    else
-      logger.error("Received beam targetId = nil")
-      format_error = true
-    end
-
-    if !j[:freq].nil?
-      j[:frequency] = j[:freq].to_f
-      if j[:frequency] < MIN_FREQ_MHZ
-        logger.warn("Received beam frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
-        j[:frequency] = MIN_FREQ_MHZ
-      end
-      if j[:frequency] > MAX_FREQ_MHZ
-        logger.warn("Received beam frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
-        j[:frequency] = MAX_FREQ_MHZ 
-      end
-    else
-      logger.error("Received beam frequency = nil")
-      format_error = true
-    end
-
-    if !j[:ra].nil?
-      j[:ra] = j[:ra].to_f
-      if j[:ra] < MIN_RA
-        logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
-        j[:ra] = MIN_RA
-      end
-      if j[:ra] > MAX_RA
-        logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
-        j[:ra] = MAX_RA
-      end
-    else
-      logger.error("Received beam ra = nil")
-      format_error = true
-    end
-
-    if !j[:dec].nil?
-      j[:dec] = j[:dec].to_f
-      if j[:dec] < MIN_DEC
-        logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
-        j[:dec] = MIN_DEC
-      end
-      if j[:dec] > MAX_DEC
-        logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
-        j[:dec] = MAX_DEC
-      end
-    else
-      logger.error("Received beam dec = nil")
-      format_error = true
-    end
-
-    if !j[:status].nil?
-      if !is_valid_beam_status(j[:status])
-        logger.error("Received an invalid beam status = #{j[:status]}")
-        j[:status] = "?"
-      end
-    else
-      logger.error("Received beam status = nil")
-      format_error = true
-    end
-
-    # If there is an object error, invalidate the whole object
-    if format_error
-      return nil
-    else
-      return j
-    end
+    return j
   end
 
   # Determines if the passed in status is equal to one of the beam status enums

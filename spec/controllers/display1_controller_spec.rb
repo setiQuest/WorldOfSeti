@@ -1,17 +1,12 @@
 require 'spec_helper'
 require 'pathy'
 require 'fixtures'
+require 'application_controller'
 
 describe Display1Controller do
   before :all do
+    # give all ruby objects the pathy gem methods
     Object.pathy!
-
-    # Define constants
-    @MAX_DEC                       = 90
-    @MIN_DEC                       = -90
-    @MAX_RA                        = 24
-    @MIN_RA                        = 0
-    @MAX_ACTIVITY_STATUS_LENGTH    = 80
   end
   
   describe "GET 'index'" do
@@ -22,9 +17,25 @@ describe Display1Controller do
   end
 
   describe "GET 'activity'" do
-    it "should be successful" do
+    it "should get data successful" do
+      sample_activity = TestFixtures::get_json_activity(1, 1, 1000.0, 0, 0, "ON1")
+      controller.stub(:get_json_activity).and_return(sample_activity)
+
       get 'activity', :format => :json
+      json = ActiveSupport::JSON.decode(response.body)
+
       response.should be_success
+
+      # primaryBeam_ra, primaryBeam_dec, fovBeam_ra, fovBeam_dec, id, status
+      primaryBeamLocation = json.at_json_path("primaryBeamLocation")
+      primaryBeamLocation.at_json_path("ra").should == sample_activity[:primaryBeamLocation]["ra"]
+      primaryBeamLocation.at_json_path("dec").should == sample_activity[:primaryBeamLocation]["dec"]
+      fovBeamLocation = json.at_json_path("fovBeamLocation")
+      fovBeamLocation.at_json_path("ra").should == sample_activity[:fovBeamLocation]["ra"]
+      fovBeamLocation.at_json_path("dec").should == sample_activity[:fovBeamLocation]["dec"]
+
+      json.at_json_path("id").should == sample_activity[:id]
+      json.at_json_path("status").should == sample_activity[:status]
     end
 
     it "should follow the JSON spec by having all keys and fields within valid range" do
@@ -72,7 +83,7 @@ describe Display1Controller do
     end
 
     it "should set the primaryBeamLocation's and fovBeamLocation's RA and DEC to the valid max value if the value is greater than the max" do
-      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(@MAX_RA+1, @MAX_DEC+1, @MAX_RA+1, @MAX_DEC+1, 0, "Observing"))
+      controller.stub(:get_json_activity).and_return(TestFixtures::get_json_activity(ApplicationController::MAX_RA+1, ApplicationController::MAX_DEC+1, ApplicationController::MAX_RA+1, ApplicationController::MAX_DEC+1, 0, "Observing"))
 
       get :activity, :format => :json
       response.should be_success
@@ -80,16 +91,16 @@ describe Display1Controller do
       json = ActiveSupport::JSON.decode(response.body)
 
       primaryBeamLocation = json.at_json_path("primaryBeamLocation")
-      primaryBeamLocation.at_json_path("ra").should equal @MAX_RA
-      primaryBeamLocation.at_json_path("dec").should equal @MAX_DEC
+      primaryBeamLocation.at_json_path("ra").should == ApplicationController::MAX_RA
+      primaryBeamLocation.at_json_path("dec").should == ApplicationController::MAX_DEC
 
       fovBeamLocation = json.at_json_path("primaryBeamLocation")
-      fovBeamLocation.at_json_path("ra").should equal @MAX_RA
-      fovBeamLocation.at_json_path("dec").should equal @MAX_DEC
+      fovBeamLocation.at_json_path("ra").should == ApplicationController::MAX_RA
+      fovBeamLocation.at_json_path("dec").should == ApplicationController::MAX_DEC
     end
 
     it "should set the primaryBeamLocation's and fovBeamLocation's RA and DEC to the valid min value if the value is less than the min" do
-      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(@MIN_RA-1, @MIN_DEC-1, @MIN_RA-1, @MIN_DEC-1, 0, "Observing"))
+      controller.stub(:get_json_activity).and_return(TestFixtures::get_json_activity(ApplicationController::MIN_RA-1, ApplicationController::MIN_DEC-1, ApplicationController::MIN_RA-1, ApplicationController::MIN_DEC-1, 0, "Observing"))
 
       get :activity, :format => :json
       response.should be_success
@@ -97,23 +108,102 @@ describe Display1Controller do
       json = ActiveSupport::JSON.decode(response.body)
 
       primaryBeamLocation = json.at_json_path("primaryBeamLocation")
-      primaryBeamLocation.at_json_path("ra").should equal @MIN_RA
-      primaryBeamLocation.at_json_path("dec").should equal @MIN_DEC
+      primaryBeamLocation.at_json_path("ra").should == ApplicationController::MIN_RA
+      primaryBeamLocation.at_json_path("dec").should == ApplicationController::MIN_DEC
 
       fovBeamLocation = json.at_json_path("primaryBeamLocation")
-      fovBeamLocation.at_json_path("ra").should equal @MIN_RA
-      fovBeamLocation.at_json_path("dec").should equal @MIN_DEC
+      fovBeamLocation.at_json_path("ra").should == ApplicationController::MIN_RA
+      fovBeamLocation.at_json_path("dec").should == ApplicationController::MIN_DEC
     end
 
-    it "should cap the status length to @MAX_ACTIVITY_STATUS_LENGTH if it is greater than @MAX_ACTIVITY_STATUS_LENGTH" do
-      controller.stub(:get_activity_data).and_return(TestFixtures::get_activity_data(0, 0, 0, 0, 0, "a" * (@MAX_ACTIVITY_STATUS_LENGTH+1)))
+    it "should cap the status length to ApplicationController::ACTIVITY_STATUS_MAX_LENGTH if it is greater than ApplicationController::ACTIVITY_STATUS_MAX_LENGTH" do
+      status = "a" * (ApplicationController::ACTIVITY_STATUS_MAX_LENGTH + 1)
+      controller.stub(:get_json_activity).and_return(TestFixtures::get_json_activity(0, 0, 0, 0, 0, status))
 
       get :activity, :format => :json
       response.should be_success
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("status").length.should equal @MAX_ACTIVITY_STATUS_LENGTH
+      json.at_json_path("status").length.should == ApplicationController::ACTIVITY_STATUS_MAX_LENGTH
+    end
+  end
+
+  describe "beam" do
+    it "should get data successful" do
+      sample_beam = TestFixtures::get_json_beam(1, 1, 1000.0, 0, 0, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+
+      get 'beam', :id => 1, :format => :json
+      response.should be_success
+            
+      json = ActiveSupport::JSON.decode(response.body)
+      
+      # id, targetId, freq, ra, dec, status
+      json.at_json_path("id").should == sample_beam[:id]
+      json.at_json_path("targetId").should == sample_beam[:targetId]
+      json.at_json_path("freq").should == sample_beam[:freq]
+      json.at_json_path("ra").should == sample_beam[:ra]
+      json.at_json_path("dec").should == sample_beam[:dec]
+      json.at_json_path("status").should == sample_beam[:status]
+    end
+
+    it "should set the id to 0 if it is set to < 0" do
+      sample_beam = TestFixtures::get_json_beam(-1, 1, 1000.0, 0, 0, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+      
+      get 'beam', :id => 1, :format => :json
+      response.should be_success
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("id").should == 0
+    end
+
+    it "should set the targetId to 0 if it is set to < 0" do
+      sample_beam = TestFixtures::get_json_beam(1, -1, 1000.0, 0, 0, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+      
+      get 'beam', :id => 1, :format => :json
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("targetId").should == 0
+    end
+
+    it "should set the freq to 0.0 if it is set to < 0" do
+      sample_beam = TestFixtures::get_json_beam(1, 1, -1, 0, 0, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+
+      get 'beam', :id => 1, :format => :json
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("frequency").should == 0.0
+    end
+
+    it "should set the RA and DEC to the valid min value if the value is less than the min" do
+      sample_beam = TestFixtures::get_json_beam(1, 1, 1000.0, ApplicationController::MIN_RA-1, ApplicationController::MIN_DEC-1, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+
+      get 'beam', :id => 1, :format => :json
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("ra").should == ApplicationController::MIN_RA
+      json.at_json_path("dec").should == ApplicationController::MIN_DEC
+    end
+
+    it "should set the RA and DEC to the valid max value if the value is greater than the max" do
+      sample_beam = TestFixtures::get_json_beam(1, 1, 1000.0, ApplicationController::MAX_RA+1, ApplicationController::MAX_DEC+1, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+
+      get 'beam', :id => 1, :format => :json
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("ra").should == ApplicationController::MAX_RA
+      json.at_json_path("dec").should == ApplicationController::MAX_DEC
     end
   end
 
