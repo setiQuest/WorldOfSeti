@@ -4,6 +4,9 @@ gem 'rails', '3.0.3'
 gem 'mysql2'
 gem 'ruby-debug19'
 gem 'ruby-debug-ide19'
+gem 'exception_notification',
+      :git => 'https://github.com/smartinez87/exception_notification',
+      :require => 'exception_notifier'
 
 group :development do
   gem 'rspec-rails'

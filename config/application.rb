@@ -73,5 +73,10 @@ module SetiWorld
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
+
+    config.middleware.use ExceptionNotifier,
+      :email_prefix => "[SetiWorld Error] ",
+      :sender_address => %{"Seti World Server" <error@localhost>},
+      :exception_recipients => %w{spring-2011-aliens@sv.cmu.edu}
   end
 end

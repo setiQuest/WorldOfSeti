@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/smartinez87/exception_notification
+  revision: 1e8fb83c56d8c796f8022e7d27cb06bfe9158492
+  specs:
+    exception_notification (2.4.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -119,6 +125,7 @@ PLATFORMS
 DEPENDENCIES
   annotate-models
   awesome_print
+  exception_notification!
   factory_girl_rails
   faker
   hirb
