@@ -1,0 +1,3 @@
+class QunitController < ApplicationController
+
+end
