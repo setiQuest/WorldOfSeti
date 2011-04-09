@@ -158,6 +158,12 @@ class Display1Controller < ApplicationController
       end
     end
 
+    # If in development mode, set the status to Observing so that the display will function when the real
+    # display is not observing
+    if Rails.env.development?
+      j[:status] = "Observing"
+    end
+
     respond_to do |format|
       if format_error
         logger.error("ERROR: Activity object not valid, discarding object.")
@@ -317,12 +323,6 @@ class Display1Controller < ApplicationController
       j = ActiveSupport::JSON.decode(response.body).to_options
     else
       j = ActiveSupport::JSON.decode(json).to_options
-    end
-
-    # If in development mode, set the status to Observing so that the display will function when the real
-    # display is not observing
-    if Rails.env.development?
-      j[:status] = "Observing"
     end
 
     return j
