@@ -311,18 +311,12 @@ class Display1Controller < ApplicationController
 
   def get_json_activity(json = nil)
     # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS != true
+    if WOS_MANUAL_TESTS != true || json.nil?
       uri = URI.parse("#{SETI_SERVER}/activity")
       response = Net::HTTP.get_response(uri)
       j = ActiveSupport::JSON.decode(response.body).to_options
     else
-      if !json.nil?
-        j = ActiveSupport::JSON.decode(json).to_options
-      else
-        uri = URI.parse("#{SETI_SERVER}/activity")
-        response = Net::HTTP.get_response(uri)
-        j = ActiveSupport::JSON.decode(response.body).to_options
-      end
+      j = ActiveSupport::JSON.decode(json).to_options
     end
 
     # If in development mode, set the status to Observing so that the display will function when the real
@@ -352,18 +346,12 @@ class Display1Controller < ApplicationController
     format_error = false
 
     # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS != true
+    if WOS_MANUAL_TESTS != true || json.nil?
       uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
       response = Net::HTTP.get_response(uri)
       j = ActiveSupport::JSON.decode(response.body).to_options
     else
-      if !json.nil?
-        j = ActiveSupport::JSON.decode(json).to_options
-      else
-        uri = URI.parse("#{SETI_SERVER}/waterfall?id=#{id}&startRow=#{start_row}")
-        response = Net::HTTP.get_response(uri)
-        j = ActiveSupport::JSON.decode(response.body).to_options
-      end
+      j = ActiveSupport::JSON.decode(json).to_options
     end
 
     # Confirm that all waterfall data exist
@@ -414,20 +402,14 @@ class Display1Controller < ApplicationController
     format_error = false
 
     # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS != true
+    if WOS_MANUAL_TESTS != true || json.nil?
       uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
       response = Net::HTTP.get_response(uri)
 
       # Decode the json to an object and convert hash keys to symbols
       j = ActiveSupport::JSON.decode(response.body).to_options
     else
-      if !json.nil?
-        j = ActiveSupport::JSON.decode(json).to_options
-      else
-        uri = URI.parse("#{SETI_SERVER}/baseline?id=#{id.to_i}")
-        response = Net::HTTP.get_response(uri)
-        j = ActiveSupport::JSON.decode(response.body).to_options
-      end
+      j = ActiveSupport::JSON.decode(json).to_options
     end
 
     if !j[:data].nil?
@@ -545,20 +527,14 @@ class Display1Controller < ApplicationController
   # Obtains the beam data from the SETI web service. Returns the JSON as a map.
   def get_json_beam(id, json = nil)
     # Never process the JSON object if we are not in manual test mode
-    if WOS_MANUAL_TESTS != true
+    if WOS_MANUAL_TESTS != true || json.nil?
       uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
       response = Net::HTTP.get_response(uri)
 
       # Decode the json to an object and convert hash keys to symbols
       j = ActiveSupport::JSON.decode(response.body).to_options
     else
-      if !json.nil?
-        j = ActiveSupport::JSON.decode(json).to_options
-      else
-        uri = URI.parse("#{SETI_SERVER}/beam?id=#{id}")
-        response = Net::HTTP.get_response(uri)
-        j = ActiveSupport::JSON.decode(response.body).to_options
-      end
+      j = ActiveSupport::JSON.decode(json).to_options
     end
 
     return j
