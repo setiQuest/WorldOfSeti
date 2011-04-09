@@ -16,12 +16,12 @@ module TestFixtures
     activity = { }
 
     activity[:primaryBeamLocation] = {}
-    activity[:primaryBeamLocation][:ra] = primaryBeam_ra
-    activity[:primaryBeamLocation][:dec] = primaryBeam_dec
+    activity[:primaryBeamLocation]["ra"] = primaryBeam_ra
+    activity[:primaryBeamLocation]["dec"] = primaryBeam_dec
 
     activity[:fovBeamLocation] = {}
-    activity[:fovBeamLocation][:ra] = fovBeam_ra
-    activity[:fovBeamLocation][:dec] = fovBeam_dec
+    activity[:fovBeamLocation]["ra"] = fovBeam_ra
+    activity[:fovBeamLocation]["dec"] = fovBeam_dec
 
     activity[:id] = id
     activity[:status] = status

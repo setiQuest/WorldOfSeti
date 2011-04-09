@@ -156,179 +156,179 @@ class Display1Controller < ApplicationController
         logger.warn("Received activity status with length > ACTIVITY_STATUS_MAX_LENGTH; trimming it to #{ACTIVITY_STATUS_MAX_LENGTH}.")
         j[:status] = j[:status].slice(0,ACTIVITY_STATUS_MAX_LENGTH)
       end
+    end
 
-      respond_to do |format|
-        if format_error
-          logger.error("ERROR: Activity object not valid, discarding object.")
-          # Respond with error, don't pass JSON, it's bad
-          format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
-        else
-          format.json { render :json => j }
+    respond_to do |format|
+      if format_error
+        logger.error("ERROR: Activity object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+        format.json { render :json => j }
+      end
+    end
+  end
+
+  #
+  #
+  def beam
+    # Do we have a format error (such as nil objects in JSON)
+    format_error = false
+
+    # Only do this if we are in manual testing, otherwise, if we are not
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+      j = get_json_beam(params[:id], params[:jsonobject])
+    else
+      j = get_json_beam(params[:id])
+    end
+
+    # sanitize data
+    if !j[:id].nil?
+      j[:id] = j[:id].to_i
+      if j[:id] < 0
+        logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
+        j[:id] = 0
+      end
+    else
+      logger.error("Received beam id = nil")
+      format_error = true
+    end
+
+    if !j[:targetId].nil?
+      j[:targetId] = j[:targetId].to_i
+      if j[:targetId] < 0
+        logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
+        j[:targetId] = 0
+      end
+    else
+      logger.error("Received beam targetId = nil")
+      format_error = true
+    end
+
+    if !j[:freq].nil?
+      j[:frequency] = j[:freq].to_f
+      if j[:frequency] < 0
+        logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
+        j[:frequency] = 0.0
+      end
+    else
+      logger.error("Received beam frequency = nil")
+      format_error = true
+    end
+
+    if !j[:ra].nil?
+      j[:ra] = j[:ra].to_f
+      if j[:ra] < MIN_RA
+        logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
+        j[:ra] = MIN_RA
+      end
+      if j[:ra] > MAX_RA
+        logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
+        j[:ra] = MAX_RA
+      end
+    else
+      logger.error("Received beam ra = nil")
+      format_error = true
+    end
+
+    if !j[:dec].nil?
+      j[:dec] = j[:dec].to_f
+      if j[:dec] < MIN_DEC
+        logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
+        j[:dec] = MIN_DEC
+      end
+      if j[:dec] > MAX_DEC
+        logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
+        j[:dec] = MAX_DEC
+      end
+    else
+      logger.error("Received beam dec = nil")
+      format_error = true
+    end
+
+    if !j[:status].nil?
+      if !is_valid_beam_status(j[:status])
+        logger.error("Received an invalid beam status = #{j[:status]}")
+      end
+    else
+      logger.error("Received beam status = nil")
+      format_error = true
+    end
+
+    respond_to do |format|
+      if format_error
+        logger.error("ERROR: Beam object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
+      else
+        format.json { render :json => j }
+      end
+    end
+  end
+
+  #
+  #
+  def frequency_coverage
+    # and we get an object, return format error.
+    if WOS_MANUAL_TESTS == true
+      observ_history = get_observational_history(params[:id], params[:jsonobject])[:observationHistory]
+    else
+      observ_history = get_observational_history(params[:id])[:observationHistory]
+    end
+
+    if observ_history
+      freq_coverage = Array.new(frequency_num_elements){ false }
+      observ_history[:freqHistory].each do |item|
+        # Check bounds
+        item = item.to_i
+        if item >= MAX_FREQ_MHZ
+          item = MAX_FREQ_MHZ - 1
+          logger.warn("Received observational frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
         end
+        if item < MIN_FREQ_MHZ
+          item = MIN_FREQ_MHZ
+          logger.warn("Received observational frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
+        end
+
+        index = (item/100).to_i - 10
+        freq_coverage[index] = true
       end
     end
 
-    #
-    #
-    def beam
-      # Do we have a format error (such as nil objects in JSON)
-      format_error = false
-
-      # Only do this if we are in manual testing, otherwise, if we are not
-      # and we get an object, return format error.
-      if WOS_MANUAL_TESTS == true
-        j = get_json_beam(params[:id], params[:jsonobject])
+    respond_to do |format|
+      if observ_history.nil?
+        logger.error("ERROR: Observational history object not valid, discarding object.")
+        # Respond with error, don't pass JSON, it's bad
+        format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
       else
-        j = get_json_beam(params[:id])
-      end
-
-      # sanitize data
-      if !j[:id].nil?
-        j[:id] = j[:id].to_i
-        if j[:id] < 0
-          logger.warn("Received beam id < 0; Setting it to 0 by default to prevent errors.")
-          j[:id] = 0
-        end
-      else
-        logger.error("Received beam id = nil")
-        format_error = true
-      end
-
-      if !j[:targetId].nil?
-        j[:targetId] = j[:targetId].to_i
-        if j[:targetId] < 0
-          logger.warn("Received beam targetId < 0; Setting it to 0 by default to prevent errors.")
-          j[:targetId] = 0
-        end
-      else
-        logger.error("Received beam targetId = nil")
-        format_error = true
-      end
-
-      if !j[:freq].nil?
-        j[:frequency] = j[:freq].to_f
-        if j[:frequency] < 0
-          logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
-          j[:frequency] = 0.0
-        end
-      else
-        logger.error("Received beam frequency = nil")
-        format_error = true
-      end
-
-      if !j[:ra].nil?
-        j[:ra] = j[:ra].to_f
-        if j[:ra] < MIN_RA
-          logger.warn("Received beam ra < #{MIN_RA}; Setting it to #{MIN_RA} by default to prevent errors.")
-          j[:ra] = MIN_RA
-        end
-        if j[:ra] > MAX_RA
-          logger.warn("Received beam ra > #{MAX_RA}; Setting it to #{MAX_RA} by default to prevent errors.")
-          j[:ra] = MAX_RA
-        end
-      else
-        logger.error("Received beam ra = nil")
-        format_error = true
-      end
-
-      if !j[:dec].nil?
-        j[:dec] = j[:dec].to_f
-        if j[:dec] < MIN_DEC
-          logger.warn("Received beam dec < #{MIN_DEC}; Setting it to #{MIN_DEC} by default to prevent errors.")
-          j[:dec] = MIN_DEC
-        end
-        if j[:dec] > MAX_DEC
-          logger.warn("Received beam dec > #{MAX_DEC}; Setting it to #{MAX_DEC} by default to prevent errors.")
-          j[:dec] = MAX_DEC
-        end
-      else
-        logger.error("Received beam dec = nil")
-        format_error = true
-      end
-
-      if !j[:status].nil?
-        if !is_valid_beam_status(j[:status])
-          logger.error("Received an invalid beam status = #{j[:status]}")
-        end
-      else
-        logger.error("Received beam status = nil")
-        format_error = true
-      end
-
-      respond_to do |format|
-        if format_error
-          logger.error("ERROR: Beam object not valid, discarding object.")
-          # Respond with error, don't pass JSON, it's bad
-          format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
-        else
-          format.json { render :json => j }
-        end
+        format.json { render :json => freq_coverage }
       end
     end
+  end
 
-    #
-    #
-    def frequency_coverage
-      # and we get an object, return format error.
-      if WOS_MANUAL_TESTS == true
-        observ_history = get_observational_history(params[:id], params[:jsonobject])[:observationHistory]
+  protected
+
+  def get_json_activity(json = nil)
+    # Never process the JSON object if we are not in manual test mode
+    if WOS_MANUAL_TESTS != true
+      uri = URI.parse("#{SETI_SERVER}/activity")
+      response = Net::HTTP.get_response(uri)
+      j = ActiveSupport::JSON.decode(response.body).to_options
+    else
+      if !json.nil?
+        j = ActiveSupport::JSON.decode(json).to_options
       else
-        observ_history = get_observational_history(params[:id])[:observationHistory]
-      end
-
-      if observ_history
-        freq_coverage = Array.new(frequency_num_elements){ false }
-        observ_history[:freqHistory].each do |item|
-          # Check bounds
-          item = item.to_i
-          if item >= MAX_FREQ_MHZ
-            item = MAX_FREQ_MHZ - 1
-            logger.warn("Received observational frequency > #{MAX_FREQ_MHZ}; Setting it to #{MAX_FREQ_MHZ} by default to prevent errors.")
-          end
-          if item < MIN_FREQ_MHZ
-            item = MIN_FREQ_MHZ
-            logger.warn("Received observational frequency < #{MIN_FREQ_MHZ}; Setting it to #{MIN_FREQ_MHZ} by default to prevent errors.")
-          end
-
-          index = (item/100).to_i - 10
-          freq_coverage[index] = true
-        end
-      end
-
-      respond_to do |format|
-        if observ_history.nil?
-          logger.error("ERROR: Observational history object not valid, discarding object.")
-          # Respond with error, don't pass JSON, it's bad
-          format.json { render :status => 500, :json => {:status => :error, :success => false, :error => true} }
-        else
-          format.json { render :json => freq_coverage }
-        end
-      end
-    end
-
-    protected
-
-    def get_json_activity(json = nil)
-      # Never process the JSON object if we are not in manual test mode
-      if WOS_MANUAL_TESTS != true
         uri = URI.parse("#{SETI_SERVER}/activity")
         response = Net::HTTP.get_response(uri)
         j = ActiveSupport::JSON.decode(response.body).to_options
-      else
-        if !json.nil?
-          j = ActiveSupport::JSON.decode(json).to_options
-        else
-          uri = URI.parse("#{SETI_SERVER}/activity")
-          response = Net::HTTP.get_response(uri)
-          j = ActiveSupport::JSON.decode(response.body).to_options
-        end
       end
+    end
 
-      # If in development mode, set the status to Observing so that the display will function when the real
-      # display is not observing
-      if Rails.env.development?
-        j[:status] = "Observing"
-      end
+    # If in development mode, set the status to Observing so that the display will function when the real
+    # display is not observing
+    if Rails.env.development?
+      j[:status] = "Observing"
     end
 
     return j
@@ -460,7 +460,7 @@ class Display1Controller < ApplicationController
       format_error = true
     end
     
-    # confirm that the data is exactly baseline width 
+    # confirm that the data is exactly baseline width
     if j[:data].size > baseline_width
       logger.warn("Received baseline chart data size #{j[:data].size} not equal to #{baseline_width}, truncation will be done.")
       j[:data] = j[:data][0..baseline_width-1]
