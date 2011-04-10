@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'pathy'
+require 'fixtures'
 
 describe Display1Controller do
   before :all do
@@ -61,6 +62,23 @@ describe Display1Controller do
       json.has_json_path?("status").should be_true
       json.at_json_path("status").is_a?(String).should be_true
       
+    end
+  end
+
+  describe "waterfall" do
+    it "should get data successfully" do
+      sample_waterfall = TestFixtures::sample_waterfall
+      controller.stub(:get_json_waterfall).and_return(sample_waterfall)
+
+      get :waterfall, :id => 3, :start_row => 5, :format => :json
+      json = ActiveSupport::JSON.decode(response.body)
+
+      response.should be_success
+
+      json.at_json_path("id").should == sample_waterfall[:id]
+      json.at_json_path("startRow").should == sample_waterfall[:startRow]
+      json.at_json_path("endRow").should == sample_waterfall[:endRow]
+      json.at_json_path("data").should == sample_waterfall[:data]
     end
   end
 

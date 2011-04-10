@@ -192,7 +192,7 @@ class Display1Controller < ApplicationController
     end
   end
 
-  private
+  protected
 
   #
   #
