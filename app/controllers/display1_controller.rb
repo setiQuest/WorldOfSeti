@@ -40,13 +40,12 @@ require 'open-uri'
 
 class Display1Controller < ApplicationController
 
-  #
-  #
   def index
   end
 
-  #
-  #
+  # Obtains the waterfall data from the SETI web service, and returns it as
+  # JSON. If there was an error in the data, it will log an error and return
+  # a HTTP 500 status to the client.
   def waterfall
     # Only do this if we are in manual testing, otherwise, if we are not
     # and we get an object, return format error.
@@ -68,8 +67,7 @@ class Display1Controller < ApplicationController
     end
   end
 
-  #
-  # Generate the baseline chart using the Google Maps API
+  # Generate the baseline chart using the Google Maps API and returns the image.
   def baseline_chart
     # Only do this if we are in manual testing, otherwise, if we are not
     # and we get an object, return format error.
@@ -109,7 +107,6 @@ class Display1Controller < ApplicationController
     end
   end
 
-  #
   # Obtains the activity data from the SETI server and returns it to the client
   # as JSON. If there was an error in the data, it will log an error and return
   # a HTTP 500 status to the client.
@@ -160,8 +157,8 @@ class Display1Controller < ApplicationController
       end
     end
 
-    # If in development mode, set the status to Observing so that the display will function when the real
-    # display is not observing
+    # If in development mode, set the status to Observing so that the display
+    # will function when the real display is not observing
     if Rails.env.development?
       j[:status] = "Observing"
     end
@@ -177,31 +174,45 @@ class Display1Controller < ApplicationController
     end
   end
 
+  # This method is called from display 2 to display the contextual information
+  # in an iframe. The URL to display is obtained from the activity end point
+  # from the SETI web service. The rails server will then scrape that site's
+  # HTML and replace all relative paths with absolute paths. Finally it will
+  # return the website's HTML as text.
   def activity_contextual_info
     j = get_json_activity
 
     j[:url] = 'http://www.bayareatours.org/test.htm' if j[:url].nil?
 
+    # open the URL using the web scrapping API Nokogiri
     doc = Nokogiri::HTML(open(j[:url]))
-      domain_name = /http[s]?:\/\/[^\/]+/.match(j[:url])[0]
+    # parse out the domain name using a regular expression so we get
+    # everything after the http:// or https://
+    domain_name = /http[s]?:\/\/[^\/]+/.match(j[:url])[0]
 
-      doc.xpath('//img').each do |img_tag|
-        if (img_tag.attribute('src').value =~ /^http/) == nil
-          img_tag.attribute('src').value = domain_name + img_tag.attribute('src').value
-        end
+    # get all img tags and if they are relative paths, append the domain name
+    # to make them absolute paths
+    doc.xpath('//img').each do |img_tag|
+      if (img_tag.attribute('src').value =~ /^http/) == nil
+        img_tag.attribute('src').value = domain_name + img_tag.attribute('src').value
       end
+    end
 
+    # get all the link attributes and if they are relative paths, append the
+    # domain name to make them absolute paths
     doc.xpath('//link').each do |link_tag|
       if (link_tag.attribute('href').value =~ /^http/) == nil
         link_tag.attribute('href').value = domain_name + link_tag.attribute('href').value
       end
     end
 
+    # return the raw HTML as text
     render :text => doc.to_s
   end
 
-  #
-  #
+  # Obtains the beam data from the SETI web service, and returns it as
+  # JSON. If there was an error in the data, it will log an error and return
+  # a HTTP 500 status to the client.
   def beam
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
@@ -298,8 +309,9 @@ class Display1Controller < ApplicationController
     end
   end
 
-  #
-  #
+  # Obtains the frequency coverage data from the SETI web service, and returns it as
+  # JSON. If there was an error in the data, it will log an error and return
+  # a HTTP 500 status to the client.
   def frequency_coverage
     # and we get an object, return format error.
     if WOS_MANUAL_TESTS == true
@@ -308,7 +320,7 @@ class Display1Controller < ApplicationController
       observ_history = get_observational_history(params[:id])
     end
 
-    if observ_history
+    if !observ_history.nil?
       freq_coverage = Array.new(frequency_num_elements){ false }
       observ_history[:observationHistory][:freqHistory].each do |item|
         # Check bounds
@@ -340,6 +352,9 @@ class Display1Controller < ApplicationController
 
   protected
 
+  # Sends an HTTP request to the SETI server to obtain the activity data in
+  # JSON format. The json parameter is optional and is used for the
+  # manual testing.
   def get_json_activity(json = nil)
     # Never process the JSON object if we are not in manual test mode
     if WOS_MANUAL_TESTS != true || json.nil?
@@ -353,10 +368,11 @@ class Display1Controller < ApplicationController
     return j
   end
 
-  #
-  #
+  # Generates random data for the waterfall used for testing purposes. Encodes
+  # the data generated into base 64 and returns it.
   def get_random_waterfall_data
     data = ''
+    # create a random string of characters
     waterfall_height.times do |i|
       data += (0...waterfall_width).map{(rand(256)).chr}.join
     end
@@ -364,8 +380,9 @@ class Display1Controller < ApplicationController
     return Base64::strict_encode64(data)
   end
 
-  #
-  #
+  # Sends an HTTP request to the SETI server to obtain the waterfall data in
+  # JSON format. Also performs input validation based on the JSON schema and
+  # returns the JSON object. If there were validation errors, it returns nil.
   def get_json_waterfall(id, start_row, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
@@ -383,9 +400,9 @@ class Display1Controller < ApplicationController
     if j[:startRow].nil? || j[:endRow].nil? || j[:id].nil? || j[:data].nil?
       format_error = true
     else
-      if j[:startRow] < 1
-        logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to 1.")
-        j[:startRow] = 1
+      if j[:startRow] < WATERFALL_MIN_STARTROW
+        logger.warn("Received waterfall#{id}.startRow = #{j[:startRow]}; reseting it to #{WATERFALL_MIN_STARTROW}.")
+        j[:startRow] = WATERFALL_MIN_STARTROW
       end
 
       if j[:endRow] > waterfall_height
@@ -402,15 +419,15 @@ class Display1Controller < ApplicationController
     end
   end
 
-  #
-  # For testing the baseline display. Generates random data
+  # Generates random data for the baseline display to use and encodes it in
+  # base 64 and returns it.
   def get_random_baseline_data
     data = (0...baseline_width*4).map{(rand(256)).chr}.join
     return Base64::strict_encode64(data)
   end
 
-  #
-  # For testing the waterfall display. Generates random waterfall data.
+  # For testing the baseline display. Obtains random baseline data and decodes
+  # it from its base 64 format and converts it to JSON and returns it.
   def get_random_json_baseline
     baseline = {}
     baseline[:id] = 1
@@ -419,9 +436,9 @@ class Display1Controller < ApplicationController
     return baseline
   end
 
-  #
-  # Sends an http request to the SETI webservice to retrieve the baseline data
-  # for the id passed in.
+  # Sends an HTTP request to the SETI web service to retrieve the baseline data
+  # for the id passed in. The json parameter is optional and is used for the
+  # manual testing.
   def get_json_baseline(id, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
@@ -485,6 +502,8 @@ class Display1Controller < ApplicationController
     end
   end
 
+  # Sends an HTTP request to the SETI web service to retrieve the observational
+  # history and returns the response in JSON.
   def get_observational_history_from_server(id)
     # make the call to the seti webservice
     uri = URI.parse("#{SETI_SERVER}/observationHistory?id=#{id}")
@@ -494,10 +513,11 @@ class Display1Controller < ApplicationController
     return ActiveSupport::JSON.decode(response.body)
   end
 
-  #
-  # Obtains the observation history from the SETI webservice, parses the data
+  # Obtains the observation history from the SETI web service, parses the data
   # and returns it as a map. The map includes the id and also the frequency
-  # history, which is an array of doubles.
+  # history, which is an array of doubles. Also performs error checking to see
+  # if values are missing or are out of range as specified in the JSON schema.
+  # The json parameter is only used when performing manual testing.
   def get_observational_history(id, json = nil)
     # Do we have a format error (such as nil objects in JSON)
     format_error = false
@@ -539,8 +559,8 @@ class Display1Controller < ApplicationController
     end
   end
 
-  #
-  # For testing the observational history/frequency coverage. Generates random data.
+  # For testing the observational history/frequency coverage.
+  # Generates random data and returns it as a map.
   def get_random_observational_history(id)
     history = {}
     history[:observationHistory]= {}
@@ -550,6 +570,7 @@ class Display1Controller < ApplicationController
   end
 
   # Obtains the beam data from the SETI web service. Returns the JSON as a map.
+  # The json parameter is only used when performing manual testing.
   def get_json_beam(id, json = nil)
     # Never process the JSON object if we are not in manual test mode
     if WOS_MANUAL_TESTS != true || json.nil?
@@ -565,7 +586,8 @@ class Display1Controller < ApplicationController
     return j
   end
 
-  # Determines if the passed in status is equal to one of the beam status enums
+  # Determines if the passed in status is equal to one of the beam status enums.
+  # This method should be used as a helper method to perform input validation.
   def is_valid_beam_status(status)
     BEAM_STATUS_ENUMS.each { |x|
       if status == x
