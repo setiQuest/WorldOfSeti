@@ -1,4 +1,3 @@
-
   var map; // Global map variable.
 
   // Initializes Google Sky Map
@@ -78,11 +77,25 @@
         var new_pixelxy = new GPoint(x,y);
         lla.push(current_projection.fromPixelToLatLng(new_pixelxy,zoom,false));
      }
-     gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
+     gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.10);
      map.addOverlay(gp);
      gp.show();               // Show the overlay
      map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
   }
+
+  function addBeamMarker(ra, dec)
+  {
+    var longitude = raToLng(decimalDegreesToString(ra));
+    var latitude  = decToLat(decimalDegreesToString(dec));
+
+    // construct GLatLng beam loc
+    var beam_ll = new GLatLng(latitude, longitude);
+   
+    // the Marker is divine
+    var marker = new GMarker(beam_ll);
+    map.addOverlay(marker);
+  }
+   
 
   // Updates the weather forecast
   function updateWeatherForecast()
@@ -139,8 +152,15 @@
                             response.fovBeamLocation.ra,
                             response.fovBeamLocation.dec);
 
+                  // Update all markers on the beam ( updateMapLocation will
+                  // remove all overlays so we don't need to worry about that)
+                  updateBeamInfo(1);
+                  updateBeamInfo(2);
+                  updateBeamInfo(3);
+                  
                   $('#contextual-info').attr('src', '/display1/activity_contextual_info');
                   $("#contextual-info").load( function(){$("#contextual-info").height($("#contextual-info").contents().find("html").height());} )
+   
                }
                else
                {
@@ -177,3 +197,33 @@
        });
      }
   }
+
+
+function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, updateFrequencyCoverageCallback_fn)
+{
+    var longitude = lngToRa(response.ra);
+    var latitude = latToDec(response.dec);
+
+    addBeamMarker(response.ra, response.dec);
+}
+
+function updateBeamInfo(id, json)
+{
+   if(json == undefined)
+   {
+      var updateBeamInfoCallback = function() { updateBeamInfo(id); };
+
+      // Take id and make AJAX query
+      $.ajax({
+         type:     'GET',
+         url:      display1_beam_path,
+         data:     { id:id },
+         success:  function(response) {
+            updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback, function(){updateFrequencyCoverage(id, response.freq);});
+            },
+         error:    function() {
+            },
+         datatype: 'json'
+     });
+   }
+}
