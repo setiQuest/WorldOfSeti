@@ -42,6 +42,9 @@ describe Display1Controller do
     end
 
     it "should follow the JSON spec by having all keys and fields within valid range" do
+      sample_activity = TestFixtures::get_json_activity(1, 1, 1000.0, 0, 0, "ON1")
+      controller.stub(:get_json_activity).and_return(sample_activity)
+
       get 'activity', :format => :json
       json = ActiveSupport::JSON.decode(response.body)
 
