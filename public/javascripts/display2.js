@@ -34,10 +34,10 @@
     var fov_beam_ll = new GLatLng(fov_latitude, fov_longitude);
 
     // Add markers to show where FOV and beam loc is (mainly for debugging)
-    var primary_marker = new GMarker(primary_beam_ll);
-    var fov_marker = new GMarker(fov_beam_ll);
-    map.addOverlay(primary_marker);
-    map.addOverlay(fov_marker);
+ //   var primary_marker = new GMarker(primary_beam_ll);
+ //  var fov_marker = new GMarker(fov_beam_ll);
+ //   map.addOverlay(primary_marker);
+ //   map.addOverlay(fov_marker);
 
     // Covert to pixels because it's easier to draw circle
     var current_projection = map.getCurrentMapType().getProjection();
