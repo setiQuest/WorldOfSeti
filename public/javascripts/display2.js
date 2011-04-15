@@ -1,25 +1,71 @@
+/*
+################################################################################
+#
+# File:    display2.js
+# Project: World of SETI (WOS)
+# Authors:
+#                  Alan Mak
+#                  Anthony Tang
+#                  Dia Kharrat
+#                  Paul Wong
+#
+# The initial source was worked on by students of Carnegie Mellon Silicon Valley
+#
+# Copyright 2011 The SETI Institute
+#
+# World of SETI is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# World of SETI is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with World of SETI.  If not, see<http://www.gnu.org/licenses/>.
+#
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+#
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org.
+#
+################################################################################
+*/
 
-  var map; // Global map variable.
+var map; // Global map variable.
 
-  // Initializes Google Sky Map
-  function initialize() {
-   if (GBrowserIsCompatible()) {
-     map = new GMap2(document.getElementById("sky_map"), {
-         mapTypes : G_SKY_MAP_TYPES
-         });
-         // sample look at Mars initially
-     var longitude = raToLng('23:14:52.02');
-     var latitude  = decToLat('-05:56:40.36');
-     map.setCenter(new GLatLng(latitude, longitude), 3);
-     map.addControl(new GLargeMapControl());
-     map.addControl(new GMapTypeControl());
-     map.enableContinuousZoom();
-   }
-  }
+/**
+ * Initializes Google Sky Map
+ */
+function initialize() {
+    if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById("sky_map"), {
+            mapTypes : G_SKY_MAP_TYPES
+        });
+        // sample look at Mars initially
+        var longitude = raToLng('23:14:52.02');
+        var latitude  = decToLat('-05:56:40.36');
+        map.setCenter(new GLatLng(latitude, longitude), 3);
+        map.addControl(new GLargeMapControl());
+        map.addControl(new GMapTypeControl());
+        map.enableContinuousZoom();
+    }
+}
 
-  // Updates the map location
-  function updateMapLocation(ra, dec, fov_ra, fov_dec)
-  {
+/**
+ * Updates the map location to the passed in coordinates. The map will pan
+ * to the location if it is not already looking at the passed in coordinates.
+ *
+ * @param ra
+ * @param dec
+ * @param fov_ra
+ * @param fov_dec
+ */
+function updateMapLocation(ra, dec, fov_ra, fov_dec)
+{
     var longitude = raToLng(decimalDegreesToString(ra));
     var latitude  = decToLat(decimalDegreesToString(dec));
     var fov_longitude = raToLng(decimalDegreesToString(fov_ra));
@@ -58,122 +104,128 @@
     var max_vertical_div_4 = SCREENSIZE_HEIGHT/4;
     while((zoom < 20) && (pixel_distance < max_vertical_div_4))
     {
-       zoom++;   // Increase zoom
-       map.zoomIn(primary_beam_ll, true, true);  // Zoom in on map
-       pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
-       fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
+        zoom++;   // Increase zoom
+        map.zoomIn(primary_beam_ll, true, true);  // Zoom in on map
+        pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
+        fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
 
-       // Calculate actual pixel distance from the two points
-       pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
-     }
+        // Calculate actual pixel distance from the two points
+        pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
+    }
 
-     // Draw circle
-     var degrees = 0;
-     var x, y;
-     var lla = new Array();
-     for(;degrees<=Math.PI*2 + .15; degrees+=.15)
-     {
+    // Draw circle
+    var degrees = 0;
+    var x, y;
+    var lla = new Array();
+    for(;degrees<=Math.PI*2 + .15; degrees+=.15)
+    {
         y =  pixelxy.y + Math.cos(degrees) * pixel_distance;
         x =  pixelxy.x + Math.sin(degrees) * pixel_distance;
         var new_pixelxy = new GPoint(x,y);
         lla.push(current_projection.fromPixelToLatLng(new_pixelxy,zoom,false));
-     }
-     gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
-     map.addOverlay(gp);
-     gp.show();               // Show the overlay
-     map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
-  }
+    }
+    gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.15);
+    map.addOverlay(gp);
+    gp.show();               // Show the overlay
+    map.panTo( primary_beam_ll );  // Pan center of the map to the primary beam location
+}
 
-  // Updates the weather forecast
-  function updateWeatherForecast()
-  {
+// Updates the weather forecast
+function updateWeatherForecast()
+{
     $('#weatherForecast').html($('#weatherForecast').html());
-  }
+}
 
-  function updateWebCam() {
+function updateWebCam() {
     var MAX_NUM_IMAGES = 18
     // initialize the panorama id if not defined yet (only happens the first time)
     if(updateWebCam.panorama_id == undefined) {
-      updateWebCam.panorama_id = 1;
-    } else {
-      // goto the next panorama id and if it hits the max num of images, reset it
-      updateWebCam.panorama_id++;
-      if(updateWebCam.panorama_id > MAX_NUM_IMAGES) {
         updateWebCam.panorama_id = 1;
-      }
+    } else {
+        // goto the next panorama id and if it hits the max num of images, reset it
+        updateWebCam.panorama_id++;
+        if(updateWebCam.panorama_id > MAX_NUM_IMAGES) {
+            updateWebCam.panorama_id = 1;
+        }
     }
 
     // rotate the 3 webcam images to the next one in the list
     updateWebCamImages(1, updateWebCam.panorama_id);
     updateWebCamImages(2, (updateWebCam.panorama_id+1) % MAX_NUM_IMAGES);
     updateWebCamImages(3, (updateWebCam.panorama_id+2) % MAX_NUM_IMAGES);
-  }
+}
 
-  function updateWebCamImages(id, panorama_id)
-  {
+function updateWebCamImages(id, panorama_id)
+{
     // to bypass browser caching, we need to append a random parameter to the URL
     d = new Date();
     $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
-  }
+}
 
-  function updateActivity(json)
-  {
-     if(json == undefined)
-     {  
-         var updateActivityCallback = function() { updateActivity(); };
-         // Take id and make AJAX query
-         $.ajax({
+function updateActivity(json)
+{
+    if(json == undefined)
+    {
+        var updateActivityCallback = function() {
+            updateActivity();
+        };
+        // Take id and make AJAX query
+        $.ajax({
             type:     'GET',
             url:      display1_activity_path,
             success:  function(response) {
-               if(response.status == "Observing")
-               {
-                  if(!timeoutManager.isObserving)
-                  {
-                     timeoutManager.isObserving = true;
-                     timeoutManager.startObserving(function() {});
-                  }
-                  // Call update map location
-                  updateMapLocation(response.primaryBeamLocation.ra,
-                            response.primaryBeamLocation.dec,
-                            response.fovBeamLocation.ra,
-                            response.fovBeamLocation.dec);
+                if(response.status == "Observing")
+                {
+                    if(!timeoutManager.isObserving)
+                    {
+                        timeoutManager.isObserving = true;
+                        timeoutManager.startObserving(function() {});
+                    }
+                    // Call update map location
+                    updateMapLocation(response.primaryBeamLocation.ra,
+                        response.primaryBeamLocation.dec,
+                        response.fovBeamLocation.ra,
+                        response.fovBeamLocation.dec);
 
-                  $('#contextual-info').attr('src', '/display1/activity_contextual_info');
-                  $("#contextual-info").load( function(){$("#contextual-info").height($("#contextual-info").contents().find("html").height());} )
-               }
-               else
-               {
-                  timeoutManager.isObserving = false;
-               }
+                    $('#contextual-info').attr('src', '/display1/activity_contextual_info');
+                    $("#contextual-info").load( function(){
+                        $("#contextual-info").height($("#contextual-info").contents().find("html").height());
+                    } )
+                }
+                else
+                {
+                    timeoutManager.isObserving = false;
+                }
 
-               setTimeout(updateActivityCallback, TIMEOUT_ACTIVITY );
+                setTimeout(updateActivityCallback, TIMEOUT_ACTIVITY );
             },
             error:    function() {
-               // We should handle error here
-               errors = true;
-               setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
+                // We should handle error here
+                errors = true;
+                setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
             },
             datatype: 'json'
-         });
-     }
-     else
-     {
+        });
+    }
+    else
+    {
         $.ajax({
-           type:     'GET',
-           url:      display1_activity_path,
-           data:     {jsonobject:json.jsonobject.value},
-           success:  function(response) {
-              if(response.status == "Observing")
-              {
-                 // Call update map location
-                 updateMapLocation(response.primaryBeamLocation.ra,
-                            response.primaryBeamLocation.dec,
-                            response.fovBeamLocation.ra,
-                            response.fovBeamLocation.dec);
-              }
-           },
-           datatype: 'json'
-       });
-     }
-  }
+            type:     'GET',
+            url:      display1_activity_path,
+            data:     {
+                jsonobject:json.jsonobject.value
+            },
+            success:  function(response) {
+                if(response.status == "Observing")
+                {
+                    // Call update map location
+                    updateMapLocation(response.primaryBeamLocation.ra,
+                        response.primaryBeamLocation.dec,
+                        response.fovBeamLocation.ra,
+                        response.fovBeamLocation.dec);
+                }
+            },
+            datatype: 'json'
+        });
+    }
+}
