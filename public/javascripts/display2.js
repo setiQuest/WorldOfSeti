@@ -130,6 +130,13 @@ function updateMapLocation(ra, dec, fov_ra, fov_dec)
     map.panTo( primary_beam_ll ); // Pan center of the map to the primary beam location
 }
 
+/**
+ * This method creates a beam marker that marks where the beam is pointing at
+ * in the Google Sky map display.
+ *
+ * @param ra The RA of the marker
+ * @param dec The DEC of the marker
+ */
 function addBeamMarker(ra, dec)
 {
     var longitude = raToLng(decimalDegreesToString(ra));
@@ -152,13 +159,18 @@ function addBeamMarker(ra, dec)
     map.addOverlay(marker);
 }
 
-
-// Updates the weather forecast
+/**
+ * Updates the weather forecast
+ */
 function updateWeatherForecast()
 {
     $('#weatherForecast').html($('#weatherForecast').html());
 }
 
+/**
+ * Updates the ATA web cam by rotating the images one by one so that we can
+ * show all of them over time.
+ */
 function updateWebCam() {
     var MAX_NUM_IMAGES = 18
     // initialize the panorama id if not defined yet (only happens the first time)
@@ -178,6 +190,14 @@ function updateWebCam() {
     updateWebCamImages(3, (updateWebCam.panorama_id+2) % MAX_NUM_IMAGES);
 }
 
+/**
+ * Changes the webcam's img src tags to the next image in the list. Also
+ * append the current date as a random parameter to the URL to prevent browser
+ * caching.
+ *
+ * @param id The id of the webcam img element
+ * @param panorama_id The id of the webcam panorama image
+ */
 function updateWebCamImages(id, panorama_id)
 {
     // to bypass browser caching, we need to append a random parameter to the URL
@@ -185,6 +205,14 @@ function updateWebCamImages(id, panorama_id)
     $('#webcamImage' + id).attr('src', 'http://atacam.seti.org/panorama/Pan' + panorama_id + ".jpg" + '?' + d.getTime());
 }
 
+/**
+ * Performs the AJAX call to the web server to obtain the activity data. It will
+ * only perform updates if the activity's status is currently observing. Also
+ * updates the map location in the Google Sky map and also updates the beam
+ * markers. Lastly it updates the URL for the contextual information.
+ *
+ * @param json The JSON response object recieved from the server.
+ */
 function updateActivity(json)
 {
     if(json == undefined)
@@ -260,7 +288,9 @@ function updateActivity(json)
     }
 }
 
-
+/**
+ * 
+ */
 function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, updateFrequencyCoverageCallback_fn)
 {
     var longitude = lngToRa(response.ra);
@@ -269,6 +299,13 @@ function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, upda
     addBeamMarker(response.ra, response.dec);
 }
 
+/**
+ * Makes a call to the web server to obtain the beam data, and calls a function
+ * to update the beam info in the view.
+ *
+ * @param id The id of the beam
+ * @param json The JSON response object
+ */
 function updateBeamInfo(id, json)
 {
     if(json == undefined)
