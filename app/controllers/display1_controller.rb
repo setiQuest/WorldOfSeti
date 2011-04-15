@@ -182,7 +182,7 @@ class Display1Controller < ApplicationController
   def activity_contextual_info
     j = get_json_activity
 
-    j[:url] = 'http://www.bayareatours.org/test.htm' if j[:url].nil?
+    j[:url] = 'http://en.m.wikipedia.org/wiki/Sun' if j[:url].nil?
 
     # open the URL using the web scrapping API Nokogiri
     doc = Nokogiri::HTML(open(j[:url]))

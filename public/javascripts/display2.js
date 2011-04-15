@@ -90,9 +90,18 @@
 
     // construct GLatLng beam loc
     var beam_ll = new GLatLng(latitude, longitude);
-   
+
+    // Create "beam" marker icon
+    var beamIcon = new GIcon();
+    beamIcon.image = "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=camping|FFFF00";
+    beamIcon.iconSize = new GSize(12, 20);
+    beamIcon.shadowSize = new GSize(22, 20);
+    beamIcon.iconAnchor = new GPoint(6, 20);
+    beamIcon.infoWindowAnchor = new GPoint(5, 1);
+    markerOptions = { icon:beamIcon };
+
     // the Marker is divine
-    var marker = new GMarker(beam_ll);
+    var marker = new GMarker(beam_ll, markerOptions);
     map.addOverlay(marker);
   }
    
