@@ -43,51 +43,77 @@
  */
 
 if (window.addEventListener) {
-  window.addEventListener("load", function() {
-    var scripts = document.getElementsByTagName("script");
-    var canvasArray = Array.prototype.slice.call(document.getElementsByTagName("canvas"));
-    var canvas;
-    for (var i = 0, j = 0; i < scripts.length; i++) {
-      if (scripts[i].type == "application/processing") {
-        var src = scripts[i].getAttribute("target");
-        if (src && src.indexOf("#") > -1) {
-          canvas = document.getElementById(src.substr(src.indexOf("#") + 1));
-          if (canvas) {
-            Processing.addInstance(new Processing(canvas, scripts[i].text));
-            for (var k = 0; k< canvasArray.length; k++)
-            {
-              if (canvasArray[k] === canvas) {
-                // remove the canvas from the array so we dont override it in the else
-                canvasArray.splice(k,1);
-              }
+    window.addEventListener("load", function() {
+        var scripts = document.getElementsByTagName("script");
+        var canvasArray = Array.prototype.slice.call(document.getElementsByTagName("canvas"));
+        var canvas;
+        for (var i = 0, j = 0; i < scripts.length; i++) {
+            if (scripts[i].type == "application/processing") {
+                var src = scripts[i].getAttribute("target");
+                if (src && src.indexOf("#") > -1) {
+                    canvas = document.getElementById(src.substr(src.indexOf("#") + 1));
+                    if (canvas) {
+                        Processing.addInstance(new Processing(canvas, scripts[i].text));
+                        for (var k = 0; k< canvasArray.length; k++)
+                        {
+                            if (canvasArray[k] === canvas) {
+                                // remove the canvas from the array so we dont override it in the else
+                                canvasArray.splice(k,1);
+                            }
+                        }
+                    }
+                } else {
+                    if (canvasArray.length >= j) {
+                        Processing.addInstance(new Processing(canvasArray[j], scripts[i].text));
+                    }
+                    j++;
+                }
             }
-          }
-        } else {
-          if (canvasArray.length >= j) {
-            Processing.addInstance(new Processing(canvasArray[j], scripts[i].text));
-          }
-          j++;
         }
-      }
-    }
-  }, false);
+    }, false);
 }
 
+/**
+ * The TimeoutManager handles the polling that is done by the various components
+ * in the view such as the activity, frequency coverage, beams, etc. It is
+ * responsible for calling methods that you register in specific intervals.
+ */
 function TimeoutManager()
 {
+    // Flag used to determine if we need to start polling or not. We only poll
+    // if the beams are observing.
     this.isObserving = false;
+
+    /**
+     *
+     */
     this.startObserving = function( startFunction ) {
         startFunction();
     };
+
+    /**
+     *
+     */
     this.setObservingTimeout = function( fn_handle, interval_milliseconds ) {
         if(timeoutManager.isObserving)
         {
-            setTimeout(function(){fn_handle(variable); var variable = null}, interval_milliseconds);
+            setTimeout(function(){
+                fn_handle(variable);
+                var variable = null
+            }, interval_milliseconds);
         }
     };
+
+    /**
+     * Registers a method to call at every interval.
+     *
+     * @param fn_handle The function to call at every interval
+     * @param interval_milliseconds The interval to call the fn_handle
+     */
     this.registerTimeout = function( fn_handle, interval_milliseconds ) {
         setInterval(fn_handle, interval_milliseconds);
     };
 }
 
+// instantiate a global timeoutManager to use
 var timeoutManager = new TimeoutManager();

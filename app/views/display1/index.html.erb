@@ -1,36 +1,36 @@
 <% # Form fields for manual testing %>
 <% if ApplicationController::WOS_MANUAL_TESTS == true %>
-<table border = 1>
-   <tr><td>
-   <form id="TestActivityForm" onsubmit="return false;" method="post">
-      <textarea rows="3" cols="70" name="jsonobject" />"Enter Activity JSON object here..." </textarea>
-      <input type="button" value="Submit" onclick="updateActivity(this.form)"/>
-   </form>
-   </td></tr>
-   <tr><td>
-      <form id="TestBeamForm" onsubmit="return false;" method="post">
-         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Beam object here..." </textarea>
-         <input type="button" value="Submit" onclick="updateBeamInfo(1, this.form)"/>
-      </form>
-   </td><td>
-      <form id="TestFreqForm" onsubmit="return false;" method="post">
-         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Freq object here..." </textarea>
-         <input type="button" value="Submit" onclick="updateFrequencyCoverage(1, null, this.form)"/>
-      </form>
-   </td></tr>
-   <tr><td>
-      <form id="TestWaterfallForm" onsubmit="return false;" method="post">
-         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Waterfall  object here..."</textarea>
-         <input type="button" value="Submit" onclick="updateWaterfall(1, this.form)"/>
-      </form>
-   </td></tr>
-   <tr><td>
-      <form id="TestBaselineForm" onsubmit="return false;" method="post">
-         <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..."</textarea>
-         <input type="button" value="Submit" onclick="updateBaseline(1, this.form)"/>
-      </form>
-   </td></tr>
-</table>
+  <table border = 1>
+    <tr><td>
+        <form id="TestActivityForm" onsubmit="return false;" method="post">
+          <textarea rows="3" cols="70" name="jsonobject" />"Enter Activity JSON object here..." </textarea>
+          <input type="button" value="Submit" onclick="updateActivity(this.form)"/>
+        </form>
+      </td></tr>
+    <tr><td>
+        <form id="TestBeamForm" onsubmit="return false;" method="post">
+          <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Beam object here..." </textarea>
+          <input type="button" value="Submit" onclick="updateBeamInfo(1, this.form)"/>
+        </form>
+      </td><td>
+        <form id="TestFreqForm" onsubmit="return false;" method="post">
+          <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Freq object here..." </textarea>
+          <input type="button" value="Submit" onclick="updateFrequencyCoverage(1, null, this.form)"/>
+        </form>
+      </td></tr>
+    <tr><td>
+        <form id="TestWaterfallForm" onsubmit="return false;" method="post">
+          <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Waterfall  object here..."</textarea>
+          <input type="button" value="Submit" onclick="updateWaterfall(1, this.form)"/>
+        </form>
+      </td></tr>
+    <tr><td>
+        <form id="TestBaselineForm" onsubmit="return false;" method="post">
+          <textarea rows="2" cols="70" name="jsonobject" />"Enter JSON Baseline object here..."</textarea>
+          <input type="button" value="Submit" onclick="updateBaseline(1, this.form)"/>
+        </form>
+      </td></tr>
+  </table>
 <% end %>
 
 <div id="display1_header">
@@ -68,7 +68,7 @@
   {
 <% # No updates for manual tests %>
 <% if ApplicationController::WOS_MANUAL_TESTS == false %>
-    updateActivity();
+      updateActivity();
 <% end %>
   });
 
