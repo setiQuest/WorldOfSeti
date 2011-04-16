@@ -188,3 +188,34 @@ function decimalDegreesToString( dd )
   stringdd += s;
   return stringdd;
 }
+
+/*
+ * This function takes in a float in decimal degrees and returns a
+ * string in DMS with degrees minutes seconds symbols
+ */
+function decimalDegreesToStringDegrees( dd )
+{
+  var h = parseInt(dd);
+  var m, s;
+  var stringdd = "" + h + "° ";
+  m = ((dd - h) * 60);
+  stringdd += parseInt(m) + "\' ";
+  s = (m - parseInt(m)) * 60;
+  stringdd += s.toFixed(1) + '"';
+  return stringdd;
+}
+
+/*
+ * This function takes in a float in decimal hours and returns a
+ * string in HMS with hours minutes seconds symbols
+ */
+function decimalHoursToStringHours( dh )
+{
+  dh = dh / 15;
+  var stringdh = Math.floor(dh).toString() + 'h ';
+  dh = (dh - Math.floor(dh)) * 60;
+  stringdh += Math.floor(dh).toString() + 'm ';
+  dh = (dh - Math.floor(dh)) * 60;
+  stringdh += Math.floor(dh).toFixed(1) + 's';
+  return stringdh;
+}

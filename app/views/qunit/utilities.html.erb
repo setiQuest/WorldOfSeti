@@ -15,12 +15,20 @@
       equals(decimalDegreesToString(input), result, "Expected " + result + " as the result, result was: " + decimalDegreesToString(input));
     });
 
-    test("Test decimalDegreesToString", function()
+    test("Test decimalDegreesToStringDegrees", function()
+    {
+      expect(1);
+      var input = 55.4;
+      var result = "55° 23' 60.0\"";
+      equals(decimalDegreesToStringDegrees(input), result, "Expected " + result + " as the result, result was: " + decimalDegreesToString(input));
+    });
+
+    test("Test decimalHoursToStringHours", function()
     {
       expect(1);
       var input = 12.44;
-      var result = "12:26:23.99999999999821";
-      equals(decimalDegreesToString(input), result, "Expected " + result + " as the result, result was: " + decimalDegreesToString(input));
+      var result = "0h 49m 45.0s";
+      equals(decimalHoursToStringHours(input), result, "Expected " + result + " as the result, result was: " + decimalDegreesToString(input));
     });
 
     test("Test raToLng", function()

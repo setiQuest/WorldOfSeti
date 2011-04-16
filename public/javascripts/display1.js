@@ -40,7 +40,7 @@
  */
 function ajaxError(callback_fn, timeout)
 {
-    timeoutManager.setObservingTimeout(callback_fn, timeout );
+    timeoutManager.setObservingTimeout(callback_fn, timeout);
 }
 
 /**
@@ -181,11 +181,11 @@ function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, upda
         $('#beam' + id + ' .beam_status').css("background-image", "url(/images/icon_off.png)");
     }
 
-    var longitude = lngToRa(response.ra);
-    var latitude = latToDec(response.dec);
+    var ra = decimalHoursToStringHours(response.ra);
+    var dec = decimalDegreesToStringDegrees(response.dec);
 
     $('#beam' + id + ' .beam_status').text(response.status);
-    $('#beam' + id + ' .beam_location').text(longitude + ' - ' + latitude);
+    $('#beam' + id + ' .beam_location').text(ra + ' - ' + dec);
     $('#beam' + id + ' .beam_description').text(response.description);
     $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
 
@@ -290,7 +290,7 @@ function updateActivityAjaxSuccess(response, updateActivityCallback_fn, initCall
  */
 function updateActivityAjaxError(updateActivityCallback_fn, timeout)
 {
-    setTimeout(updateActivityCallback, TIMEOUT_RETRY_LONG );
+    setTimeout(updateActivityCallback, timeout);
 }
 
 /**
