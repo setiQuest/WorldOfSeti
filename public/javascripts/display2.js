@@ -289,13 +289,13 @@ function updateActivity(json)
 }
 
 /**
- * 
+ * This method gets called when the AJAX call for the beam info returns on
+ * success.
+ *
+ * @param response The JSON response object
  */
-function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, updateFrequencyCoverageCallback_fn)
+function updateBeamInfoAjaxSuccess(response)
 {
-    var longitude = lngToRa(response.ra);
-    var latitude = latToDec(response.dec);
-
     addBeamMarker(response.ra, response.dec);
 }
 
