@@ -37,6 +37,8 @@
 
 /**
  *
+ * @param callback_fn
+ * @param timeout
  */
 function ajaxError(callback_fn, timeout)
 {
@@ -168,7 +170,14 @@ function updateBaseline(id, json)
 }
 
 /**
+ * Updates the beam information when the AJAX call to the server for beam
+ * data is successful. Updates the icon image for the beam status, location,
+ * description, and frequency.
  * 
+ * @param response The response JSON object
+ * @param id The id of the beam
+ * @param updateBeamInfoCallback_fn The function to call in the next beam timeout
+ * @param updateFrequencyCoverageCallback_fn
  */
 function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, updateFrequencyCoverageCallback_fn)
 {
@@ -191,7 +200,7 @@ function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, upda
 
     updateFrequencyCoverageCallback_fn();
 
-    timeoutManager.setObservingTimeout(updateBeamInfoCallback_fn, TIMEOUT_BEAM_INFO );
+    timeoutManager.setObservingTimeout(updateBeamInfoCallback_fn, TIMEOUT_BEAM_INFO);
 }
 
 /**
@@ -290,7 +299,7 @@ function updateActivityAjaxSuccess(response, updateActivityCallback_fn, initCall
  */
 function updateActivityAjaxError(updateActivityCallback_fn, timeout)
 {
-    setTimeout(updateActivityCallback, timeout);
+    setTimeout(updateActivityCallback_fn, timeout);
 }
 
 /**
