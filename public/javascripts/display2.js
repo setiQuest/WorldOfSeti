@@ -96,7 +96,7 @@ function updateMapLocation(ra, dec, fov_ra, fov_dec)
     var pixelxy;
     var fov_pixelxy;
 
-    map.setZoom(zoom); // zoom out entirely first
+   // map.setZoom(zoom); // zoom out entirely first
 
     // Start zoom at very far away ( zoom 0 is entire sky) and then
     // gradually zoom in. Stop when the radius of the FOV is greater than
@@ -105,13 +105,15 @@ function updateMapLocation(ra, dec, fov_ra, fov_dec)
     while((zoom < 20) && (pixel_distance < max_vertical_div_4))
     {
         zoom++; // Increase zoom
-        map.zoomIn(primary_beam_ll, true, true); // Zoom in on map
+    //    map.zoomIn(primary_beam_ll, true, true); // Zoom in on map
         pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
         fov_pixelxy = current_projection.fromLatLngToPixel(fov_beam_ll,zoom);
 
         // Calculate actual pixel distance from the two points
         pixel_distance = Math.sqrt(Math.pow(pixelxy.x - fov_pixelxy.x,2) + Math.pow(pixelxy.y - fov_pixelxy.y,2));
     }
+
+   map.setZoom(zoom); // zoom to range
 
     // Draw circle
     var degrees = 0;

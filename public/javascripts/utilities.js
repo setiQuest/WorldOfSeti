@@ -18,10 +18,10 @@
 */
 
 var keyStr = "ABCDEFGHIJKLMNOP" +
-                "QRSTUVWXYZabcdef" +
-                "ghijklmnopqrstuv" +
-                "wxyz0123456789+/" +
-                "=";
+"QRSTUVWXYZabcdef" +
+"ghijklmnopqrstuv" +
+"wxyz0123456789+/" +
+"=";
 
 function encode64(input) {
     var output = "";
@@ -110,13 +110,13 @@ function decode64(input) {
   // All Rights Reserved.
 */
 function latToDec(latitude) {
-  if (latitude < 0) return '-' + latToDec(- latitude);
-  var DEC = Math.floor(latitude).toString() + '° ';
-  latitude = (latitude - Math.floor(latitude)) * 60;
-  DEC += Math.floor(latitude).toString() + '\' ';
-  latitude = (latitude - Math.floor(latitude)) * 60;
-  DEC += latitude.toFixed(1) + '"';
-  return DEC;
+    if (latitude < 0) return '-' + latToDec(- latitude);
+    var DEC = Math.floor(latitude).toString() + '° ';
+    latitude = (latitude - Math.floor(latitude)) * 60;
+    DEC += Math.floor(latitude).toString() + '\' ';
+    latitude = (latitude - Math.floor(latitude)) * 60;
+    DEC += latitude.toFixed(1) + '"';
+    return DEC;
 }
 
 /*
@@ -129,12 +129,12 @@ function latToDec(latitude) {
   // All Rights Reserved.
 */
 function decToLat(dec) {
-  if (dec[0] == '-') return '-' + decToLat(dec.substring(1));
-  var decSplit = dec.split(':');
-  var latitude = parseFloat(decSplit[0]) +
-                 parseFloat(decSplit[1]) / 60.0 +
-                 parseFloat(decSplit[2]) / 3600.0;
-  return latitude;
+    if (dec[0] == '-') return '-' + decToLat(dec.substring(1));
+    var decSplit = dec.split(':');
+    var latitude = parseFloat(decSplit[0]) +
+    parseFloat(decSplit[1]) / 60.0 +
+    parseFloat(decSplit[2]) / 3600.0;
+    return latitude;
 }
 
 /*
@@ -147,13 +147,13 @@ function decToLat(dec) {
 
 */
 function lngToRa(longitude) {
-  longitude = (- longitude + 180) / 15;
-  var RA = Math.floor(longitude).toString() + 'h ';
-  longitude = (longitude - Math.floor(longitude)) * 60;
-  RA += Math.floor(longitude).toString() + 'm ';
-  longitude = (longitude - Math.floor(longitude)) * 60;
-  RA += Math.floor(longitude).toFixed(1) + 's';
-  return RA;
+    longitude = (- longitude + 180) / 15;
+    var RA = Math.floor(longitude).toString() + 'h ';
+    longitude = (longitude - Math.floor(longitude)) * 60;
+    RA += Math.floor(longitude).toString() + 'm ';
+    longitude = (longitude - Math.floor(longitude)) * 60;
+    RA += Math.floor(longitude).toFixed(1) + 's';
+    return RA;
 }
 
 /*
@@ -166,11 +166,11 @@ function lngToRa(longitude) {
   // All Rights Reserved.
 */
 function raToLng(ra) {
-  var raSplit = ra.split(':');
-  var longitude = parseFloat(raSplit[0]) +
-                  parseFloat(raSplit[1]) / 60.0 +
-                  parseFloat(raSplit[2]) / 3600.0;
-  return - (longitude * 15 - 180);
+    var raSplit = ra.split(':');
+    var longitude = parseFloat(raSplit[0]) +
+    parseFloat(raSplit[1]) / 60.0 +
+    parseFloat(raSplit[2]) / 3600.0;
+    return - (longitude * 15 - 180);
 }
 
 /*
@@ -179,14 +179,14 @@ function raToLng(ra) {
  */
 function decimalDegreesToString( dd )
 {
-  var h = parseInt(dd);
-  var m, s;
-  var stringdd = "" + h + ":";
-  m = ((dd - h) * 60);
-  stringdd += parseInt(m) + ":";
-  s = (m - parseInt(m)) * 60;
-  stringdd += s;
-  return stringdd;
+    var h = parseInt(dd);
+    var m, s;
+    var stringdd = "" + h + ":";
+    m = ((dd - h) * 60);
+    stringdd += parseInt(m) + ":";
+    s = (m - parseInt(m)) * 60;
+    stringdd += s;
+    return stringdd;
 }
 
 /*
@@ -195,14 +195,28 @@ function decimalDegreesToString( dd )
  */
 function decimalDegreesToStringDegrees( dd )
 {
-  var h = parseInt(dd);
-  var m, s;
-  var stringdd = "" + h + "° ";
-  m = ((dd - h) * 60);
-  stringdd += parseInt(m) + "\' ";
-  s = (m - parseInt(m)) * 60;
-  stringdd += s.toFixed(1) + '"';
-  return stringdd;
+    var h = parseInt(dd);
+    var m, s;
+    var stringdd = "" + h + "° ";
+    m = ((dd - h) * 60);
+
+    // convert to a positive number if it is negative
+    var mInt = parseInt(m);
+    if(mInt < 0) {
+        mInt = -mInt;
+    }
+
+    stringdd += mInt + "\' ";
+
+    // convert to a positive number if it is negative
+    var sInt = m - parseInt(m);
+    if(sInt < 0) {
+        sInt = -sInt;
+    }
+
+    s = sInt * 60;
+    stringdd += s.toFixed(1) + '"';
+    return stringdd;
 }
 
 /*
@@ -211,11 +225,11 @@ function decimalDegreesToStringDegrees( dd )
  */
 function decimalHoursToStringHours( dh )
 {
-  dh = dh / 15;
-  var stringdh = Math.floor(dh).toString() + 'h ';
-  dh = (dh - Math.floor(dh)) * 60;
-  stringdh += Math.floor(dh).toString() + 'm ';
-  dh = (dh - Math.floor(dh)) * 60;
-  stringdh += Math.floor(dh).toFixed(1) + 's';
-  return stringdh;
+    dh = dh / 15;
+    var stringdh = Math.floor(dh).toString() + 'h ';
+    dh = (dh - Math.floor(dh)) * 60;
+    stringdh += Math.floor(dh).toString() + 'm ';
+    dh = (dh - Math.floor(dh)) * 60;
+    stringdh += Math.floor(dh).toFixed(1) + 's';
+    return stringdh;
 }
