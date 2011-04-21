@@ -225,7 +225,7 @@ function updateActivity(json)
             type: 'GET',
             url: display1_activity_path,
             success: function(response) {
-                if(response.status == "Observing")
+                if(isObserving(response.status))
                 {
                     if(!timeoutManager.isObserving)
                     {

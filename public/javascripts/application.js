@@ -117,3 +117,7 @@ function TimeoutManager()
 
 // instantiate a global timeoutManager to use
 var timeoutManager = new TimeoutManager();
+
+function isObserving(status) {
+    return (status != "Idle")
+}
