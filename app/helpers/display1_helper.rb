@@ -47,7 +47,7 @@ module Display1Helper
   end
 
   def baseline_height
-    100
+    150
   end
 
   # Defines the number of elements in a frequency coverage chart.
