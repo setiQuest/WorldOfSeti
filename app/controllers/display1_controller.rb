@@ -249,7 +249,7 @@ class Display1Controller < ApplicationController
     end
 
     if !j[:freq].nil?
-      j[:frequency] = j[:freq].to_f
+      j[:frequency] = '%4.4f' % j[:freq].to_f
       if j[:frequency] < 0
         logger.warn("Received beam frequency < 0; Setting it to 0 by default to prevent errors.")
         j[:frequency] = 0.0
