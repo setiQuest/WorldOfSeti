@@ -228,7 +228,7 @@ describe Display1Controller do
 
       json = ActiveSupport::JSON.decode(response.body)
 
-      json.at_json_path("frequency").should == 0.0
+      json.at_json_path("freq").should == 0.0
     end
 
     it "should set the RA and DEC to the valid min value if the value is less than the min" do
