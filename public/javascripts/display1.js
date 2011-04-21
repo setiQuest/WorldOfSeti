@@ -277,7 +277,7 @@ function updateActivityAjaxSuccess(response, updateActivityCallback_fn, initCall
 
     if(bSetObserving)
     {
-        if(response.status == "Observing")
+        if(response.status != "Idle")
         {
             if(!timeoutManager.isObserving)
             {
