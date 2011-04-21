@@ -194,7 +194,7 @@ function updateBeamInfoAjaxSuccess(response, id, updateBeamInfoCallback_fn, upda
     var dec = decimalDegreesToStringDegrees(response.dec);
 
     $('#beam' + id + ' .beam_status').text(response.status);
-    $('#beam' + id + ' .beam_location').text(ra + ' - ' + dec);
+    $('#beam' + id + ' .beam_location').text(ra + ' / ' + dec);
     $('#beam' + id + ' .beam_description').text(response.description);
     $('#beam' + id + ' .beam_frequency').text(response.freq + ' MHz');
 
