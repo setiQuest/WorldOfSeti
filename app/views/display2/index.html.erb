@@ -45,22 +45,6 @@
 
 <script type="text/javascript">
 
-  function scrollContextualInfo()
-  {    
-    var offset = $("#contextual-info").offset();
-    var iframeHeight = $("#contextual-info").height();
-    var iframeContainerHeight = $("#contextual-info-container").height();
-    var offsetTop = offset.top;
-    
-    offsetTop -= CONTEXTUAL_INFO_SCROLL_PIXEL;
-    if(offsetTop < -iframeHeight + $("#contextual-info-container").offset().top)
-    {
-      offsetTop = iframeContainerHeight + $("#contextual-info-container").offset().top;
-    }
-    
-    $("#contextual-info").offset({ top: offsetTop });
-  }
-
   $(window).load(function()
   {    
     initialize();

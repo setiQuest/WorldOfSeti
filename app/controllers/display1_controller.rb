@@ -289,11 +289,7 @@ class Display1Controller < ApplicationController
       format_error = true
     end
 
-    if !j[:status].nil?
-      if !is_valid_beam_status(j[:status])
-        logger.error("Received an invalid beam status = #{j[:status]}")
-      end
-    else
+    if j[:status].nil?
       logger.error("Received beam status = nil")
       format_error = true
     end
@@ -584,17 +580,5 @@ class Display1Controller < ApplicationController
     end
 
     return j
-  end
-
-  # Determines if the passed in status is equal to one of the beam status enums.
-  # This method should be used as a helper method to perform input validation.
-  def is_valid_beam_status(status)
-    BEAM_STATUS_ENUMS.each { |x|
-      if status == x
-        return true
-      end
-    }
-
-    return false
   end
 end

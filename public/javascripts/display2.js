@@ -347,3 +347,27 @@ function updateBeamInfo(id, json)
         });
     }
 }
+
+
+function scrollContextualInfo()
+{
+    var offset = $("#contextual-info").offset();
+    var iframeHeight = $("#contextual-info", top.document).height();
+    var iframeContainerHeight = $("#contextual-info-container").height();
+    var offsetTop = offset.top;
+
+    if(iframeHeight > iframeContainerHeight)
+    {
+      offsetTop -= CONTEXTUAL_INFO_SCROLL_PIXEL;
+      if(offsetTop < -iframeHeight + $("#contextual-info-container").offset().top)
+      {
+        offsetTop = iframeContainerHeight + $("#contextual-info-container").offset().top;
+      }
+
+      $("#contextual-info").offset({ top: offsetTop });
+    }
+    else
+    {
+      $("#contextual-info").offset({ top: offset });
+    }
+}
