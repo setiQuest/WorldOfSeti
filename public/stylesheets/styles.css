@@ -151,10 +151,10 @@ body {
 }
 
 .divider-horizontal {
-    margin-top: 25px;
+    margin-top: 20px;
     margin-left: 50px;
     margin-right: 0px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     height: 1px;
     background-color: #0072ff;
 }
