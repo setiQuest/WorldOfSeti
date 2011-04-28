@@ -245,7 +245,8 @@ body {
 
 #weatherForecast {
     position: absolute;
-    left: 100px;
+    left: 600px;
+/* Remove when panorama is working    left: 100px; */
     top: 960px;
     width: 728px;
     height: 90px;
