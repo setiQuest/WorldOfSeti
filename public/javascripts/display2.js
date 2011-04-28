@@ -129,7 +129,20 @@ function updateMapLocation(ra, dec, fov_ra, fov_dec)
     gp = new GPolygon(lla , "#FFFFFF", 2, 1,"#0000FF",.10);
     map.addOverlay(gp);
     gp.show(); // Show the overlay
-    map.panTo( primary_beam_ll ); // Pan center of the map to the primary beam location
+
+    // Pan to right of the center of the primary beam
+    var center_pixelxy = current_projection.fromLatLngToPixel(primary_beam_ll,zoom);
+
+    // Shift center of the FOV circle 400 pixels to the right
+    center_pixelxy.x -= 400; 
+    // When panorama is working, uncomment the below to shift FOV circle up.
+   // center_pixelxy.y += 150; 
+    var center_beam_ll = current_projection.fromPixelToLatLng(center_pixelxy,zoom,false);
+    
+
+
+   // map.panTo( primary_beam_ll ); // Pan center of the map to the primary beam location
+    map.panTo( center_beam_ll ); // Pan center of the map to the primary beam location
 }
 
 /**
