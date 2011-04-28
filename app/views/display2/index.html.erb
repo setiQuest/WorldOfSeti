@@ -54,9 +54,9 @@
 <% if ApplicationController::WOS_MANUAL_TESTS == false %>
       updateActivity();
       timeoutManager.registerTimeout(function() { updateWeatherForecast(); },  TIMEOUT_WEATHER );
-     # timeoutManager.registerTimeout(function() { updateWebCam(); },  TIMEOUT_WEBCAM );
+     //timeoutManager.registerTimeout(function() { updateWebCam(); },  TIMEOUT_WEBCAM );
       setInterval(function(){scrollContextualInfo()}, TIMEOUT_CONTEXTUAL_SCROLL);
 <% end %>
-  })
+  });
 
 </script>
