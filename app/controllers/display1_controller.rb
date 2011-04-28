@@ -255,8 +255,8 @@ class Display1Controller < ApplicationController
         j[:freq] = 0.0
       end
     else
-      logger.error("Received beam frequency = nil")
-      format_error = true
+      # if nil, just set it to ?
+      j[:freq] = "?"
     end
 
     if !j[:ra].nil?

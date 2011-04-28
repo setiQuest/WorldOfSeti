@@ -231,6 +231,17 @@ describe Display1Controller do
       json.at_json_path("freq").should == 0.0
     end
 
+    it "should set teh freq to ? if it is null" do
+      sample_beam = TestFixtures::get_json_beam(1, 1, nil, 0, 0, "ON1")
+      controller.stub(:get_json_beam).and_return(sample_beam)
+
+      get 'beam', :id => 1, :format => :json
+
+      json = ActiveSupport::JSON.decode(response.body)
+
+      json.at_json_path("freq").should == "?"
+    end
+
     it "should set the RA and DEC to the valid min value if the value is less than the min" do
       sample_beam = TestFixtures::get_json_beam(1, 1, 1000.0, ApplicationController::MIN_RA-1, ApplicationController::MIN_DEC-1, "ON1")
       controller.stub(:get_json_beam).and_return(sample_beam)
