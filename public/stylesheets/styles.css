@@ -310,3 +310,8 @@ body {
 img:-moz-broken, img:-moz-user-disabled {
     -moz-force-broken-image-icon: 1;
 }
+
+.logo-cmusv {
+    float: right;
+    margin-left: 150px;
+}
