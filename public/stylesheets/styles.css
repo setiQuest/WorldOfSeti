@@ -315,3 +315,9 @@ img:-moz-broken, img:-moz-user-disabled {
     float: right;
     margin-left: 150px;
 }
+
+.logo-cmusv-display2 {
+    position: absolute;
+    left: 1600px;
+    top: 25px;
+}
